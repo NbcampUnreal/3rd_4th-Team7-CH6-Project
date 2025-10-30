@@ -11,7 +11,7 @@ ASOHAIMonster::ASOHAIMonster()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = ASOHAIMonsterController::StaticClass();
 
-	PatrolSpeed = 600.0f;
+	PatrolSpeed = 400.0f;
 }
 
 void ASOHAIMonster::BeginPlay()

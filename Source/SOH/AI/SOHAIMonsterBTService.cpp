@@ -2,6 +2,7 @@
 #include "SOHAIMonsterController.h"
 #include "SOHAIMonster.h"
 #include "Engine/TargetPoint.h"
+#include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 USOHAIMonsterBTService::USOHAIMonsterBTService()
@@ -24,12 +25,33 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	ASOHAIMonster* Monster = Cast<ASOHAIMonster>(MonsterController->GetPawn());
 	if (!Monster) return;
 
-	const int32 NumTargets = Monster->PatrolTargets.Num();
-	if (NumTargets <= 0) return;
+	AActor* Player = UGameplayStatics::GetPlayerPawn(Monster->GetWorld(), 0);
+	if (!Player) return;
 
-	const int32 RandomIndex = FMath::RandRange(0, NumTargets - 1);
-	AActor* Target = Monster->PatrolTargets[RandomIndex];
-	if (!Target) return;
+	const float DetectRange = 1000.f;
+	const float Distance = FVector::Dist(Monster->GetActorLocation(), Player->GetActorLocation());
 
-	BB->SetValueAsObject(TEXT("PatrolTarget"), Target);
+	if (Distance <= DetectRange)
+	{
+		BB->SetValueAsObject(TEXT("PlayerActor"), Player);
+		BB->SetValueAsBool(TEXT("PlayerInRange"), true);
+
+		BB->ClearValue(TEXT("PatrolTarget"));
+	}
+	else
+	{
+		BB->SetValueAsBool(TEXT("PlayerInRange"), false);
+		BB->ClearValue(TEXT("PlayerActor"));
+
+		const int32 NumTargets = Monster->PatrolTargets.Num();
+		if (NumTargets > 0)
+		{
+			const int32 RandomIndex = FMath::RandRange(0, NumTargets - 1);
+			AActor* Target = Monster->PatrolTargets[RandomIndex];
+			if (Target)
+			{
+				BB->SetValueAsObject(TEXT("PatrolTarget"), Target);
+			}
+		}
+	}
 }
