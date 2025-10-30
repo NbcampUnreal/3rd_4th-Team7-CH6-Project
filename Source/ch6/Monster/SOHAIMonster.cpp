@@ -1,26 +1,24 @@
 #include "Monster/SOHAIMonster.h"
+#include "Engine/TargetPoint.h"
+#include "Monster/SOHAIMonsterController.h"
+#include "AIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ASOHAIMonster::ASOHAIMonster()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	AIControllerClass = ASOHAIMonsterController::StaticClass();
+
+	PatrolSpeed = 600.0f;
 }
 
 void ASOHAIMonster::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
 }
 
-void ASOHAIMonster::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-void ASOHAIMonster::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
 

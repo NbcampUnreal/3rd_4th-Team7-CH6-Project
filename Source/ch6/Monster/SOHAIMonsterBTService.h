@@ -8,5 +8,12 @@ UCLASS()
 class CH6_API USOHAIMonsterBTService : public UBTService
 {
 	GENERATED_BODY()
+
+
+public:
+	USOHAIMonsterBTService();
+
+protected:
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 	
 };

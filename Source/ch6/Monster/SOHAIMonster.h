@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "SOHAIMonster.generated.h"
 
+class ATargetPoint;
+
 UCLASS()
 class CH6_API ASOHAIMonster : public ACharacter
 {
@@ -15,9 +17,11 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+public:
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI|Patrol")
+	TArray<ATargetPoint*> PatrolTargets;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Movement")
+	float PatrolSpeed;
 };

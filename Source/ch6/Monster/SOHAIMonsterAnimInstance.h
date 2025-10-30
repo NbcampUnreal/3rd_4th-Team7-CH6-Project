@@ -8,5 +8,12 @@ UCLASS()
 class CH6_API USOHAIMonsterAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+
+public:
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Anim")
+	float Speed;
 	
 };
