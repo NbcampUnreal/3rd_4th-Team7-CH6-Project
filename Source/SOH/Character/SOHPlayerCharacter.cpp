@@ -73,3 +73,17 @@ void ASOHPlayerCharacter::StopRun(const FInputActionValue& Value)
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
+void ASOHPlayerCharacter::ToggleCrouch()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+		UE_LOG(LogTemp, Warning, TEXT("UnCrouch Called"));
+	}
+	else
+	{
+		Crouch();
+		UE_LOG(LogTemp, Warning, TEXT("Crouch Called"));
+	}
+}
+

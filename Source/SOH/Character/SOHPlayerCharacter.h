@@ -45,4 +45,5 @@ public:
 	void Look(const FInputActionValue& Value);
 	void StartRun(const FInputActionValue& Value);
 	void StopRun(const FInputActionValue& Value);
+	void ToggleCrouch();
 };

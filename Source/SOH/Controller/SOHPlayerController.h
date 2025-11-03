@@ -30,9 +30,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputAction* IA_Run;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* IA_Crouch;
+
 	/** --- 입력 처리 --- */
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void StartRun(const FInputActionValue& Value);
 	void StopRun(const FInputActionValue& Value);
+	void ToggleCrouch(const FInputActionValue& Value);
 };

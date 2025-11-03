@@ -38,6 +38,11 @@ void ASOHPlayerController::SetupInputComponent()
 			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Started, this, &ASOHPlayerController::StartRun);
 			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Completed, this, &ASOHPlayerController::StopRun);
 		}
+
+		if (IA_Crouch)
+		{
+			EnhancedInput->BindAction(IA_Crouch, ETriggerEvent::Started, this, &ASOHPlayerController::ToggleCrouch);
+		}
 	}
 }
 
@@ -71,5 +76,13 @@ void ASOHPlayerController::StopRun(const FInputActionValue& Value)
 	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
 	{
 		MyChar->StopRun(Value);
+	}
+}
+
+void ASOHPlayerController::ToggleCrouch(const FInputActionValue& Value)
+{
+	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
+	{
+		MyChar->ToggleCrouch();
 	}
 }
