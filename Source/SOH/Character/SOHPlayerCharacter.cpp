@@ -25,6 +25,8 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false; // 카메라는 SpringArm 회전을 따름
+
+	Tags.Add(FName("Player"));//플레이어 태그 
 }
 
 void ASOHPlayerCharacter::BeginPlay()
