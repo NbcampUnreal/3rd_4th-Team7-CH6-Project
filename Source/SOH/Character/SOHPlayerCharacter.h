@@ -3,15 +3,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "SOHCharacter.generated.h"
+#include "SOHPlayerCharacter.generated.h"
 
 UCLASS()
-class SOH_API ASOHCharacter : public ACharacter
+class SOH_API ASOHPlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	ASOHCharacter();
+	ASOHPlayerCharacter();
 
 protected:
 	virtual void BeginPlay() override;

@@ -1,4 +1,4 @@
-#include "SOHCharacter.h"
+#include "SOHPlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -6,7 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
 
-ASOHCharacter::ASOHCharacter()
+ASOHPlayerCharacter::ASOHPlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -30,7 +30,7 @@ ASOHCharacter::ASOHCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // 카메라는 SpringArm 회전을 따름
 }
 
-void ASOHCharacter::BeginPlay()
+void ASOHPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -46,7 +46,7 @@ void ASOHCharacter::BeginPlay()
 	}
 }
 
-void ASOHCharacter::Move(const FInputActionValue& Value)
+void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D Axis = Value.Get<FVector2D>();
 	if (Controller)
@@ -68,38 +68,38 @@ void ASOHCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void ASOHCharacter::Look(const FInputActionValue& Value)
+void ASOHPlayerCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D Axis = Value.Get<FVector2D>();
 	AddControllerYawInput(Axis.X);
 	AddControllerPitchInput(Axis.Y);
 }
 
-void ASOHCharacter::StartRun(const FInputActionValue& Value)
+void ASOHPlayerCharacter::StartRun(const FInputActionValue& Value)
 {
 	bIsRunning = true;
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
-void ASOHCharacter::StopRun(const FInputActionValue& Value)
+void ASOHPlayerCharacter::StopRun(const FInputActionValue& Value)
 {
 	bIsRunning = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 
-void ASOHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ASOHPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		if (IA_Move) EnhancedInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ASOHCharacter::Move);
-		if (IA_Look) EnhancedInput->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ASOHCharacter::Look);
+		if (IA_Move) EnhancedInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ASOHPlayerCharacter::Move);
+		if (IA_Look) EnhancedInput->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ASOHPlayerCharacter::Look);
 		if (IA_Run)
 		{
-			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Started, this, &ASOHCharacter::StartRun);
-			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Completed, this, &ASOHCharacter::StopRun);
+			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Started, this, &ASOHPlayerCharacter::StartRun);
+			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Completed, this, &ASOHPlayerCharacter::StopRun);
 		}
 	}
 }
