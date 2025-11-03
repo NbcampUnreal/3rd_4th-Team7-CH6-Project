@@ -22,34 +22,15 @@ protected:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	float WalkSpeed = 300.f;
+	float WalkSpeed = 200.f;
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	float RunSpeed = 600.f;
+	float RunSpeed = 400.f;
 
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool bIsRunning = false;
-
-	//입력 액션
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	class UInputMappingContext* IMC_Player;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	class UInputAction* IA_Move;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	class UInputAction* IA_Look;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	class UInputAction* IA_Run;
-
-	//이동 입력
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
-	void StartRun(const FInputActionValue& Value);
-	void StopRun(const FInputActionValue& Value);
 
 	//카메라 관련
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -59,5 +40,9 @@ protected:
 	class UCameraComponent* FollowCamera;
 
 public:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	//이동 입력
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+	void StartRun(const FInputActionValue& Value);
+	void StopRun(const FInputActionValue& Value);
 };

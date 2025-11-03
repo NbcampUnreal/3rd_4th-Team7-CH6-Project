@@ -2,9 +2,6 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "Components/InputComponent.h"
 
 ASOHPlayerCharacter::ASOHPlayerCharacter()
 {
@@ -33,17 +30,6 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 void ASOHPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		if (ULocalPlayer* LP = PC->GetLocalPlayer())
-		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
-			{
-				if (IMC_Player)
-					Subsystem->AddMappingContext(IMC_Player, 0);
-			}
-		}
-	}
 }
 
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
@@ -87,19 +73,3 @@ void ASOHPlayerCharacter::StopRun(const FInputActionValue& Value)
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-
-void ASOHPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		if (IA_Move) EnhancedInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ASOHPlayerCharacter::Move);
-		if (IA_Look) EnhancedInput->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ASOHPlayerCharacter::Look);
-		if (IA_Run)
-		{
-			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Started, this, &ASOHPlayerCharacter::StartRun);
-			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Completed, this, &ASOHPlayerCharacter::StopRun);
-		}
-	}
-}
