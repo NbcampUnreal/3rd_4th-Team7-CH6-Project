@@ -2,6 +2,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
 
 ASOHCharacter::ASOHCharacter()
@@ -31,61 +33,73 @@ ASOHCharacter::ASOHCharacter()
 void ASOHCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void ASOHCharacter::MoveForward(float Value)
-{
-	if (Controller && Value != 0.0f)//컨트롤러가 있고 입력값이 0이 아닐 때
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
-		const FRotator Rotation = Controller->GetControlRotation();//컨트롤러의 회전값 가져오기
-		const FRotator YawRotation(0, Rotation.Yaw, 0);//피치와 롤을 0으로 설정하여 요 회전만 사용
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		if (ULocalPlayer* LP = PC->GetLocalPlayer())
+		{
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+			{
+				if (IMC_Player)
+					Subsystem->AddMappingContext(IMC_Player, 0);
+			}
+		}
 	}
 }
 
-void ASOHCharacter::MoveRight(float Value)
+void ASOHCharacter::Move(const FInputActionValue& Value)
 {
-	if (Controller && Value != 0.0f)
+	const FVector2D Axis = Value.Get<FVector2D>();
+	if (Controller)
 	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		AddMovementInput(Direction, Value);
+		// Forward
+		if (Axis.Y != 0.f)
+		{
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FVector Direction = FRotationMatrix(FRotator(0.f, Rotation.Yaw, 0.f)).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Axis.Y);
+		}
+		// Right
+		if (Axis.X != 0.f)
+		{
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FVector Direction = FRotationMatrix(FRotator(0.f, Rotation.Yaw, 0.f)).GetUnitAxis(EAxis::Y);
+			AddMovementInput(Direction, Axis.X);
+		}
 	}
 }
 
-void ASOHCharacter::Turn(float Value)
+void ASOHCharacter::Look(const FInputActionValue& Value)
 {
-	AddControllerYawInput(Value);//컨트롤러의 요 회전 입력 추가
+	const FVector2D Axis = Value.Get<FVector2D>();
+	AddControllerYawInput(Axis.X);
+	AddControllerPitchInput(Axis.Y);
 }
 
-void ASOHCharacter::LookUp(float Value)
+void ASOHCharacter::StartRun(const FInputActionValue& Value)
 {
-	AddControllerPitchInput(Value);
-}
-
-void ASOHCharacter::StartRun()
-{
-	bIsRunning = true;//달리기 상태로 변경
+	bIsRunning = true;
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
-void ASOHCharacter::StopRun()
+void ASOHCharacter::StopRun(const FInputActionValue& Value)
 {
 	bIsRunning = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-void ASOHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)//입력 컴포넌트 설정
+
+void ASOHCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &ASOHCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ASOHCharacter::MoveRight);
-	PlayerInputComponent->BindAxis("Turn", this, &ASOHCharacter::Turn);
-	PlayerInputComponent->BindAxis("LookUp", this, &ASOHCharacter::LookUp);
-
-	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASOHCharacter::StartRun);
-	PlayerInputComponent->BindAction("Run", IE_Released, this, &ASOHCharacter::StopRun);
+	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		if (IA_Move) EnhancedInput->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ASOHCharacter::Move);
+		if (IA_Look) EnhancedInput->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ASOHCharacter::Look);
+		if (IA_Run)
+		{
+			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Started, this, &ASOHCharacter::StartRun);
+			EnhancedInput->BindAction(IA_Run, ETriggerEvent::Completed, this, &ASOHCharacter::StopRun);
+		}
+	}
 }
