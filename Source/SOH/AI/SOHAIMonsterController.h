@@ -6,8 +6,9 @@
 
 class UBehaviorTree;
 class UBlackboardComponent;
-class AActor;
-class ACSMonsterCharacter;
+class UAIPerceptionComponent;
+class UAISenseConfig_Sight;
+class UAISenseConfig_Hearing;
 
 UCLASS()
 class SOH_API ASOHAIMonsterController : public AAIController
@@ -20,10 +21,26 @@ public:
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
+	UFUNCTION()
+	void HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
 private:
 	UPROPERTY()
 	UBehaviorTree* BehaviorTreeAsset;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	UBlackboardComponent* BlackboardComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	UAIPerceptionComponent* PerceptionComp;
+
+	UPROPERTY()
+	UAISenseConfig_Sight* SightConfig;
+
+	UPROPERTY()
+	UAISenseConfig_Hearing* HearingConfig;
+
+	static const FName Key_PlayerActor;
+	static const FName Key_PlayerInRange;
+	static const FName Key_PatrolTarget;
 };
