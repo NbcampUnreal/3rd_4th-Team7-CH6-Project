@@ -28,6 +28,23 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	if (!Monster) return;
 
 	const bool bPlayerInRange = BB->GetValueAsBool(TEXT("PlayerInRange"));
+
+	AActor* PlayerActor = Cast<AActor>(BB->GetValueAsObject(TEXT("PlayerActor")));
+	bool bInAttackRange = false;
+
+	if (PlayerActor)
+	{
+		const float DistSq = FVector::DistSquared(
+			PlayerActor->GetActorLocation(),
+			Monster->GetActorLocation()
+		);
+
+		const float Range = Monster->AttackRange;
+		bInAttackRange = DistSq <= FMath::Square(Range);
+	}
+
+	BB->SetValueAsBool(TEXT("AttackRange"), bInAttackRange);
+
 	if (bPlayerInRange)
 	{
 		BB->ClearValue(TEXT("PatrolTarget"));
@@ -37,15 +54,11 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	const int32 NumTargets = Monster->PatrolTargets.Num();
 	if (NumTargets > 0)
 	{
-		//AActor* Current = Cast<AActor>(BB->GetValueAsObject(TEXT("PatrolTarget")));
-		//if (!Current)
-		//{
 			const int32 RandomIndex = FMath::RandRange(0, NumTargets - 1);
 			AActor* Target = Monster->PatrolTargets[RandomIndex];
 			if (Target)
 			{
 				BB->SetValueAsObject(TEXT("PatrolTarget"), Target);
 			}
-		//}
 	}
 }

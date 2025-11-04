@@ -20,7 +20,7 @@ protected:
 
 
 public:
-	/** 순찰 지점 배열 (에디터에서 배치 후 할당) */
+	//Patrol
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI|Patrol")
 	TArray<ATargetPoint*> PatrolTargets;
 
@@ -49,4 +49,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AI|Movement")
 	void SetMoveSpeed(float NewSpeed);
+
+	//Attack
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Combat")
+	float AttackRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Combat")
+	float AttackDamage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Combat")
+	UAnimMontage* AttackMontage;
+
+	UFUNCTION(BlueprintCallable, Category = "AI|Combat")
+	void TryAttack();
 };

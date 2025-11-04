@@ -9,8 +9,12 @@ USOHAIMonsterBTDecorator::USOHAIMonsterBTDecorator()
 
 bool USOHAIMonsterBTDecorator::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	if (!BB) return false;
+    if (UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent())
+    {
+        const bool bSensed = BB->GetValueAsBool(TEXT("PlayerInRange"));
+        const bool bInAttackRange = BB->GetValueAsBool(TEXT("AttackRange"));
+        return bSensed && bInAttackRange;
+    }
 
-	return BB->GetValueAsBool(TEXT("PlayerInRange"));
+    return false;
 }
