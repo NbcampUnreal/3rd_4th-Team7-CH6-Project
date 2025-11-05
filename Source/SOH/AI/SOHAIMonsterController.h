@@ -18,6 +18,9 @@ class SOH_API ASOHAIMonsterController : public AAIController
 public:
 	ASOHAIMonsterController();
 
+	void SetDetectOnlyPlayer();
+	void RestoreDetectAll();
+
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 

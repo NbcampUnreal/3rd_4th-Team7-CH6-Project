@@ -2,6 +2,8 @@
 #include "SOHAIMonsterController.h"
 #include "SOHAIMonster.h"
 #include "Engine/TargetPoint.h"
+#include "NavigationSystem.h"
+#include "NavigationPath.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -17,9 +19,11 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-
 	AAIController* MonsterController = OwnerComp.GetAIOwner();
 	if (!MonsterController) return;
+
+	UWorld* World = MonsterController->GetWorld();
+	if (!World) return;
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 	if (!BB) return;
@@ -44,6 +48,33 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	}
 
 	BB->SetValueAsBool(TEXT("AttackRange"), bInAttackRange);
+
+	if (bPlayerInRange && PlayerActor)
+	{
+		UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
+		if (NavSys)
+		{
+			const ANavigationData* NavData = NavSys->GetDefaultNavDataInstance(FNavigationSystem::DontCreate);
+			if (NavData)
+			{
+				FPathFindingQuery Query(MonsterController, *NavData, Monster->GetActorLocation(), PlayerActor->GetActorLocation());
+				const FPathFindingResult Result = NavSys->FindPathSync(Query);
+
+				if (!Result.IsSuccessful() || !Result.Path.IsValid() || Result.IsPartial())
+				{
+					BB->SetValueAsBool(TEXT("PlayerInRange"), false);
+					BB->ClearValue(TEXT("PlayerActor"));
+
+					MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
+
+					if (ASOHAIMonsterController* MC = Cast<ASOHAIMonsterController>(MonsterController))
+					{
+						MC->RestoreDetectAll();
+					}
+				}
+			}
+		}
+	}
 
 	if (bPlayerInRange)
 	{
