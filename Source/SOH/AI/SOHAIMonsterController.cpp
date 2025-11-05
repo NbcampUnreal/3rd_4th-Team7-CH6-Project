@@ -65,6 +65,24 @@ void ASOHAIMonsterController::OnPossess(APawn* InPawn)
 	}
 }
 
+void ASOHAIMonsterController::SetDetectOnlyPlayer()
+{
+	if (!SightConfig || !PerceptionComp) return;
+	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
+	PerceptionComp->RequestStimuliListenerUpdate();
+}
+
+void ASOHAIMonsterController::RestoreDetectAll()
+{
+	if (!SightConfig || !PerceptionComp) return;
+	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	PerceptionComp->RequestStimuliListenerUpdate();
+}
+
 void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (!Actor || !BlackboardComp)
@@ -73,7 +91,9 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 	}
 
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-	if (Actor != PlayerPawn)
+	const bool bChasingPlayer = BlackboardComp->GetValueAsBool(Key_PlayerInRange);
+
+	if (Actor != PlayerPawn && bChasingPlayer)
 	{
 		return;
 	}
@@ -91,6 +111,8 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		}
 
 		SetFocus(PlayerPawn);
+
+		SetDetectOnlyPlayer();
 	}
 	else
 	{
@@ -103,5 +125,7 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		{
 			Monster->SetMoveSpeed(Monster->PatrolSpeed);
 		}
+
+		RestoreDetectAll();
 	}
 }
