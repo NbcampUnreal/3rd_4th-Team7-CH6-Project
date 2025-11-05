@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "SOH/Item/SOHFlashlight.h"
 #include "SOHPlayerController.generated.h"
 
 UCLASS()
@@ -33,10 +34,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* IA_Crouch;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* IA_Interact;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* IA_ToggleFlashlight;
+
 	/** --- 입력 처리 --- */
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void StartRun(const FInputActionValue& Value);
 	void StopRun(const FInputActionValue& Value);
 	void ToggleCrouch(const FInputActionValue& Value);
+	void Interact(const FInputActionValue& Value);
+	void ToggleFlashlight(const FInputActionValue& Value);
 };

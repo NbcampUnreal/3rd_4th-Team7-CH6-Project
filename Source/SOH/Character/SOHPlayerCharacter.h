@@ -5,6 +5,8 @@
 #include "InputActionValue.h"
 #include "SOHPlayerCharacter.generated.h"
 
+class ASOHFlashlight;
+
 UCLASS()
 class SOH_API ASOHPlayerCharacter : public ACharacter
 {
@@ -39,6 +41,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	ASOHFlashlight* Flashlight;
+
 	// 타이머 기반 감지 함수
 	void TraceForInteractable();
 
@@ -49,6 +54,8 @@ public:
 	void StartRun(const FInputActionValue& Value);
 	void StopRun(const FInputActionValue& Value);
 	void ToggleCrouch();
+	void Interact();
+	void ToggleFlashlight();
 
 
 private:

@@ -4,6 +4,7 @@
 #include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
+#include "SOH/Item/SOHFlashlight.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -146,6 +147,27 @@ void ASOHPlayerCharacter::ToggleCrouch()
 	{
 		Crouch();
 		UE_LOG(LogTemp, Warning, TEXT("Crouch Called"));
+	}
+}
+
+void ASOHPlayerCharacter::Interact()
+{
+	if (LastHighlightedItem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Interacted with: %s"), *LastHighlightedItem->GetName());
+		// 아이템과 상호작용 로직 추가
+	}
+}
+
+void ASOHPlayerCharacter::ToggleFlashlight()
+{
+	if (Flashlight)
+	{
+		Flashlight->Toggle();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Flashlight assigned!"));
 	}
 }
 

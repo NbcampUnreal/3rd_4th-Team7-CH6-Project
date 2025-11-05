@@ -18,6 +18,7 @@ void ASOHPlayerController::BeginPlay()
 			if (IMC_Player)
 				Subsystem->AddMappingContext(IMC_Player, 0);
 		}
+
 	}
 }
 
@@ -43,6 +44,18 @@ void ASOHPlayerController::SetupInputComponent()
 		{
 			EnhancedInput->BindAction(IA_Crouch, ETriggerEvent::Started, this, &ASOHPlayerController::ToggleCrouch);
 		}
+
+		if (IA_Interact)
+		{
+			EnhancedInput->BindAction(IA_Interact, ETriggerEvent::Started, this, &ASOHPlayerController::Interact);
+		}
+		
+		if (IA_ToggleFlashlight)	
+		{
+			EnhancedInput->BindAction(IA_ToggleFlashlight, ETriggerEvent::Started, this, &ASOHPlayerController::ToggleFlashlight);
+		}
+
+		
 	}
 }
 
@@ -85,4 +98,21 @@ void ASOHPlayerController::ToggleCrouch(const FInputActionValue& Value)
 	{
 		MyChar->ToggleCrouch();
 	}
+}
+
+void ASOHPlayerController::Interact(const FInputActionValue& Value)
+{
+	if(ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
+	{
+		MyChar->Interact();
+	}
+}
+
+void ASOHPlayerController::ToggleFlashlight(const FInputActionValue& Value)
+{
+	if(ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
+	{
+		MyChar->ToggleFlashlight();
+	}
+	
 }
