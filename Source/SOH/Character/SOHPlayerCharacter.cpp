@@ -1,5 +1,9 @@
 #include "SOHPlayerCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Engine/World.h"
+#include "DrawDebugHelpers.h"
+#include "Components/StaticMeshComponent.h"
+#include "TimerManager.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -32,6 +36,62 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 void ASOHPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 0.1초마다 감지 실행 (초당 10회)
+	GetWorldTimerManager().SetTimer(TraceTimerHandle, this, &ASOHPlayerCharacter::TraceForInteractable, 0.1f, true);
+}
+
+void ASOHPlayerCharacter::TraceForInteractable()
+{
+	// 카메라 위치와 방향 가져오기
+	UCameraComponent* Camera = FindComponentByClass<UCameraComponent>();
+	if (!Camera) return;
+
+	FVector Start = Camera->GetComponentLocation();
+	FVector End = Start + (Camera->GetForwardVector() * 500.0f); // 감지 거리 500cm
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	AActor* HitActor = nullptr;
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+	if (bHit)
+	{
+		HitActor = HitResult.GetActor();
+	}
+
+	DrawDebugLine(
+		GetWorld(),
+		Start,
+		End,
+		bHit ? FColor::Red : FColor::Green,
+		false,   // 지속 시간 유지 여부
+		0.05f,   // 지속 시간 (초)
+		0,       // Depth priority
+		1.5f     // 두께
+	);
+
+	// 이전 아이템과 다르면 이전 아웃라인 해제
+	if (LastHighlightedItem && LastHighlightedItem != HitActor)
+	{
+		if (UStaticMeshComponent* ItemMesh = LastHighlightedItem->FindComponentByClass<UStaticMeshComponent>())
+		{
+			ItemMesh->SetRenderCustomDepth(false);
+		}
+		LastHighlightedItem = nullptr;
+	}
+
+	// 새로운 아이템이면 아웃라인 표시
+	if (HitActor && HitActor->ActorHasTag("Item"))
+	{
+		if (UStaticMeshComponent* ItemMesh = HitActor->FindComponentByClass<UStaticMeshComponent>())
+		{
+			ItemMesh->SetRenderCustomDepth(true);
+			ItemMesh->SetCustomDepthStencilValue(1); // 머티리얼에서 사용하는 스텐실 값
+		}
+		LastHighlightedItem = HitActor;
+	}
 }
 
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
@@ -88,4 +148,5 @@ void ASOHPlayerCharacter::ToggleCrouch()
 		UE_LOG(LogTemp, Warning, TEXT("Crouch Called"));
 	}
 }
+
 

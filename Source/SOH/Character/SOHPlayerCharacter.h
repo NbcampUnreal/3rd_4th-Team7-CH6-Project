@@ -39,6 +39,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 
+	// 타이머 기반 감지 함수
+	void TraceForInteractable();
 
 public:
 	//이동 입력
@@ -47,4 +49,12 @@ public:
 	void StartRun(const FInputActionValue& Value);
 	void StopRun(const FInputActionValue& Value);
 	void ToggleCrouch();
+
+
+private:
+	// 이전에 바라봤던 아이템
+	AActor* LastHighlightedItem = nullptr;
+
+	// 타이머 핸들
+	FTimerHandle TraceTimerHandle;
 };
