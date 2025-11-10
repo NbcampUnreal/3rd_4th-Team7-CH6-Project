@@ -23,6 +23,7 @@ public:
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
 
 	UFUNCTION()
 	void HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
@@ -46,4 +47,8 @@ private:
 	static const FName Key_PlayerActor;
 	static const FName Key_PlayerInRange;
 	static const FName Key_PatrolTarget;
+
+	static const FName Key_LastKnownLocation;
+	static const FName Key_SearchPoint;
+	static const FName Key_SearchUntilTime;
 };
