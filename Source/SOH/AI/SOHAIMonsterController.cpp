@@ -18,6 +18,9 @@ const FName ASOHAIMonsterController::Key_PatrolTarget(TEXT("PatrolTarget"));
 const FName ASOHAIMonsterController::Key_LastKnownLocation(TEXT("LastKnownLocation"));
 const FName ASOHAIMonsterController::Key_SearchPoint(TEXT("SearchPoint"));
 const FName ASOHAIMonsterController::Key_SearchUntilTime(TEXT("SearchUntilTime"));
+const FName ASOHAIMonsterController::Key_PathFailing(TEXT("PathFailing"));
+const FName ASOHAIMonsterController::Key_IsSearching(TEXT("IsSearching"));
+const FName ASOHAIMonsterController::Key_PlayerOnNav(TEXT("PlayerOnNav"));
 
 ASOHAIMonsterController::ASOHAIMonsterController()
 {
@@ -34,7 +37,7 @@ ASOHAIMonsterController::ASOHAIMonsterController()
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	SightConfig->AutoSuccessRangeFromLastSeenLocation = 0.f;
+	SightConfig->AutoSuccessRangeFromLastSeenLocation = -1.f;
 	PerceptionComp->RequestStimuliListenerUpdate();
 
 	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
@@ -75,7 +78,7 @@ void ASOHAIMonsterController::SetDetectOnlyPlayer()
 	if (!SightConfig || !PerceptionComp) return;
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
-	SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	PerceptionComp->RequestStimuliListenerUpdate();
 }
 
@@ -103,8 +106,18 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		BlackboardComp->SetValueAsBool(Key_PlayerInRange, true);
 		BlackboardComp->ClearValue(Key_LastKnownLocation);
 
+		BlackboardComp->ClearValue(Key_SearchPoint);
+		BlackboardComp->SetValueAsFloat(Key_SearchUntilTime, 0.f);
+		BlackboardComp->SetValueAsBool(Key_IsSearching, false);
+
 		if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
 			Monster->SetMoveSpeed(Monster->ChaseSpeed);
+
+		if (SightConfig && PerceptionComp)
+		{
+			SightConfig->AutoSuccessRangeFromLastSeenLocation = SightConfig->SightRadius;
+			PerceptionComp->RequestStimuliListenerUpdate();
+		}
 
 		SetFocus(PlayerPawn);
 	}
@@ -112,6 +125,12 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 	{
 		BlackboardComp->SetValueAsBool(Key_PlayerInRange, false);
 		BlackboardComp->ClearValue(Key_PlayerActor);
+
+		if (SightConfig && PerceptionComp)
+		{
+			SightConfig->AutoSuccessRangeFromLastSeenLocation = 0.f;
+			PerceptionComp->RequestStimuliListenerUpdate();
+		}
 
 		FVector LastKnown = Stimulus.StimulusLocation;
 
@@ -127,7 +146,7 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		const float Now = GetWorld()->GetTimeSeconds();
 		const float UntilExisting = BlackboardComp->GetValueAsFloat(Key_SearchUntilTime);
 
-		if (!(UntilExisting > Now))
+		if (!(UntilExisting > Now + 1.f))
 		{
 			BlackboardComp->SetValueAsFloat(Key_SearchUntilTime, Now + 10.f);
 		}
@@ -137,7 +156,7 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
 			Monster->SetMoveSpeed(Monster->PatrolSpeed);
 
-		GetPerceptionComponent()->ForgetAll();
+		GetPerceptionComponent()->ForgetAll();;
 	}
 }
 

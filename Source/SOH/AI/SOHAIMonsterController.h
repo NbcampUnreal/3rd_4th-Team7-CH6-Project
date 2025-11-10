@@ -16,6 +16,17 @@ class SOH_API ASOHAIMonsterController : public AAIController
 	GENERATED_BODY()
 	
 public:
+	static const FName Key_PlayerActor;
+	static const FName Key_PlayerInRange;
+	static const FName Key_PatrolTarget;
+
+	static const FName Key_LastKnownLocation;
+	static const FName Key_SearchPoint;
+	static const FName Key_SearchUntilTime;
+	static const FName Key_PathFailing;
+	static const FName Key_IsSearching;
+	static const FName Key_PlayerOnNav;
+
 	ASOHAIMonsterController();
 
 	void SetDetectOnlyPlayer();
@@ -43,12 +54,4 @@ private:
 
 	UPROPERTY()
 	UAISenseConfig_Hearing* HearingConfig;
-
-	static const FName Key_PlayerActor;
-	static const FName Key_PlayerInRange;
-	static const FName Key_PatrolTarget;
-
-	static const FName Key_LastKnownLocation;
-	static const FName Key_SearchPoint;
-	static const FName Key_SearchUntilTime;
 };

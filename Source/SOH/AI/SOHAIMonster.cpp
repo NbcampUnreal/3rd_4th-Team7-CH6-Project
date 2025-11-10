@@ -26,8 +26,8 @@ ASOHAIMonster::ASOHAIMonster()
 	PatrolSpeed = 300.f;
 	ChaseSpeed = 500.f;
 
-	SightRadius = 2000.f;
-	LoseSightRadius = 2400.f;
+	SightRadius = 1000.f;
+	LoseSightRadius = 1300.f;
 	PeripheralVisionAngle = 80.f;
 
 	HearingRange = 1500.f;
