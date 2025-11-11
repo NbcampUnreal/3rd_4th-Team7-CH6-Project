@@ -1,0 +1,72 @@
+{
+	"FileVersion": 3,
+	"Version": 6,
+	"VersionName": "1.3.1",
+	"FriendlyName": "Ultimate Level Art Tool",
+	"Description": "A set of tools that can be used for level design",
+	"Category": "Level Design",
+	"CreatedBy": "Leartes Studios",
+	"CreatedByURL": "https://leartesstudios.com",
+	"DocsURL": "https://drive.google.com/file/d/1Hqwvq32vmGx-SFaC0t12otKMl7BWLURd/view",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/ec0988f250ef49ebaf7852cdfe3e6516",
+	"SupportURL": "https://leartes.atlassian.net/servicedesk/customer/portal/1",
+	"EngineVersion": "5.6.0",
+	"CanContainContent": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "UltimateLevelArtTool",
+			"Type": "Editor",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "ModularBuilding",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "ObjectDistribution",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "AutoSpline",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "AutoSplineEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "MaterialAssignment",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		}
+	]
+}
