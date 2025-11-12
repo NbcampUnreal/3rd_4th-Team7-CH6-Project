@@ -126,6 +126,8 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		BlackboardComp->SetValueAsBool(Key_PlayerInRange, false);
 		BlackboardComp->ClearValue(Key_PlayerActor);
 
+		BlackboardComp->SetValueAsBool(Key_PlayerOnNav, false);
+
 		if (SightConfig && PerceptionComp)
 		{
 			SightConfig->AutoSuccessRangeFromLastSeenLocation = 0.f;

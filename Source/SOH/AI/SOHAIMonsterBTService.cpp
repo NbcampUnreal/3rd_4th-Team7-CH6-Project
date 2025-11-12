@@ -42,6 +42,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         const float DistSq = FVector::DistSquared(PlayerActor->GetActorLocation(), Monster->GetActorLocation());
         bInAttackRange = (DistSq <= FMath::Square(Monster->AttackRange));
     }
+
     BB->SetValueAsBool(TEXT("AttackRange"), bInAttackRange);
 
     const float Now = World->GetTimeSeconds();
@@ -52,6 +53,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         BB->ClearValue(TEXT("LastKnownLocation"));
         BB->ClearValue(TEXT("SearchPoint"));
         BB->ClearValue(TEXT("SearchUntilTime"));
+        BB->ClearValue(TEXT("PlayerActor"));
         BB->SetValueAsBool(TEXT("IsSearching"), false);
         MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
     }
@@ -59,7 +61,13 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
     bool bPathFail = false;
     if (bPlayerInRange && PlayerActor)
     {
-        MonsterController->SetFocus(PlayerActor);
+        const bool bSearchingNow = BB->GetValueAsBool(TEXT("IsSearching"));
+        const bool bPathFailNow = BB->GetValueAsBool(TEXT("PathFailing"));
+
+        if (!bSearchingNow && !bPathFailNow)
+        {
+            MonsterController->SetFocus(PlayerActor);
+        }
 
         if (UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(World))
         {
@@ -89,7 +97,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
             BB->SetValueAsVector(TEXT("LastKnownLocation"), PlayerActor->GetActorLocation());
             BB->SetValueAsFloat(TEXT("SearchUntilTime"), Now + 30.f);
             BB->SetValueAsBool(TEXT("IsSearching"), true);
-            MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
+            //MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
         }
     }
 
@@ -100,7 +108,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         if (UNavigationSystemV1* Nav = UNavigationSystemV1::GetCurrent(World))
         {
             FNavLocation Out;
-            bOnNav = Nav->ProjectPointToNavigation(PlayerActor->GetActorLocation(), Out, FVector(300, 300, 300));
+            bOnNav = Nav->ProjectPointToNavigation(PlayerActor->GetActorLocation(), Out, FVector(30, 30, 120));
         }
 
         BB->SetValueAsBool(TEXT("PlayerOnNav"), bOnNav);
@@ -109,8 +117,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         {
             BB->SetValueAsBool(TEXT("PathFailing"), true);
 
-            BB->SetValueAsBool(TEXT("PlayerInRange"), false);
-            BB->ClearValue(TEXT("PlayerActor"));
+            //BB->ClearValue(TEXT("PlayerActor"));
         }
         else
         {
