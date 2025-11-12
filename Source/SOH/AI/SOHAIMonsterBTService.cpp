@@ -108,7 +108,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         if (UNavigationSystemV1* Nav = UNavigationSystemV1::GetCurrent(World))
         {
             FNavLocation Out;
-            bOnNav = Nav->ProjectPointToNavigation(PlayerActor->GetActorLocation(), Out, FVector(30, 30, 120));
+            bOnNav = Nav->ProjectPointToNavigation(PlayerActor->GetActorLocation(), Out, FVector(50, 50, 120));
         }
 
         BB->SetValueAsBool(TEXT("PlayerOnNav"), bOnNav);
@@ -168,7 +168,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         {
             const FVector Cur = BB->GetValueAsVector(TEXT("SearchPoint"));
             const float DistSq = FVector::DistSquared(Monster->GetActorLocation(), Cur);
-            if (DistSq < FMath::Square(10.f))
+            if (DistSq < FMath::Square(30.f))
                 BB->ClearValue(TEXT("SearchPoint"));
         }
 
@@ -177,8 +177,19 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
             if (UNavigationSystemV1* Nav = UNavigationSystemV1::GetCurrent(World))
             {
                 FNavLocation Out;
-                if (Nav->GetRandomReachablePointInRadius(LK, 1500.f, Out))
-                    BB->SetValueAsVector(TEXT("SearchPoint"), Out.Location);
+                if (Nav->GetRandomReachablePointInRadius(LK, 1000.0f, Out))
+                {
+                    FVector Adjusted = Out.Location;
+                    Adjusted.Z = LK.Z;
+                    FNavLocation Proj;
+                    if (Nav->ProjectPointToNavigation(Adjusted, Proj, FVector(50.f, 50.f, 120.f)))
+                    {
+                        Adjusted = Proj.Location;
+                        Adjusted.Z = LK.Z;
+                    }
+
+                    BB->SetValueAsVector(TEXT("SearchPoint"), Adjusted);
+                }
                 else
                     BB->SetValueAsVector(TEXT("SearchPoint"), LK);
             }

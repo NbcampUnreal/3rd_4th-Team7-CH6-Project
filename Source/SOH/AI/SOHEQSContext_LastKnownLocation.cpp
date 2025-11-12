@@ -32,7 +32,7 @@ void USOHEQSContext_LastKnownLocation::ProvideContext(
             if (UNavigationSystemV1* Nav = UNavigationSystemV1::GetCurrent(W))
             {
                 FNavLocation Proj;
-                if (Nav->ProjectPointToNavigation(LK, Proj, FVector(300, 300, 300)))
+                if (Nav->ProjectPointToNavigation(LK, Proj, FVector(50, 50, 120)))
                 {
                     Out = Proj.Location;
                 }

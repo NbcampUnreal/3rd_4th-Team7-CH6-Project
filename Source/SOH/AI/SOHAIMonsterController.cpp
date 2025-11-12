@@ -139,7 +139,7 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		if (UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld()))
 		{
 			FNavLocation Projected;
-			if (NavSys->ProjectPointToNavigation(LastKnown, Projected, FVector(300, 300, 300)))
+			if (NavSys->ProjectPointToNavigation(LastKnown, Projected, FVector(30, 30, 120)))
 				LastKnown = Projected.Location;
 		}
 
