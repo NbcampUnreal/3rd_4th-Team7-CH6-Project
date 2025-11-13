@@ -57,8 +57,17 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         BB->ClearValue(TEXT("SearchPoint"));
         BB->ClearValue(TEXT("SearchUntilTime"));
         BB->ClearValue(TEXT("PlayerActor"));
+        BB->SetValueAsBool(TEXT("PlayerInRange"), false);
         BB->SetValueAsBool(TEXT("IsSearching"), false);
         MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
+
+        if (APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(MonsterController, 0))
+        {
+            if (UAIPerceptionComponent* Perc = MonsterController->GetPerceptionComponent())
+            {
+                Perc->ForgetActor(PlayerPawn);
+            }
+        }
     }
 
     bool bPathFail = false;
@@ -100,7 +109,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
             BB->SetValueAsVector(TEXT("LastKnownLocation"), PlayerActor->GetActorLocation());
             BB->SetValueAsFloat(TEXT("SearchUntilTime"), Now + 30.f);
             BB->SetValueAsBool(TEXT("IsSearching"), true);
-            //MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
+            MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
         }
     }
 
@@ -114,42 +123,30 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
             bOnNav = Nav->ProjectPointToNavigation(PlayerActor->GetActorLocation(), Out, FVector(50, 50, 120));
         }
 
+        const bool bPrevOnNav = BB->GetValueAsBool(TEXT("PlayerOnNav"));
         BB->SetValueAsBool(TEXT("PlayerOnNav"), bOnNav);
 
         if (!bOnNav)
         {
             BB->SetValueAsBool(TEXT("PathFailing"), true);
 
-            //BB->ClearValue(TEXT("PlayerActor"));
-        }
-        else
-        {
-            if (!BB->GetValueAsBool(TEXT("PlayerInRange")) || !BB->GetValueAsObject(TEXT("PlayerActor")))
+            if (bPrevOnNav && PlayerActor)
             {
-                APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(MonsterController, 0);
-                bool bSeeingNow = false;
+                FVector PLoc = PlayerActor->GetActorLocation();
 
-                if (UAIPerceptionComponent* Perc = MonsterController->GetPerceptionComponent())
+                if (UNavigationSystemV1* Nav = UNavigationSystemV1::GetCurrent(World))
                 {
-                    FActorPerceptionBlueprintInfo Info;
-                    if (PlayerPawn && Perc->GetActorsPerception(PlayerPawn, Info))
+                    FNavLocation Proj;
+                    if (Nav->ProjectPointToNavigation(PLoc, Proj, FVector(50.f, 50.f, 120.f)))
                     {
-                        for (const FAIStimulus& S : Info.LastSensedStimuli)
-                        {
-                            if (S.WasSuccessfullySensed()) { bSeeingNow = true; break; }
-                        }
+                        PLoc = Proj.Location;
                     }
                 }
 
-                if (bSeeingNow && PlayerPawn)
-                {
-                    BB->SetValueAsObject(TEXT("PlayerActor"), PlayerPawn);
-                    BB->SetValueAsBool(TEXT("PlayerInRange"), true);
-                    BB->SetValueAsBool(TEXT("PathFailing"), false);
-                    MonsterController->SetFocus(PlayerPawn);
-                }
+                BB->SetValueAsVector(TEXT("LastKnownLocation"), PLoc);
             }
         }
+
     }
 
     if (!bPathFail && bPrevPathFail)
@@ -197,7 +194,6 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
                     BB->SetValueAsVector(TEXT("SearchPoint"), LK);
             }
         }
-
         return;
     }
 

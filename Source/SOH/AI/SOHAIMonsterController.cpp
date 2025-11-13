@@ -78,7 +78,7 @@ void ASOHAIMonsterController::SetDetectOnlyPlayer()
 	if (!SightConfig || !PerceptionComp) return;
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
-	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
 	PerceptionComp->RequestStimuliListenerUpdate();
 }
 
@@ -134,31 +134,12 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 			PerceptionComp->RequestStimuliListenerUpdate();
 		}
 
-		FVector LastKnown = Stimulus.StimulusLocation;
-
-		if (UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld()))
-		{
-			FNavLocation Projected;
-			if (NavSys->ProjectPointToNavigation(LastKnown, Projected, FVector(30, 30, 120)))
-				LastKnown = Projected.Location;
-		}
-
-		BlackboardComp->SetValueAsVector(Key_LastKnownLocation, LastKnown);
-		
-		const float Now = GetWorld()->GetTimeSeconds();
-		const float UntilExisting = BlackboardComp->GetValueAsFloat(Key_SearchUntilTime);
-
-		if (!(UntilExisting > Now + 1.f))
-		{
-			BlackboardComp->SetValueAsFloat(Key_SearchUntilTime, Now + 10.f);
-		}
-
 		ClearFocus(EAIFocusPriority::Gameplay);
 
 		if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
 			Monster->SetMoveSpeed(Monster->PatrolSpeed);
 
-		GetPerceptionComponent()->ForgetAll();;
+		GetPerceptionComponent()->ForgetAll();
 	}
 }
 
