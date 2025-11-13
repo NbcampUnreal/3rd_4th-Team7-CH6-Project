@@ -32,6 +32,9 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
     ASOHAIMonster* Monster = Cast<ASOHAIMonster>(MonsterController->GetPawn());
     if (!Monster) return;
 
+    UAIPerceptionComponent* Perception = MonsterController->GetPerceptionComponent();
+    if (!Perception) return;
+
     const bool bPlayerInRange = BB->GetValueAsBool(TEXT("PlayerInRange"));
     AActor* PlayerActor = Cast<AActor>(BB->GetValueAsObject(TEXT("PlayerActor")));
 
@@ -55,7 +58,6 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         BB->ClearValue(TEXT("SearchUntilTime"));
         BB->ClearValue(TEXT("PlayerActor"));
         BB->SetValueAsBool(TEXT("IsSearching"), false);
-        AActor* Player = Cast<AActor>(BB->GetValueAsObject(TEXT("PlayerActor")));
         MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
     }
 
