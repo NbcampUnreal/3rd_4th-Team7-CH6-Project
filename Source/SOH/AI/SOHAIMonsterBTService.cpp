@@ -147,6 +147,15 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
             }
         }
 
+        else if (bOnNav && !bPrevOnNav)
+        {
+            BB->ClearValue(TEXT("LastKnownLocation"));
+            BB->ClearValue(TEXT("SearchPoint"));
+            BB->SetValueAsBool(TEXT("IsSearching"), false);
+            BB->SetValueAsFloat(TEXT("SearchUntilTime"), 0.f);
+            BB->SetValueAsBool(TEXT("PathFailing"), false);
+        }
+
     }
 
     if (!bPathFail && bPrevPathFail)
@@ -158,6 +167,23 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         (BB->IsVectorValueSet(TEXT("LastKnownLocation")) &&
             BB->GetValueAsFloat(TEXT("SearchUntilTime")) > 0.f &&
             Now < BB->GetValueAsFloat(TEXT("SearchUntilTime")));
+
+    if (Monster)
+    {
+        if (bPlayerInRange && PlayerActor && !bPathFail && !bSearching)
+        {
+            Monster->SetMoveSpeed(Monster->ChaseSpeed);
+        }
+        else if (bSearching)
+        {
+            Monster->SetMoveSpeed(Monster->PatrolSpeed);
+        }
+        else
+        {
+            Monster->SetMoveSpeed(Monster->PatrolSpeed);
+        }
+    }
+
 
     if (bSearching)
     {
