@@ -110,8 +110,8 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		BlackboardComp->SetValueAsFloat(Key_SearchUntilTime, 0.f);
 		BlackboardComp->SetValueAsBool(Key_IsSearching, false);
 
-		if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
-			Monster->SetMoveSpeed(Monster->ChaseSpeed);
+		//if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
+		//	Monster->SetMoveSpeed(Monster->ChaseSpeed);
 
 		if (SightConfig && PerceptionComp)
 		{
@@ -136,8 +136,8 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 
 		ClearFocus(EAIFocusPriority::Gameplay);
 
-		if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
-			Monster->SetMoveSpeed(Monster->PatrolSpeed);
+		//if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
+		//	Monster->SetMoveSpeed(Monster->PatrolSpeed);
 
 		GetPerceptionComponent()->ForgetAll();
 	}

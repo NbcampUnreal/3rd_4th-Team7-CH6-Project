@@ -24,7 +24,7 @@ ASOHAIMonster::ASOHAIMonster()
 	bUseControllerRotationYaw = false;
 
 	PatrolSpeed = 300.f;
-	ChaseSpeed = 500.f;
+	ChaseSpeed = 600.f;
 
 	SightRadius = 1000.f;
 	LoseSightRadius = 1300.f;
