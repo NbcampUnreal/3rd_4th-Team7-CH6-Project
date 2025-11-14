@@ -62,7 +62,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 		HitActor = HitResult.GetActor();
 	}
 	// 디버그 라인 그리기
-	/*
+	
 	DrawDebugLine(
 		GetWorld(),
 		Start,
@@ -73,7 +73,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 		0,       // Depth priority
 		1.5f     // 두께
 	);
-	*/
+	
 
 	// 이전 아이템과 다르면 이전 아웃라인 해제
 	if (LastHighlightedItem && LastHighlightedItem != HitActor)
