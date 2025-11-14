@@ -2,6 +2,7 @@
 #include "SOHAIMonster.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "NavigationSystem.h"
 #include "UObject/ConstructorHelpers.h"
@@ -21,6 +22,8 @@ const FName ASOHAIMonsterController::Key_SearchUntilTime(TEXT("SearchUntilTime")
 const FName ASOHAIMonsterController::Key_PathFailing(TEXT("PathFailing"));
 const FName ASOHAIMonsterController::Key_IsSearching(TEXT("IsSearching"));
 const FName ASOHAIMonsterController::Key_PlayerOnNav(TEXT("PlayerOnNav"));
+
+const FName ASOHAIMonsterController::Key_SpiderAlertLocation(TEXT("SpiderAlertLocation"));
 
 ASOHAIMonsterController::ASOHAIMonsterController()
 {
@@ -110,9 +113,6 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 		BlackboardComp->SetValueAsFloat(Key_SearchUntilTime, 0.f);
 		BlackboardComp->SetValueAsBool(Key_IsSearching, false);
 
-		//if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
-		//	Monster->SetMoveSpeed(Monster->ChaseSpeed);
-
 		if (SightConfig && PerceptionComp)
 		{
 			SightConfig->AutoSuccessRangeFromLastSeenLocation = SightConfig->SightRadius;
@@ -136,9 +136,6 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 
 		ClearFocus(EAIFocusPriority::Gameplay);
 
-		//if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
-		//	Monster->SetMoveSpeed(Monster->PatrolSpeed);
-
 		GetPerceptionComponent()->ForgetAll();
 	}
 }
@@ -148,6 +145,11 @@ void ASOHAIMonsterController::OnMoveCompleted(FAIRequestID RequestID, const FPat
 	Super::OnMoveCompleted(RequestID, Result);
 
 	if (!BlackboardComp) return;
+
+	if (Result.IsSuccess() && BlackboardComp->IsVectorValueSet(Key_SpiderAlertLocation))
+	{
+		BlackboardComp->ClearValue(Key_SpiderAlertLocation);
+	}
 
 	if (BlackboardComp->IsVectorValueSet(Key_SearchPoint))
 	{

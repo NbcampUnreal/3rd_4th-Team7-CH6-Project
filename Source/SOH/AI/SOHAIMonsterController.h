@@ -27,6 +27,8 @@ public:
 	static const FName Key_IsSearching;
 	static const FName Key_PlayerOnNav;
 
+	static const FName Key_SpiderAlertLocation;
+
 	ASOHAIMonsterController();
 
 	void SetDetectOnlyPlayer();
