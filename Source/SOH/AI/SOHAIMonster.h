@@ -20,6 +20,13 @@ protected:
 
 
 public:
+	//두리번 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* LookAroundMontage;
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void PlayLookAroundMontage();
+
 	//Patrol
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI|Patrol")
 	TArray<ATargetPoint*> PatrolTargets;

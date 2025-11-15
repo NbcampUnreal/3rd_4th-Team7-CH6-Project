@@ -24,7 +24,7 @@ ASOHAIMonster::ASOHAIMonster()
 
 	bUseControllerRotationYaw = false;
 
-	PatrolSpeed = 300.f;
+	PatrolSpeed = 200.f;
 	ChaseSpeed = 600.f;
 
 	SightRadius = 1000.f;
@@ -50,6 +50,16 @@ void ASOHAIMonster::SetMoveSpeed(float NewSpeed)
 	{
 		Move->MaxWalkSpeed = NewSpeed;
 	}
+}
+
+void ASOHAIMonster::PlayLookAroundMontage()
+{
+    if (!LookAroundMontage) return;
+
+    if (UAnimInstance* Anim = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr)
+    {
+        Anim->Montage_Play(LookAroundMontage);
+    }
 }
 
 void ASOHAIMonster::TryAttack()

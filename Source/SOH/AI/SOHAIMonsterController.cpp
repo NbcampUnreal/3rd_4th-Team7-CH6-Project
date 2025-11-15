@@ -146,6 +146,14 @@ void ASOHAIMonsterController::OnMoveCompleted(FAIRequestID RequestID, const FPat
 
 	if (!BlackboardComp) return;
 
+	if (Result.IsSuccess())
+	{
+		if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
+		{
+			Monster->PlayLookAroundMontage();
+		}
+	}
+
 	if (Result.IsSuccess() && BlackboardComp->IsVectorValueSet(Key_SpiderAlertLocation))
 	{
 		BlackboardComp->ClearValue(Key_SpiderAlertLocation);
