@@ -63,4 +63,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AI|Combat")
 	void TryAttack();
+
+	//Open Door
+
+	bool HasLineOfSightToTarget(AActor* Target);
 };

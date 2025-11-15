@@ -32,6 +32,11 @@ EBTNodeResult::Type USOHAttackTaskNode::ExecuteTask(UBehaviorTreeComponent& Owne
 	if (DistSq > FMath::Square(Monster->AttackRange))
 		return EBTNodeResult::Succeeded;
 
+	if (!Monster->HasLineOfSightToTarget(Target))
+	{
+		return EBTNodeResult::Succeeded;
+	}
+
 	Monster->TryAttack();
 
 	return EBTNodeResult::Succeeded;

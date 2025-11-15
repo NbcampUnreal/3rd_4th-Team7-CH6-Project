@@ -90,6 +90,11 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
                 bPathFail = (!Result.IsSuccessful() || !Result.Path.IsValid() || Result.IsPartial());
             }
         }
+
+        if (!bPathFail && Monster)
+        {
+            Monster->HasLineOfSightToTarget(PlayerActor);
+        }
     }
 
     const bool bPrevPathFail = BB->GetValueAsBool(TEXT("PathFailing"));

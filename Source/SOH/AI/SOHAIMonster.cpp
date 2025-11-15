@@ -1,4 +1,5 @@
 #include "SOHAIMonster.h"
+#include "SOH/Interface/SOHDoorInterface.h" 
 #include "Engine/TargetPoint.h"
 #include "SOHAIMonsterController.h"
 #include "AIController.h"
@@ -72,4 +73,51 @@ void ASOHAIMonster::TryAttack()
     }
 
     UGameplayStatics::ApplyDamage(Target, AttackDamage, GetController(), this, nullptr);
+}
+
+bool ASOHAIMonster::HasLineOfSightToTarget(AActor* Target)
+{
+    if (!Target)
+        return false;
+
+    UWorld* World = GetWorld();
+    if (!World)
+        return false;
+
+    FVector Start = GetActorLocation();
+    FVector End = Target->GetActorLocation();
+
+    FHitResult Hit;
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(MonsterLOS), false);
+    Params.AddIgnoredActor(this);
+
+    const bool bHit = World->LineTraceSingleByChannel(
+        Hit,
+        Start,
+        End,
+        ECC_Visibility,
+        Params
+    );
+
+    if (!bHit)
+    {
+        return true;
+    }
+
+    AActor* HitActor = Hit.GetActor();
+    if (!HitActor)
+        return false;
+
+    if (HitActor == Target)
+    {
+        return true;
+    }
+
+    if (HitActor->GetClass()->ImplementsInterface(USOHDoorInterface::StaticClass()))
+    {
+        ISOHDoorInterface::Execute_OpenDoorForAI(HitActor, this);
+        return false;
+    }
+
+    return false;
 }
