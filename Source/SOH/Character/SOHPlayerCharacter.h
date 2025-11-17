@@ -41,6 +41,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 
+	// Flashlight 상태
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight")
+	bool bFlashlightOn = false;
+
+	// 손전등 상체 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* FlashlightMontage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	ASOHFlashlight* Flashlight;
 
@@ -56,6 +64,7 @@ public:
 	void ToggleCrouch();
 	void Interact();
 	void ToggleFlashlight();
+	void PlayUpperBodyMontage(UAnimMontage* Montage);
 
 
 private:

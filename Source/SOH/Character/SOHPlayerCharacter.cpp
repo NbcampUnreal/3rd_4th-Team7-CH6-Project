@@ -166,6 +166,12 @@ void ASOHPlayerCharacter::ToggleFlashlight()
 	if (Flashlight)
 	{
 		Flashlight->Toggle();
+
+		// 손전등 켤 때 상체 몽타주 재생
+		if (bFlashlightOn) // Toggle() 내부에서 상태가 바뀌는 걸 확인해야 함
+		{
+			PlayUpperBodyMontage(FlashlightMontage); // UpperBody 슬롯 사용
+		}
 	}
 	else
 	{
@@ -173,4 +179,16 @@ void ASOHPlayerCharacter::ToggleFlashlight()
 	}
 }
 
-
+void ASOHPlayerCharacter::PlayUpperBodyMontage(UAnimMontage* Montage)
+{
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		if (UAnimInstance* AnimInstance = MeshComp->GetAnimInstance())
+		{
+			if (Montage)
+			{
+				AnimInstance->Montage_Play(Montage);
+			}
+		}
+	}
+}
