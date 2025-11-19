@@ -14,8 +14,8 @@ class ACharacter;
 UCLASS()
 class SOH_API ASOHFlashlight : public AActor
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
     ASOHFlashlight();
 

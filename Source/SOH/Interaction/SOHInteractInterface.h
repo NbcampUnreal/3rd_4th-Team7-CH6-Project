@@ -20,5 +20,5 @@ public:
 	void Interact(AActor* Caller);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interaction")
-	bool CanReceiveTrace(AActor* Caller);
+	bool CanReceiveTrace(AActor* Caller, bool bCanInteract);
 };
