@@ -35,6 +35,7 @@ ASOHFlashlight::ASOHFlashlight()
     Spot->SetVisibility(false, true);
     Spot->SetHiddenInGame(true);
     Spot->SetIntensity(0.f);
+	
 }
 
 void ASOHFlashlight::Tick(float DeltaSeconds)

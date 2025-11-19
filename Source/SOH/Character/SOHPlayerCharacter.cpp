@@ -14,7 +14,7 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 
 	//회전 설정
 	bUseControllerRotationPitch = false;//컨트롤러의 피치 회전 사용 안함
-	bUseControllerRotationYaw = false;//컨트롤러의 요 회전 사용 안함
+	bUseControllerRotationYaw = true;//컨트롤러의 요 회전 사용 안함
 	bUseControllerRotationRoll = false;//컨트롤러의 롤 회전 사용 안함
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;                //이동 방향으로 회전
@@ -49,7 +49,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	if (!Camera) return;
 
 	FVector Start = Camera->GetComponentLocation();
-	FVector End = Start + (Camera->GetForwardVector() * 500.0f); // 감지 거리 500cm
+	FVector End = Start + (Camera->GetForwardVector() * 30.0f); // 감지 거리 30cm
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
