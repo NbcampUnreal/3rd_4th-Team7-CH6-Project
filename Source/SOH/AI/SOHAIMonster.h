@@ -14,10 +14,8 @@ class SOH_API ASOHAIMonster : public ACharacter
 public:
 	ASOHAIMonster();
 
-
 protected:
 	virtual void BeginPlay() override;
-
 
 public:
 	//두리번 몽타주
