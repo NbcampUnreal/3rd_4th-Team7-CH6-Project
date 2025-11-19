@@ -63,6 +63,7 @@ public:
 	void StopRun(const FInputActionValue& Value);
 	void ToggleCrouch();
 	void Interact();
+	void InteractWithItem();
 	void ToggleFlashlight();
 	void PlayUpperBodyMontage(UAnimMontage* Montage);
 

@@ -26,7 +26,6 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 300.f;            // 카메라 거리
 	SpringArm->bUsePawnControlRotation = true;     // 캐릭터 회전과 따로 회전
-
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false; // 카메라는 SpringArm 회전을 따름
