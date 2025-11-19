@@ -57,3 +57,32 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	TArray<FName> itemTags;
 };
+
+// 인벤토리 슬롯 구조체 정의
+USTRUCT(BlueprintType)
+struct FSOHInventoryItem
+{
+	GENERATED_BODY()
+
+public:
+	// 아이템 ID
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	FName itemID = NAME_None;
+    
+	// 아이템 개수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 quantity = 0;
+    
+	// 기본 생성자
+	FSOHInventoryItem()
+	{
+		
+	}
+
+	// 값을 받는 생성자
+	FSOHInventoryItem(FName inID, int32 inQuantity)
+	{
+		itemID = inID;
+		quantity = inQuantity;
+	}
+};
