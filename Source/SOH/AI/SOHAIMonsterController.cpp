@@ -52,6 +52,8 @@ ASOHAIMonsterController::ASOHAIMonsterController()
 	PerceptionComp->ConfigureSense(*HearingConfig);
 	PerceptionComp->SetDominantSense(UAISense_Sight::StaticClass());
 	PerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this, &ASOHAIMonsterController::HandleTargetPerceptionUpdated);
+
+	bPrevSensedPlayer = false;
 }
 
 void ASOHAIMonsterController::OnPossess(APawn* InPawn)
@@ -103,8 +105,15 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 
 	const bool bSensed = Stimulus.WasSuccessfullySensed();
 
+	ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn());
+
 	if (bSensed)
 	{
+		if (!bPrevSensedPlayer && Monster)
+		{
+			Monster->PlayDetectPlayerSound();
+		}
+
 		BlackboardComp->SetValueAsObject(Key_PlayerActor, PlayerPawn);
 		BlackboardComp->SetValueAsBool(Key_PlayerInRange, true);
 		BlackboardComp->ClearValue(Key_LastKnownLocation);
@@ -138,6 +147,8 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 
 		GetPerceptionComponent()->ForgetAll();
 	}
+
+	bPrevSensedPlayer = bSensed;
 }
 
 void ASOHAIMonsterController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)

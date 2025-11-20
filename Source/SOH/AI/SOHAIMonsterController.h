@@ -56,4 +56,6 @@ private:
 
 	UPROPERTY()
 	UAISenseConfig_Hearing* HearingConfig;
+
+	bool bPrevSensedPlayer;
 };

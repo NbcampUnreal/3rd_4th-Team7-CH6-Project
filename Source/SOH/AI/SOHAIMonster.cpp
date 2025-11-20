@@ -131,3 +131,19 @@ bool ASOHAIMonster::HasLineOfSightToTarget(AActor* Target)
 
     return false;
 }
+
+void ASOHAIMonster::PlayDetectPlayerSound()
+{
+    if (!DetectPlayerSound)
+        return;
+
+    UWorld* World = GetWorld();
+    if (!World)
+        return;
+
+    UGameplayStatics::PlaySoundAtLocation(
+        World,
+        DetectPlayerSound,
+        GetActorLocation()
+    );
+}

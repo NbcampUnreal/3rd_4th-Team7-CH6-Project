@@ -69,6 +69,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AI|Combat")
 	void TryAttack();
 
+	//Sound
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* DetectPlayerSound;
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayDetectPlayerSound();
+
 	//Open Door
 
 	bool HasLineOfSightToTarget(AActor* Target);
