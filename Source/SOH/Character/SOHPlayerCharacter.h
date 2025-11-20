@@ -69,6 +69,7 @@ public:
 
 private:
 	// 이전에 바라봤던 아이템
+	UPROPERTY()
 	AActor* LastHighlightedItem = nullptr;
 
 	// 타이머 핸들

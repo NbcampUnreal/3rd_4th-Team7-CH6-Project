@@ -7,6 +7,7 @@
 #include "SOH/Item/SOHFlashlight.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Interaction/SOHInteractInterface.h" // 인터페이스 헤더 추가
 
 ASOHPlayerCharacter::ASOHPlayerCharacter()
 {
@@ -49,7 +50,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	if (!Camera) return;
 
 	FVector Start = Camera->GetComponentLocation();
-	FVector End = Start + (Camera->GetForwardVector() * 30.0f); // 감지 거리 30cm
+	FVector End = Start + (Camera->GetForwardVector() * 1000.0f); // 감지 거리 30cm //1000으로 수정
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
@@ -60,6 +61,18 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	if (bHit)
 	{
 		HitActor = HitResult.GetActor();
+
+		UE_LOG(LogTemp, Warning, TEXT("Trace Hit Actor: %s"),
+		HitActor ? *HitActor->GetName() : TEXT("None"));
+
+		bool bImplements = HitActor && HitActor->Implements<USOHInteractInterface>();
+		UE_LOG(LogTemp, Warning, TEXT("Implements Interface? %s"),
+			bImplements ? TEXT("YES") : TEXT("NO"));
+
+		if (!bImplements)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("? HitActor does NOT implement SOHInteractInterface!"));
+		}
 	}
 	// 디버그 라인 그리기
 	
@@ -73,28 +86,44 @@ void ASOHPlayerCharacter::TraceForInteractable()
 		0,       // Depth priority
 		1.5f     // 두께
 	);
-	
 
-	// 이전 아이템과 다르면 이전 아웃라인 해제
-	if (LastHighlightedItem && LastHighlightedItem != HitActor)
+	// 인터랙트 인터페이스의 캔리시브트레이스로 교체
+	if (LastHighlightedItem != HitActor)
 	{
-		if (UStaticMeshComponent* ItemMesh = LastHighlightedItem->FindComponentByClass<UStaticMeshComponent>())
+		if (LastHighlightedItem)
 		{
-			ItemMesh->SetRenderCustomDepth(false);
+			if (LastHighlightedItem->Implements<USOHInteractInterface>())
+			{
+				ISOHInteractInterface::Execute_CanReceiveTrace(LastHighlightedItem, this, false);
+			}
 		}
-		LastHighlightedItem = nullptr;
-	}
-
-	// 새로운 아이템이면 아웃라인 표시
-	if (HitActor && HitActor->ActorHasTag("Item"))
-	{
-		if (UStaticMeshComponent* ItemMesh = HitActor->FindComponentByClass<UStaticMeshComponent>())
+		LastHighlightedItem = nullptr; 
+		if (HitActor && HitActor->Implements<USOHInteractInterface>())
 		{
-			ItemMesh->SetRenderCustomDepth(true);
-			ItemMesh->SetCustomDepthStencilValue(1); // 머티리얼에서 사용하는 스텐실 값
+			ISOHInteractInterface::Execute_CanReceiveTrace(HitActor, this, true);
+			LastHighlightedItem = HitActor;
 		}
-		LastHighlightedItem = HitActor;
 	}
+	 
+	// // 이전 아이템과 다르면 이전 아웃라인 해제
+	// if (LastHighlightedItem && LastHighlightedItem != HitActor)
+	// {
+	// 	if (UStaticMeshComponent* ItemMesh = LastHighlightedItem->FindComponentByClass<UStaticMeshComponent>())
+	// 	{
+	// 		ItemMesh->SetRenderCustomDepth(false);
+	// 	}
+	// 	LastHighlightedItem = nullptr;
+	// }
+	// // 새로운 아이템이면 아웃라인 표시
+	// if (HitActor && HitActor->ActorHasTag("Item"))
+	// {
+	// 	if (UStaticMeshComponent* ItemMesh = HitActor->FindComponentByClass<UStaticMeshComponent>())
+	// 	{
+	// 		ItemMesh->SetRenderCustomDepth(true);
+	// 		ItemMesh->SetCustomDepthStencilValue(1); // 머티리얼에서 사용하는 스텐실 값
+	// 	}
+	// 	LastHighlightedItem = HitActor;
+	// }
 }
 
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
@@ -158,6 +187,7 @@ void ASOHPlayerCharacter::Interact()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Interacted with: %s"), *LastHighlightedItem->GetName());
 		// 아이템과 상호작용 로직 추가
+		ISOHInteractInterface::Execute_Interact(LastHighlightedItem, this); //인터페이스 인터랙트 추가
 	}
 }
 
