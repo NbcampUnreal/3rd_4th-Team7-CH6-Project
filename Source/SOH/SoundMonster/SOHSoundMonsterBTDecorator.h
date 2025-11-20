@@ -9,4 +9,9 @@ class SOH_API USOHSoundMonsterBTDecorator : public UBTDecorator
 {
 	GENERATED_BODY()
 	
+public:
+	USOHSoundMonsterBTDecorator();
+
+protected:
+	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
 };
