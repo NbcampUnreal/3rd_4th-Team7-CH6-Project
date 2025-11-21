@@ -12,6 +12,7 @@ ASOHBaseItem::ASOHBaseItem()
     // 2. 물리 및 충돌 설정
     itemMesh->SetSimulatePhysics(true);
     itemMesh->SetCollisionProfileName(TEXT("PhysicsActor"));
+    itemMesh->SetGenerateOverlapEvents(true);
     
     // 상호작용(E키, 라인트레이스)을 위해 Visibility 채널 Block 설정
     itemMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
@@ -27,7 +28,7 @@ void ASOHBaseItem::BeginPlay()
     Super::BeginPlay();
 
     // BeginPlay 로그: 아이템이 월드에 생성되었음을 알림
-    // UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] BeginPlay: %s (ItemID: %s)"), *GetName(), *itemID.ToString());
+    UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] BeginPlay: %s (ItemID: %s)"), *GetName(), *itemID.ToString());
 
     // 만약 레벨에 미리 배치해두고 ID를 적어놨다면, 시작하자마자 초기화 진행
     if (!itemID.IsNone())
@@ -39,6 +40,7 @@ void ASOHBaseItem::BeginPlay()
         // UE_LOG(LogTemp, Error, TEXT("[SOHBaseItem] Error: ItemID is None at BeginPlay! Check Blueprint Defaults."));
     }
 }
+
 void ASOHBaseItem::InitItem(FName newItemID)
 {
     // 1. ID 저장
@@ -60,7 +62,7 @@ void ASOHBaseItem::InitItem(FName newItemID)
             if (itemData->mesh)
             {
                 itemMesh->SetStaticMesh(itemData->mesh);
-                // UE_LOG(LogTemp, Log, TEXT("[SOHBaseItem] Mesh Set Successfully for %s"), *itemID.ToString());
+                UE_LOG(LogTemp, Log, TEXT("[SOHBaseItem] Mesh Set Successfully for %s"), *itemID.ToString());
 
                 // (선택사항) 아이템 이름으로 액터 이름 바꾸기 (디버깅용)
                 #if WITH_EDITOR
@@ -69,17 +71,17 @@ void ASOHBaseItem::InitItem(FName newItemID)
             }
             else
             {
-                // UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] Data Found, but Mesh is NULL for ID: %s"), *itemID.ToString());
+                UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] Data Found, but Mesh is NULL for ID: %s"), *itemID.ToString());
             }
         }
         else
         {
-            // UE_LOG(LogTemp, Error, TEXT("[SOHBaseItem] Init Failed: Data Table has no row for ID: %s"), *itemID.ToString());
+            UE_LOG(LogTemp,Warning, TEXT("[SOHBaseItem] Init Failed: Data Table has no row for ID: %s"), *itemID.ToString());
         }
     }
     else
     {
-        // UE_LOG(LogTemp, Error, TEXT("[SOHBaseItem] CRITICAL: SOHItemManager Subsystem NOT Found!"));
+        UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] CRITICAL: SOHItemManager Subsystem NOT Found!"));
     }
 }
 
@@ -90,7 +92,7 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
     Super::Interact_Implementation(Caller);
 
     // 상호작용 시도 로그
-    // UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] Interact Called by Actor: %s"), Caller ? *Caller->GetName() : TEXT("NULL"));
+    UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] Interact Called by Actor: %s"), Caller ? *Caller->GetName() : TEXT("NULL"));
 
     if (!Caller) return;
 
@@ -107,7 +109,7 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
 
         if (bSuccess)
         {
-            // UE_LOG(LogTemp, Log, TEXT("BaseItem: Picked up by %s -> ItemID: %s"), *Caller->GetName(), *itemID.ToString());
+            UE_LOG(LogTemp, Log, TEXT("BaseItem: Picked up by %s -> ItemID: %s"), *Caller->GetName(), *itemID.ToString());
             
             // 3. UI 숨기기
             HideInteractWidget();
@@ -117,12 +119,12 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
         }
         else
         {
-            // UE_LOG(LogTemp, Warning, TEXT("Inventory Full or Error!"));
+            UE_LOG(LogTemp, Warning, TEXT("Inventory Full or Error!"));
         }
     }
     else
     {
-        // UE_LOG(LogTemp, Warning, TEXT("Interactor has no SOHInventoryComponent!"));
+        UE_LOG(LogTemp, Warning, TEXT("Interactor has no SOHInventoryComponent!"));
     }
 }
 
