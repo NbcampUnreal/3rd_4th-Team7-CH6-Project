@@ -146,4 +146,13 @@ void ASOHAIMonster::PlayDetectPlayerSound()
         DetectPlayerSound,
         GetActorLocation()
     );
+
+    if (ChaseSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(
+            World,
+            ChaseSound,
+            GetActorLocation()
+        );
+    }
 }

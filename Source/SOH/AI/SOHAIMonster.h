@@ -5,6 +5,8 @@
 #include "SOHAIMonster.generated.h"
 
 class ATargetPoint;
+class UAudioComponent;
+class USoundBase;
 
 UCLASS()
 class SOH_API ASOHAIMonster : public ACharacter
@@ -73,6 +75,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	USoundBase* DetectPlayerSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Movement")
+	USoundBase* ChaseSound;
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayDetectPlayerSound();
