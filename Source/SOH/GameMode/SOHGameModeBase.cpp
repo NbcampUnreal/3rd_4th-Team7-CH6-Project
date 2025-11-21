@@ -20,17 +20,7 @@ void ASOHGameModeBase::OnGameClear()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Game Clear!"));
 	ShowGameClearUI();
-
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerHandle,
-		[this]()
-		{
-			LoadLevel(LobbyLevelName);
-		},
-		3.0f,
-		false
-	);
+	
 }
 
 void ASOHGameModeBase::OnPlayerDied()
