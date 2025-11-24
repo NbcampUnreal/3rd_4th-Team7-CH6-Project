@@ -1,65 +1,58 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Item/SOHBaseItem.h"
 #include "SOHFlashlight.generated.h"
 
 class USceneComponent;
-class UStaticMeshComponent;
 class USpotLightComponent;
 class UCameraComponent;
 class USkeletalMeshComponent;
 class ACharacter;
 
 UCLASS()
-class SOH_API ASOHFlashlight : public AActor
+class SOH_API ASOHFlashlight : public ASOHBaseItem
 {
     GENERATED_BODY()
 
 public:
     ASOHFlashlight();
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "Flashlight")
     void Toggle();
 
-    UFUNCTION(BlueprintCallable)
-    void InteractPickup(ACharacter* Picker);
-
 protected:
-    virtual void Tick(float DeltaSeconds) override;
+    virtual void BeginPlay() override;
+
+    virtual void Interact_Implementation(AActor* Caller) override;
+
+    virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 private:
-    UPROPERTY(VisibleAnywhere)
-    USceneComponent* Root;
-
     UPROPERTY(VisibleAnywhere)
     USceneComponent* Pivot;
 
     UPROPERTY(VisibleAnywhere)
-    UStaticMeshComponent* Mesh;
-
-    UPROPERTY(VisibleAnywhere)
     USpotLightComponent* Spot;
-
 
     UPROPERTY()
     ACharacter* OwnerChar;
 
     UPROPERTY()
-    UCameraComponent* OwnerCam;
-
-    UPROPERTY()
     USkeletalMeshComponent* OwnerMesh;
 
-    UPROPERTY(EditAnywhere)
-    FName HandSocketName;
+    UPROPERTY(EditAnywhere, Category = "Flashlight")
+    FName HandSocketName = TEXT("FlashlightSocket");
 
-    UPROPERTY(EditAnywhere)
-    float IntensityOn;
+    UPROPERTY(EditAnywhere, Category = "Flashlight")
+    float IntensityOn = 4000.f;
 
-    bool bOn;
-    bool bEquipped;
+    UPROPERTY(EditAnywhere, Category = "Flashlight")
+    bool bStartOn = false;
+
+    bool bOn = false;
+    bool bEquipped = false;
 
     void SetOn(bool bEnable);
-    void UpdateToCamera();
+    void SetEquipped(ACharacter* NewOwner);
 };

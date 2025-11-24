@@ -1,61 +1,62 @@
-#include "SOHFlashlight.h"
+#include "Item/SOHFlashlight.h"
 #include "Components/SceneComponent.h"
-#include "Components/StaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
-#include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "SOHInventoryComponent.h"
 
 ASOHFlashlight::ASOHFlashlight()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
 
-    // 루트와 기준 생성
-    Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-    SetRootComponent(Root);
     Pivot = CreateDefaultSubobject<USceneComponent>(TEXT("Pivot"));
-    Pivot->SetupAttachment(Root);
+    RootComponent = Pivot;
 
-    // 외형 생성
-    Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-    Mesh->SetupAttachment(Pivot);
+    if (itemMesh)
+    {
+        itemMesh->SetupAttachment(Pivot);
 
-    // 라이트 생성
+        itemMesh->SetSimulatePhysics(false);
+        itemMesh->SetEnableGravity(false);
+
+        itemMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+        itemMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+        itemMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+    }
+
     Spot = CreateDefaultSubobject<USpotLightComponent>(TEXT("Spot"));
     Spot->SetupAttachment(Pivot);
     Spot->bUseInverseSquaredFalloff = false;
-    Spot->SetIntensity(4000.f);
+    Spot->SetIntensity(IntensityOn);
 
-    HandSocketName = TEXT("FlashlightSocket"); // 손 소켓 이름
-    IntensityOn = 4000.f; // 밝기
-    bOn = false; // 꺼진 상태로 시작
-    bEquipped = false; // 장착전
-
-    //배치시 상태 라이트 꺼짐
-    Spot->SetVisibility(false, true);
-    Spot->SetHiddenInGame(true);
-    Spot->SetIntensity(0.f);
-	
+    bOn = false;
+    bEquipped = false;
 }
 
-void ASOHFlashlight::Tick(float DeltaSeconds)
+void ASOHFlashlight::BeginPlay()
 {
-    Super::Tick(DeltaSeconds);
+    Super::BeginPlay();
 
-    // 장착시 카메라 방향을 업데이트해서 회전
-    if (bEquipped) UpdateToCamera();
+    SetOn(bStartOn);
+
+    if (!bEquipped)
+    {
+        SetOn(false);
+    }
 }
 
-void ASOHFlashlight::UpdateToCamera()
+void ASOHFlashlight::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-    if (OwnerCam && Pivot)
-        Pivot->SetWorldRotation(OwnerCam->GetComponentRotation()); // 카메라 회전값 복사
+    // BaseItem의 오버랩 자동 줍기(Destroy) 무력화
+    // Trace + E키 Interact만으로 줍게 하려면 비워두면 됨
 }
 
 void ASOHFlashlight::SetOn(bool bEnable)
 {
-    // 라이트 on/off 설정
     bOn = bEnable;
+
+    if (!Spot) return;
+
     Spot->SetVisibility(bOn, true);
     Spot->SetHiddenInGame(!bOn);
     Spot->SetIntensity(bOn ? IntensityOn : 0.f);
@@ -63,28 +64,52 @@ void ASOHFlashlight::SetOn(bool bEnable)
 
 void ASOHFlashlight::Toggle()
 {
-    // F키 입력 시 호출 — 켜져있으면 끄고, 꺼져있으면 켬
+    if (!bEquipped) return;
     SetOn(!bOn);
 }
 
-// 줍기
-void ASOHFlashlight::InteractPickup(ACharacter* Picker)
+void ASOHFlashlight::SetEquipped(ACharacter* NewOwner)
 {
-    if (!Picker) return;
+    if (!NewOwner) return;
 
-    // Owner 정보
-    OwnerChar = Picker;
-    OwnerCam = Picker->FindComponentByClass<UCameraComponent>();
-    OwnerMesh = Picker->GetMesh();
-
-    //방어코드? 소켓이름이랑 맞는 소켓이 없으면 return 합니다.
+    OwnerChar = NewOwner;
+    OwnerMesh = NewOwner->GetMesh();
     if (!OwnerMesh || !OwnerMesh->DoesSocketExist(HandSocketName)) return;
 
-    Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    AttachToComponent(OwnerMesh,
-        FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-        HandSocketName); // 붙일 소켓 이름
+    if (itemMesh)
+    {
+        itemMesh->SetSimulatePhysics(false);
+        itemMesh->SetEnableGravity(false);
+        itemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
 
-    bEquipped = true; // 손에 들린 상태 SetOn함수에서 쓰임 들려있어야만 킬 수 있게끔.
+    AttachToComponent(
+        OwnerMesh,
+        FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+        HandSocketName
+    );
+
+    bEquipped = true;
+
     SetOn(false);
+
+    SetActorEnableCollision(false);
+    HideInteractWidget();
+    ApplyOverlayMaterial(nullptr);
+}
+
+void ASOHFlashlight::Interact_Implementation(AActor* Caller)
+{
+    if (!Caller) return;
+
+    USOHInventoryComponent* InventoryComp = Caller->FindComponentByClass<USOHInventoryComponent>();
+    const bool bAdded = InventoryComp ? InventoryComp->AddToInventory(itemID, 1) : false;
+
+    if (!bAdded)
+        return;
+
+    if (ACharacter* Char = Cast<ACharacter>(Caller))
+    {
+        SetEquipped(Char);
+    }
 }
