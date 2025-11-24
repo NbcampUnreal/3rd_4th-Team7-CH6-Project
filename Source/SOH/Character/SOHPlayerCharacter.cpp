@@ -258,8 +258,6 @@ void ASOHPlayerCharacter::Die()
 	if (bIsDead) return;
 	bIsDead = true;
 
-	UE_LOG(LogTemp, Warning, TEXT("Player Die"));
-
 	// 움직임/회전 멈추기
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
@@ -267,7 +265,8 @@ void ASOHPlayerCharacter::Die()
 	// 입력 막기
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
-		DisableInput(PC);
+		PC->SetIgnoreLookInput(true);
+		PC->SetIgnoreMoveInput(true);
 	}
 
 	// 죽음 몽타주 재생
@@ -288,10 +287,21 @@ void ASOHPlayerCharacter::Die()
 		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
 	}
 
+	FTimerHandle DeathDelayHandle;
+	GetWorldTimerManager().SetTimer(
+		DeathDelayHandle,
+		this,
+		&ASOHPlayerCharacter::CallGameModeOnPlayerDied,
+		3.0f,
+		false
+	);
+}
+
+void ASOHPlayerCharacter::CallGameModeOnPlayerDied()
+{
 	if (UWorld* World = GetWorld())
 	{
-		AGameModeBase* GMBase = UGameplayStatics::GetGameMode(World);
-		if (ASOHGameModeBase* GM = Cast<ASOHGameModeBase>(GMBase))
+		if (ASOHGameModeBase* GM = Cast<ASOHGameModeBase>(UGameplayStatics::GetGameMode(World)))
 		{
 			GM->OnPlayerDied();
 		}

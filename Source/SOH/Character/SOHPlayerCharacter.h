@@ -73,6 +73,9 @@ protected:
 
 	void Die();
 
+	UFUNCTION()
+	void CallGameModeOnPlayerDied();
+
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
