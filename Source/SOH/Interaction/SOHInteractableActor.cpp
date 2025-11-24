@@ -8,11 +8,14 @@
 
 ASOHInteractableActor::ASOHInteractableActor()
 {
-	PrimaryActorTick.bCanEverTick = true; InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
-	InteractionWidget->SetupAttachment(RootComponent);
-	InteractionWidget->SetWidgetSpace(EWidgetSpace::World);
-	InteractionWidget->SetDrawSize(FVector2D(200.f, 100.f));
-	InteractionWidget->SetVisibility(false);
+	PrimaryActorTick.bCanEverTick = true;
+
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	// InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
+	// InteractionWidget->SetupAttachment(RootComponent);
+	// InteractionWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	// InteractionWidget->SetDrawAtDesiredSize(true);
+	// InteractionWidget->SetVisibility(false);
 }
 void ASOHInteractableActor::BeginPlay()
 {
@@ -33,13 +36,13 @@ bool ASOHInteractableActor::CanReceiveTrace_Implementation(AActor* Caller, bool 
 {
 	if (bCanInteract)
 	{
-		ShowInteractWidget();
+		//ShowInteractWidget();
 		ApplyOverlayMaterial(OutlineMaterial);
 		return true;
 	}
 	else
 	{
-		HideInteractWidget();
+		//HideInteractWidget();
 		ApplyOverlayMaterial(nullptr);
 		return false;
 	}
@@ -48,7 +51,7 @@ void ASOHInteractableActor::ShowInteractWidget()
 {
 	 if (InteractionWidget)
 	 {
-		 InteractionWidget->SetVisibility(true);
+	 	InteractionWidget->SetVisibility(true);
 	 }
 }
 void ASOHInteractableActor::HideInteractWidget()
@@ -60,14 +63,14 @@ void ASOHInteractableActor::HideInteractWidget()
 }
 void ASOHInteractableActor::ApplyOverlayMaterial(UMaterialInterface* Material)
 {
-	TArray<UMeshComponent*> MeshComponents;
-	GetComponents<UMeshComponent>(MeshComponents);
-	for (UMeshComponent* Mesh : MeshComponents)
+	TArray<UStaticMeshComponent*> MeshComponents;
+	GetComponents<UStaticMeshComponent>(MeshComponents);
+	for (UStaticMeshComponent* Mesh : MeshComponents)
 	{
 		if (Mesh)
 		{
 			Mesh->SetOverlayMaterial(Material);
-			//Mesh->GetStaticMesh()->NaniteSettings.bEnabled = false;
+			Mesh->bDisallowNanite = true;
 		}
 	}
 }

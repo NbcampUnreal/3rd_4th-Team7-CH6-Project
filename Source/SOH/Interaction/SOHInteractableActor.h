@@ -5,10 +5,14 @@
 #include "GameFramework/Actor.h"
 #include "SOHInteractInterface.h"
 #include "Components/WidgetComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Materials/MaterialInterface.h"
-#include "Blueprint/UserWidget.h"
+#include "Animation/WidgetAnimation.h"
 #include "SOHInteractableActor.generated.h"
+
+class UMaterialInterface;
+class UStaticMeshComponent;
+class UUserWidget;
+class UWidgetAnimation;
+
 
 UCLASS()
 class SOH_API ASOHInteractableActor : public AActor, public ISOHInteractInterface
@@ -35,15 +39,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction|UI")
 	TSubclassOf<UUserWidget> InteractionWidgetClass;
 
-	// Widget Component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interaction", meta=(AllowPrivateAccess="true"))
-	UWidgetComponent* InteractionWidget;
-
 	// Outline Material
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction|Visual")
 	UMaterialInterface* OutlineMaterial;
-
-	// Actor 내부 모든 StaticMeshComponent
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interaction|Mesh", meta=(AllowPrivateAccess="true"))
-	TArray<UStaticMeshComponent*> StaticMeshComponents;
+	
+	// Widget Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interaction")
+	UWidgetComponent* InteractionWidget;
 };
