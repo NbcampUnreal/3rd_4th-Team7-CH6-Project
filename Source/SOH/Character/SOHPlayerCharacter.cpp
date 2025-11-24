@@ -62,17 +62,17 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	{
 		HitActor = HitResult.GetActor();
 
-		UE_LOG(LogTemp, Warning, TEXT("Trace Hit Actor: %s"),
-		HitActor ? *HitActor->GetName() : TEXT("None"));
-
-		bool bImplements = HitActor && HitActor->Implements<USOHInteractInterface>();
-		UE_LOG(LogTemp, Warning, TEXT("Implements Interface? %s"),
-			bImplements ? TEXT("YES") : TEXT("NO"));
-
-		if (!bImplements)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("? HitActor does NOT implement SOHInteractInterface!"));
-		}
+		// UE_LOG(LogTemp, Warning, TEXT("Trace Hit Actor: %s"),
+		// HitActor ? *HitActor->GetName() : TEXT("None"));
+		//
+		// bool bImplements = HitActor && HitActor->Implements<USOHInteractInterface>();
+		// UE_LOG(LogTemp, Warning, TEXT("Implements Interface? %s"),
+		// 	bImplements ? TEXT("YES") : TEXT("NO"));
+		//
+		// if (!bImplements)
+		// {
+		// 	UE_LOG(LogTemp, Warning, TEXT("? HitActor does NOT implement SOHInteractInterface!"));
+		// }
 	}
 	// 디버그 라인 그리기
 	

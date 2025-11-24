@@ -4,7 +4,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SOHInteractInterface.h"
-#include "Components/MeshComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Materials/MaterialInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "SOHInteractableActor.generated.h"
 
@@ -15,6 +17,7 @@ class SOH_API ASOHInteractableActor : public AActor, public ISOHInteractInterfac
 	
 public:	
 	ASOHInteractableActor();
+	void BeginPlay() override;
 
 protected:
 
@@ -28,10 +31,19 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	void ApplyOverlayMaterial(UMaterialInterface* Material);
 
+	// Widget Class
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction|UI")
 	TSubclassOf<UUserWidget> InteractionWidgetClass;
-	UPROPERTY()
-	TObjectPtr<UUserWidget> InteractionWidgetInstance;
+
+	// Widget Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interaction", meta=(AllowPrivateAccess="true"))
+	UWidgetComponent* InteractionWidget;
+
+	// Outline Material
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction|Visual")
-	TObjectPtr<UMaterialInterface> OutlineMaterial;
+	UMaterialInterface* OutlineMaterial;
+
+	// Actor 내부 모든 StaticMeshComponent
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interaction|Mesh", meta=(AllowPrivateAccess="true"))
+	TArray<UStaticMeshComponent*> StaticMeshComponents;
 };
