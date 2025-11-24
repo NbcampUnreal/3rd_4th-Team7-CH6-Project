@@ -87,7 +87,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
             {
                 FPathFindingQuery Query(MonsterController, *NavData, Monster->GetActorLocation(), PlayerActor->GetActorLocation());
                 const FPathFindingResult Result = NavSys->FindPathSync(Query);
-                bPathFail = (!Result.IsSuccessful() || !Result.Path.IsValid() || Result.IsPartial());
+                bPathFail = (!Result.IsSuccessful() || !Result.Path.IsValid()); // || Result.IsPartial()
             }
         }
 

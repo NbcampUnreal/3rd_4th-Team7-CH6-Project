@@ -85,4 +85,5 @@ public:
 	//Open Door
 
 	bool HasLineOfSightToTarget(AActor* Target);
+
 };
