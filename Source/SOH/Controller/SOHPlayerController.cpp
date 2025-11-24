@@ -10,7 +10,6 @@ void ASOHPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Enhanced Input Context 적용
 	if (ULocalPlayer* LP = GetLocalPlayer())
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
@@ -59,7 +58,6 @@ void ASOHPlayerController::SetupInputComponent()
 	}
 }
 
-// 입력 처리 함수
 void ASOHPlayerController::Move(const FInputActionValue& Value)
 {
 	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))

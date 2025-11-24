@@ -6,6 +6,8 @@
 #include "SOHPlayerCharacter.generated.h"
 
 class ASOHFlashlight;
+class UAnimMontage;
+class USoundBase;
 
 UCLASS()
 class SOH_API ASOHPlayerCharacter : public ACharacter
@@ -17,8 +19,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override; // í‹±í•¨ìˆ˜ ì¶”ê°€
 
-	//ÀÌµ¿ °ü·Ã
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RotationRate = 500.f;
 
@@ -30,33 +32,78 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RunSpeed = 400.f;
 
-	
+	// ì—¬ê¸°ì„œë¶€í„°
+
+	// ì²´ë ¥
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat|Health")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat|Health")
+	float Health;
+
+	// ìŠ¤íƒœë¯¸ë„ˆ
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat|Stamina")
+	float MaxStamina = 100.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat|Stamina")
+	float Stamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat|Stamina")
+	float StaminaDrainPerSec = 10.f;   // ë‹¬ë¦´ ë•Œ ì´ˆë‹¹ ì†Œëª¨
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat|Stamina")
+	float StaminaRegenPerSec = 10.f;   // ì‰¬ë©´ ì´ˆë‹¹ íšŒë³µ
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat|Stamina")
+	float MinStaminaToRun = 5.f;       // ì´ ì´í•˜ì´ë©´ ë‹¬ë¦¬ê¸° ë¶ˆê°€
+
+
+	// ì²´ë ¥ ê°ì†Œ/ì£½ìŒ ì²˜ë¦¬
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Death")
+	UAnimMontage* DeathMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Death")
+	USoundBase* DeathSound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
+	bool bIsDead = false;
+
+	void Die();
+
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator,
+		AActor* DamageCauser
+	) override;
+
+	// ì—¬ê¸°ê¹Œì§€ êµ¬í˜„.
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool bIsRunning = false;
 
-	//Ä«¸Ş¶ó °ü·Ã
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class USpringArmComponent* SpringArm;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 
-	// Flashlight »óÅÂ
+	// Flashlight 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight")
 	bool bFlashlightOn = false;
 
-	// ¼ÕÀüµî »óÃ¼ ¸ùÅ¸ÁÖ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* FlashlightMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	ASOHFlashlight* Flashlight;
 
-	// Å¸ÀÌ¸Ó ±â¹İ °¨Áö ÇÔ¼ö
 	void TraceForInteractable();
 
 public:
-	//ÀÌµ¿ ÀÔ·Â
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void StartRun(const FInputActionValue& Value);
@@ -68,10 +115,8 @@ public:
 
 
 private:
-	// ÀÌÀü¿¡ ¹Ù¶óºÃ´ø ¾ÆÀÌÅÛ
 	UPROPERTY()
 	AActor* LastHighlightedItem = nullptr;
 
-	// Å¸ÀÌ¸Ó ÇÚµé
 	FTimerHandle TraceTimerHandle;
 };

@@ -12,13 +12,12 @@ UCLASS()
 class SOH_API ASOHPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	//
+
 public:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
 protected:
-	/** --- 입력 액션 --- */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* IMC_Player;
 
@@ -40,7 +39,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputAction* IA_ToggleFlashlight;
 
-	/** --- 입력 처리 --- */
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void StartRun(const FInputActionValue& Value);

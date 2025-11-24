@@ -7,50 +7,75 @@
 #include "SOH/Item/SOHFlashlight.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Interaction/SOHInteractInterface.h" // ÀÎÅÍÆäÀÌ½º Çì´õ Ãß°¡
+#include "Interaction/SOHInteractInterface.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameMode/SOHGameModeBase.h"
 
 ASOHPlayerCharacter::ASOHPlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	//È¸Àü ¼³Á¤
-	bUseControllerRotationPitch = false;//ÄÁÆ®·Ñ·¯ÀÇ ÇÇÄ¡ È¸Àü »ç¿ë ¾ÈÇÔ
-	bUseControllerRotationYaw = true;//ÄÁÆ®·Ñ·¯ÀÇ ¿ä È¸Àü »ç¿ë ¾ÈÇÔ
-	bUseControllerRotationRoll = false;//ÄÁÆ®·Ñ·¯ÀÇ ·Ñ È¸Àü »ç¿ë ¾ÈÇÔ
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
 
-	GetCharacterMovement()->bOrientRotationToMovement = true;                //ÀÌµ¿ ¹æÇâÀ¸·Î È¸Àü
-	GetCharacterMovement()->RotationRate = FRotator(0.f, RotationRate, 0.f); //È¸Àü ¼Óµµ ¹× ÀÌµ¿ ¼Óµµ ¼³Á¤
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;                        //°È±â ¼Óµµ ¼³Á¤
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, RotationRate, 0.f);
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-	//Ä«¸Ş¶ó ÄÄÆ÷³ÍÆ®
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 300.f;            // Ä«¸Ş¶ó °Å¸®
-	SpringArm->bUsePawnControlRotation = true;     // Ä³¸¯ÅÍ È¸Àü°ú µû·Î È¸Àü
+	SpringArm->TargetArmLength = 300.f;
+	SpringArm->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false; // Ä«¸Ş¶ó´Â SpringArm È¸ÀüÀ» µû¸§
+	FollowCamera->bUsePawnControlRotation = false;
 
-	Tags.Add(FName("Player"));//ÇÃ·¹ÀÌ¾î ÅÂ±× 
+	Tags.Add(FName("Player"));
+
+	Health = MaxHealth;
+	Stamina = MaxStamina;
 }
 
 void ASOHPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 0.1ÃÊ¸¶´Ù °¨Áö ½ÇÇà (ÃÊ´ç 10È¸)
 	GetWorldTimerManager().SetTimer(TraceTimerHandle, this, &ASOHPlayerCharacter::TraceForInteractable, 0.1f, true);
+}
+
+void ASOHPlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bIsDead) return;
+
+	// ìŠ¤í…Œë¯¸ë„ˆ ì²˜ë¦¬
+	if (bIsRunning)
+	{
+		Stamina = FMath::Max(0.f, Stamina - StaminaDrainPerSec * DeltaTime);
+
+		// ìŠ¤í…Œë¯¸ë„ˆ ë°”ë‹¥ë‚˜ë©´ ìë™ìœ¼ë¡œ ë‹¬ë¦¬ê¸° í•´ì œ
+		if (Stamina <= 0.f)
+		{
+			bIsRunning = false;
+			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		}
+	}
+	else
+	{
+		Stamina = FMath::Min(MaxStamina, Stamina + StaminaRegenPerSec * DeltaTime);
+	}
 }
 
 void ASOHPlayerCharacter::TraceForInteractable()
 {
-	// Ä«¸Ş¶ó À§Ä¡¿Í ¹æÇâ °¡Á®¿À±â
 	UCameraComponent* Camera = FindComponentByClass<UCameraComponent>();
 	if (!Camera) return;
 
 	FVector Start = Camera->GetComponentLocation();
-	FVector End = Start + (Camera->GetForwardVector() * 1000.0f); // °¨Áö °Å¸® 30cm //1000À¸·Î ¼öÁ¤
+	FVector End = Start + (Camera->GetForwardVector() * 1000.0f); // ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ 30cm //1000ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
@@ -61,33 +86,19 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	if (bHit)
 	{
 		HitActor = HitResult.GetActor();
-
-		// UE_LOG(LogTemp, Warning, TEXT("Trace Hit Actor: %s"),
-		// HitActor ? *HitActor->GetName() : TEXT("None"));
-		//
-		// bool bImplements = HitActor && HitActor->Implements<USOHInteractInterface>();
-		// UE_LOG(LogTemp, Warning, TEXT("Implements Interface? %s"),
-		// 	bImplements ? TEXT("YES") : TEXT("NO"));
-		//
-		// if (!bImplements)
-		// {
-		// 	UE_LOG(LogTemp, Warning, TEXT("? HitActor does NOT implement SOHInteractInterface!"));
-		// }
 	}
-	// µğ¹ö±× ¶óÀÎ ±×¸®±â
 	
-	DrawDebugLine(
-		GetWorld(),
-		Start,
-		End,
-		bHit ? FColor::Red : FColor::Green,
-		false,   // Áö¼Ó ½Ã°£ À¯Áö ¿©ºÎ
-		0.05f,   // Áö¼Ó ½Ã°£ (ÃÊ)
-		0,       // Depth priority
-		1.5f     // µÎ²²
-	);
+	//DrawDebugLine(
+	//	GetWorld(),
+	//	Start,
+	//	End,
+	//	bHit ? FColor::Red : FColor::Green,
+	//	false,
+	//	0.05f,
+	//	0,
+	//	1.5f
+	//);
 
-	// ÀÎÅÍ·¢Æ® ÀÎÅÍÆäÀÌ½ºÀÇ Äµ¸®½ÃºêÆ®·¹ÀÌ½º·Î ±³Ã¼
 	if (LastHighlightedItem != HitActor)
 	{
 		if (LastHighlightedItem)
@@ -103,9 +114,8 @@ void ASOHPlayerCharacter::TraceForInteractable()
 			ISOHInteractInterface::Execute_CanReceiveTrace(HitActor, this, true);
 			LastHighlightedItem = HitActor;
 		}
-	}
-	 
-	// // ÀÌÀü ¾ÆÀÌÅÛ°ú ´Ù¸£¸é ÀÌÀü ¾Æ¿ô¶óÀÎ ÇØÁ¦
+	} 
+	//
 	// if (LastHighlightedItem && LastHighlightedItem != HitActor)
 	// {
 	// 	if (UStaticMeshComponent* ItemMesh = LastHighlightedItem->FindComponentByClass<UStaticMeshComponent>())
@@ -114,13 +124,13 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	// 	}
 	// 	LastHighlightedItem = nullptr;
 	// }
-	// // »õ·Î¿î ¾ÆÀÌÅÛÀÌ¸é ¾Æ¿ô¶óÀÎ Ç¥½Ã
+	//
 	// if (HitActor && HitActor->ActorHasTag("Item"))
 	// {
 	// 	if (UStaticMeshComponent* ItemMesh = HitActor->FindComponentByClass<UStaticMeshComponent>())
 	// 	{
 	// 		ItemMesh->SetRenderCustomDepth(true);
-	// 		ItemMesh->SetCustomDepthStencilValue(1); // ¸ÓÆ¼¸®¾ó¿¡¼­ »ç¿ëÇÏ´Â ½ºÅÙ½Ç °ª
+	// 		ItemMesh->SetCustomDepthStencilValue(1); // ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ó¿¡¼ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½Ù½ï¿½ ï¿½ï¿½
 	// 	}
 	// 	LastHighlightedItem = HitActor;
 	// }
@@ -186,8 +196,7 @@ void ASOHPlayerCharacter::Interact()
 	if (LastHighlightedItem)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Interacted with: %s"), *LastHighlightedItem->GetName());
-		// ¾ÆÀÌÅÛ°ú »óÈ£ÀÛ¿ë ·ÎÁ÷ Ãß°¡
-		ISOHInteractInterface::Execute_Interact(LastHighlightedItem, this); //ÀÎÅÍÆäÀÌ½º ÀÎÅÍ·¢Æ® Ãß°¡
+		ISOHInteractInterface::Execute_Interact(LastHighlightedItem, this);
 	}
 }
 
@@ -197,10 +206,9 @@ void ASOHPlayerCharacter::ToggleFlashlight()
 	{
 		Flashlight->Toggle();
 
-		// ¼ÕÀüµî ÄÓ ¶§ »óÃ¼ ¸ùÅ¸ÁÖ Àç»ı
-		if (bFlashlightOn) // Toggle() ³»ºÎ¿¡¼­ »óÅÂ°¡ ¹Ù²î´Â °É È®ÀÎÇØ¾ß ÇÔ
+		if (bFlashlightOn)
 		{
-			PlayUpperBodyMontage(FlashlightMontage); // UpperBody ½½·Ô »ç¿ë
+			PlayUpperBodyMontage(FlashlightMontage);
 		}
 	}
 	else
@@ -219,6 +227,73 @@ void ASOHPlayerCharacter::PlayUpperBodyMontage(UAnimMontage* Montage)
 			{
 				AnimInstance->Montage_Play(Montage);
 			}
+		}
+	}
+}
+
+// ë°ë¯¸ì§€ ì²˜ë¦¬
+
+float ASOHPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (bIsDead) return 0.f;
+
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (ActualDamage <= 0.f) return 0.f;
+
+	Health = FMath::Clamp(Health - ActualDamage, 0.f, MaxHealth);
+
+	if (Health <= 0.f)
+	{
+		Die();
+	}
+
+	return ActualDamage;
+}
+
+// ì£½ìŒ ì²˜ë¦¬
+
+void ASOHPlayerCharacter::Die()
+{
+	if (bIsDead) return;
+	bIsDead = true;
+
+	UE_LOG(LogTemp, Warning, TEXT("Player Die"));
+
+	// ì›€ì§ì„/íšŒì „ ë©ˆì¶”ê¸°
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+
+	// ì…ë ¥ ë§‰ê¸°
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		DisableInput(PC);
+	}
+
+	// ì£½ìŒ ëª½íƒ€ì£¼ ì¬ìƒ
+	if (DeathMontage)
+	{
+		if (USkeletalMeshComponent* MeshComp = GetMesh())
+		{
+			if (UAnimInstance* Anim = MeshComp->GetAnimInstance())
+			{
+				Anim->Montage_Play(DeathMontage);
+			}
+		}
+	}
+
+	// ì‚¬ìš´ë“œ ì¬ìƒ
+	if (DeathSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		AGameModeBase* GMBase = UGameplayStatics::GetGameMode(World);
+		if (ASOHGameModeBase* GM = Cast<ASOHGameModeBase>(GMBase))
+		{
+			GM->OnPlayerDied();
 		}
 	}
 }
