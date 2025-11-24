@@ -111,10 +111,7 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
         {
             UE_LOG(LogTemp, Log, TEXT("BaseItem: Picked up by %s -> ItemID: %s"), *Caller->GetName(), *itemID.ToString());
             
-            // 3. UI 숨기기
-            HideInteractWidget();
-
-            // 4. 월드에서 삭제
+            // 3. 월드에서 삭제
             Destroy();
         }
         else

@@ -43,7 +43,6 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 			UE_LOG(LogTemp, Log, TEXT("[Lock] 성공! 열쇠(%s)를 사용하여 잠금을 해제했습니다."), *RequiredKeyID.ToString());
             
 			// 4. 잠금 해제 연출
-			HideInteractWidget(); // UI 숨기기
 			Destroy(); // 자물쇠 삭제
 		}
 		else
