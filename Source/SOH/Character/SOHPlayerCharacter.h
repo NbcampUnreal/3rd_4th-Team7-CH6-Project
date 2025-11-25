@@ -18,6 +18,14 @@ class SOH_API ASOHPlayerCharacter : public ACharacter
 public:
 	ASOHPlayerCharacter();
 
+public:
+	//GameInstance에서 호출하기 위해 만들었습니다.
+	UFUNCTION(BlueprintCallable)
+	float GetHealth() const { return Health; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetStamina() const { return Stamina; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override; // 틱함수 추가

@@ -10,6 +10,7 @@
 #include "Interaction/SOHInteractInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameMode/SOHGameModeBase.h"
+#include "GameMode/SOHGameInstance.h"
 #include "Blueprint/UserWidget.h"
 
 ASOHPlayerCharacter::ASOHPlayerCharacter()
@@ -51,6 +52,23 @@ void ASOHPlayerCharacter::BeginPlay()
 			PlayerHUD->AddToViewport();
 
 			UpdateOverlay(Health, MaxHealth);
+		}
+	}
+
+	GetWorldTimerManager().SetTimer(TraceTimerHandle, this, &ASOHPlayerCharacter::TraceForInteractable, 0.1f, true);
+
+	// ============================
+	// LOAD GAME RESTORE (추가)
+	// ============================
+	if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+	{
+		if (GI->bLoadedFromSave)   // 로드한 상태인지 체크
+		{
+			SetActorTransform(GI->LoadedPlayerTransform);
+			Health = GI->LoadedHealth;
+			Stamina = GI->LoadedStamina;
+
+			UpdateOverlay(Health, MaxHealth);  // UI도 업데이트
 		}
 	}
 
