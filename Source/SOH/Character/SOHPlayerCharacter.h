@@ -8,6 +8,7 @@
 class ASOHFlashlight;
 class UAnimMontage;
 class USoundBase;
+class UUserWidget;
 
 UCLASS()
 class SOH_API ASOHPlayerCharacter : public ACharacter
@@ -116,6 +117,16 @@ public:
 	void ToggleFlashlight();
 	void PlayUpperBodyMontage(UAnimMontage* Montage);
 
+	// 체력 관련 UI
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateOverlay(float HealthValue, float MaxHealthValue);
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> PlayerHUDClass;
+
+	UPROPERTY(BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	UUserWidget* PlayerHUD = nullptr;
 
 private:
 	UPROPERTY()

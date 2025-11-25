@@ -10,6 +10,7 @@
 #include "Interaction/SOHInteractInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameMode/SOHGameModeBase.h"
+#include "Blueprint/UserWidget.h"
 
 ASOHPlayerCharacter::ASOHPlayerCharacter()
 {
@@ -41,6 +42,17 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 void ASOHPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (PlayerHUDClass)
+	{
+		PlayerHUD = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDClass);
+		if (PlayerHUD)
+		{
+			PlayerHUD->AddToViewport();
+
+			UpdateOverlay(Health, MaxHealth);
+		}
+	}
 
 	GetWorldTimerManager().SetTimer(TraceTimerHandle, this, &ASOHPlayerCharacter::TraceForInteractable, 0.1f, true);
 }
@@ -242,6 +254,10 @@ float ASOHPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	if (ActualDamage <= 0.f) return 0.f;
 
 	Health = FMath::Clamp(Health - ActualDamage, 0.f, MaxHealth);
+
+	UE_LOG(LogTemp, Warning, TEXT("Overlay Call: %f / %f"), Health, MaxHealth);
+
+	UpdateOverlay(Health, MaxHealth);
 
 	if (Health <= 0.f)
 	{
