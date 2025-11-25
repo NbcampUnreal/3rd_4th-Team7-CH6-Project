@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "SOHInventoryComponent.h"
+#include "Character/SOHPlayerCharacter.h"
 
 ASOHFlashlight::ASOHFlashlight()
 {
@@ -27,7 +28,7 @@ ASOHFlashlight::ASOHFlashlight()
     Spot = CreateDefaultSubobject<USpotLightComponent>(TEXT("Spot"));
     Spot->SetupAttachment(Pivot);
     Spot->bUseInverseSquaredFalloff = false;
-    Spot->SetIntensity(IntensityOn);
+    //Spot->SetIntensity(IntensityOn);
 
     bOn = false;
     bEquipped = false;
@@ -45,12 +46,6 @@ void ASOHFlashlight::BeginPlay()
     }
 }
 
-void ASOHFlashlight::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-    // BaseItem의 오버랩 자동 줍기(Destroy) 무력화
-    // Trace + E키 Interact만으로 줍게 하려면 비워두면 됨
-}
-
 void ASOHFlashlight::SetOn(bool bEnable)
 {
     bOn = bEnable;
@@ -59,12 +54,13 @@ void ASOHFlashlight::SetOn(bool bEnable)
 
     Spot->SetVisibility(bOn, true);
     Spot->SetHiddenInGame(!bOn);
-    Spot->SetIntensity(bOn ? IntensityOn : 0.f);
+    //Spot->SetIntensity(bOn ? IntensityOn : 0.f);
 }
 
 void ASOHFlashlight::Toggle()
 {
     if (!bEquipped) return;
+
     SetOn(!bOn);
 }
 
@@ -111,5 +107,10 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
     if (ACharacter* Char = Cast<ACharacter>(Caller))
     {
         SetEquipped(Char);
+
+        if (ASOHPlayerCharacter* PC = Cast<ASOHPlayerCharacter>(Caller))
+        {
+            PC->SetFlashlight(this);
+        }
     }
 }

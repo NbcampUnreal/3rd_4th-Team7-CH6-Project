@@ -117,6 +117,11 @@ public:
 	void ToggleFlashlight();
 	void PlayUpperBodyMontage(UAnimMontage* Montage);
 
+	void SetFlashlight(ASOHFlashlight* NewFlashlight)
+	{
+		Flashlight = NewFlashlight;
+	}
+
 	// 체력 관련 UI
 
 	UFUNCTION(BlueprintImplementableEvent)

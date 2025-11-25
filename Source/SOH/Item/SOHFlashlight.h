@@ -26,8 +26,6 @@ protected:
 
     virtual void Interact_Implementation(AActor* Caller) override;
 
-    virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
 private:
     UPROPERTY(VisibleAnywhere)
     USceneComponent* Pivot;
@@ -44,8 +42,8 @@ private:
     UPROPERTY(EditAnywhere, Category = "Flashlight")
     FName HandSocketName = TEXT("FlashlightSocket");
 
-    UPROPERTY(EditAnywhere, Category = "Flashlight")
-    float IntensityOn = 4000.f;
+    //UPROPERTY(EditAnywhere, Category = "Flashlight")
+    //float IntensityOn = 4000.f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight")
     bool bStartOn = false;
