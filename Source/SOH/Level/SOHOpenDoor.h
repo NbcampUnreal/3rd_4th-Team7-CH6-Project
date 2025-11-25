@@ -7,6 +7,7 @@
 class UStaticMeshComponent;
 class USceneComponent;
 class USoundBase;
+class ASOHLockActor;
 
 UCLASS()
 class SOH_API ASOHOpenDoor : public ASOHInteractableActor
@@ -49,7 +50,7 @@ protected:
 	void BP_CloseDoor(AActor* Caller);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Door")
-	void BP_OnLocked(AActor* Caller);
+	void BP_OnLocked(AActor* Caller); // 문 열 수 없다는 로직을 만들기 위해 남겨둠
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Door")
@@ -57,4 +58,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Door")
 	void NotifyDoorMoveFinished(bool bNowOpen);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door|Lock")
+	ASOHLockActor* LinkedLockActor;
+
+	UFUNCTION(BlueprintCallable, Category = "Door|Lock")
+	void UnlockOpenDoor(AActor* Caller);
 };

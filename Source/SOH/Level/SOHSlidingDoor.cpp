@@ -1,4 +1,5 @@
 #include "SOHSlidingDoor.h"
+#include "Item/SOHLockActor.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -30,8 +31,23 @@ void ASOHSlidingDoor::Interact_Implementation(AActor* Caller)
 
 	if (bLocked)
 	{
-		BP_OnLocked(Caller);
-		return;
+		if (LinkedLockActor)
+		{
+			if (IsValid(LinkedLockActor))
+			{
+				BP_OnLocked(Caller);
+				return;
+			}
+			else
+			{
+				bLocked = false;
+			}
+		}
+		else
+		{
+			BP_OnLocked(Caller);
+			return;
+		}
 	}
 
 	bIsMoving = true;
@@ -65,4 +81,24 @@ void ASOHSlidingDoor::NotifyDoorMoveFinished(bool bNowOpen)
 {
 	bIsOpen = bNowOpen;
 	bIsMoving = false;
+}
+
+void ASOHSlidingDoor::UnlockSlidingDoor(AActor* Caller)
+{
+	if (!bLocked)
+	{
+		return;
+	}
+
+	bLocked = false;
+
+	if (!bIsOpen)
+	{
+		if (OpenSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, OpenSound, GetActorLocation());
+		}
+
+		BP_OpenDoor(Caller);
+	}
 }
