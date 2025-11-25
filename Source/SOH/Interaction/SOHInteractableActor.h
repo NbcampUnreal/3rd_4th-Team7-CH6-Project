@@ -5,7 +5,6 @@
 #include "GameFramework/Actor.h"
 #include "SOHInteractInterface.h"
 #include "Components/WidgetComponent.h"
-#include "Animation/WidgetAnimation.h"
 #include "SOHInteractableActor.generated.h"
 
 class UMaterialInterface;
@@ -34,16 +33,11 @@ protected:
 	void HideInteractWidget();
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	void ApplyOverlayMaterial(UMaterialInterface* Material);
-
-	// Widget Class
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction|UI")
 	TSubclassOf<UUserWidget> InteractionWidgetClass;
-
-	// Outline Material
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction|Visual")
 	UMaterialInterface* OutlineMaterial;
-	
-	// Widget Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interaction")
 	UWidgetComponent* InteractionWidget;
 };

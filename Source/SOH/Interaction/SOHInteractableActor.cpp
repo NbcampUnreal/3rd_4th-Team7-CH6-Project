@@ -3,7 +3,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "Materials/MaterialInterface.h"
 
 ASOHInteractableActor::ASOHInteractableActor()
@@ -20,14 +19,15 @@ ASOHInteractableActor::ASOHInteractableActor()
 void ASOHInteractableActor::BeginPlay()
 {
 	Super::BeginPlay();
-	if (InteractionWidgetClass)
-	{
-		InteractionWidget->SetWidgetClass(InteractionWidgetClass);
-	}
+	// if (InteractionWidgetClass)
+	// {
+	// 	InteractionWidget->SetWidgetClass(InteractionWidgetClass);
+	// }
 }
 void ASOHInteractableActor::Interact_Implementation(AActor* Caller)
 {
-	// C++ 기본 정의: Interact가 호출되었음을 알리는 로그 출력 if (Caller)
+	// C++ 기본 정의: Interact가 호출되었음을 알리는 로그 출력 
+	if (Caller)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Base Interact called on %s by %s. No specific action defined in C++."), *GetName(), *Caller->GetName());
 	}
