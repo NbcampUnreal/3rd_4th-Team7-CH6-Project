@@ -1,4 +1,6 @@
 #include "SOHGameInstance.h"
+#include "SOHSaveGame.h"
+#include "Character/SOHPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 USOHGameInstance::USOHGameInstance()
@@ -66,4 +68,64 @@ void USOHGameInstance::AdvanceStage()
 	UE_LOG(LogTemp, Warning, TEXT("==== Stage %d 완료! 다음 Stage로 이동 ===="), CurrentStage);
 
 	CurrentStage++;
+}
+
+void USOHGameInstance::SaveGameData()
+{
+	USOHSaveGame* Save = Cast<USOHSaveGame>(
+		UGameplayStatics::CreateSaveGameObject(USOHSaveGame::StaticClass())
+	);
+
+	Save->SaveLevelName = FName(*GetWorld()->GetMapName());
+	
+	Save->SavedStage = CurrentStage;
+	Save->SavedConditions = CompletedConditions;
+
+	// 플레이어 정보
+	ACharacter* Player = UGameplayStatics::GetPlayerCharacter(this, 0);
+	if (Player)
+	{
+		Save->PlayerTransform = Player->GetActorTransform();
+
+		// 체력 스테미너는 정현 PlayerCharacter에서 Get함수 만들면 읽어올 수 있음
+		ASOHPlayerCharacter* P = Cast<ASOHPlayerCharacter>(Player);
+		if (P)
+		{
+			Save->SavedHealth = P->GetHealth();
+			Save->SavedStamina = P->GetStamina();
+		}
+	}
+
+	UGameplayStatics::SaveGameToSlot(Save, TEXT("SaveSlot1"), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("[SAVE] Game saved successfully."));
+}
+
+bool USOHGameInstance::LoadGameData()
+{
+	if (!UGameplayStatics::DoesSaveGameExist(TEXT("SaveSlot1"), 0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[LOAD] Save file not found."));
+		return false;
+	}
+
+	USOHSaveGame* Save = Cast<USOHSaveGame>(
+		UGameplayStatics::LoadGameFromSlot(TEXT("SaveSlot1"), 0)
+	);
+	if (!Save) return false;
+
+	// Stage 복원
+	CurrentStage = Save->SavedStage;
+	CompletedConditions = Save->SavedConditions;
+
+	// 레벨 로드
+	UGameplayStatics::OpenLevel(this, Save->SaveLevelName);
+
+	// 플레이어 위치/체력은 "레벨 로드 후" BeginPlay에서 복원할 것
+	LoadedPlayerTransform = Save->PlayerTransform;
+	LoadedHealth = Save->SavedHealth;
+	LoadedStamina = Save->SavedStamina;
+
+	UE_LOG(LogTemp, Warning, TEXT("[LOAD] Game loaded successfully."));
+	return true;
 }

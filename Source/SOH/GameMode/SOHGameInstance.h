@@ -42,4 +42,23 @@ public:
 	// Stage를 완료하고 다음 Stage로 
 	UFUNCTION(BlueprintCallable, Category="Stage")
 	void AdvanceStage();
+
+	UFUNCTION(BlueprintCallable)
+	void SaveGameData();
+
+	UFUNCTION(BlueprintCallable)
+	bool LoadGameData();
+
+	//SaveGame 로드 후 임시 저장용
+	UPROPERTY()
+	FTransform LoadedPlayerTransform;
+
+	UPROPERTY()
+	float LoadedHealth;
+
+	UPROPERTY()
+	float LoadedStamina;
+
+	UPROPERTY()
+	bool bLoadedFromSave = false;
 };

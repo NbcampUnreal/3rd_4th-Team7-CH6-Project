@@ -28,16 +28,7 @@ void ASOHGameModeBase::OnPlayerDied()
 	UE_LOG(LogTemp, Error, TEXT("Player Died!"));
 	ShowGameOverUI();
 
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerHandle,
-		[this]()
-		{
-			LoadLevel(LobbyLevelName);
-		},
-		3.0f,
-		false
-	);
+	
 }
 
 void ASOHGameModeBase::LoadLevel(FName LevelName)

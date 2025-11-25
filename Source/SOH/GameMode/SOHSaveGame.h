@@ -8,5 +8,29 @@ UCLASS()
 class SOH_API USOHSaveGame : public USaveGame
 {
 	GENERATED_BODY()
-	
+
+public:
+	UPROPERTY(BlueprintReadWrite)
+	FName SaveLevelName;
+
+	UPROPERTY(BlueprintReadWrite)
+	FTransform PlayerTransform;
+
+	UPROPERTY(BlueprintReadWrite)
+	float SavedHealth;
+
+	UPROPERTY(BlueprintReadWrite)
+	float SavedStamina;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 SavedStage;
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FName> SavedConditions;
+
+	USOHSaveGame()
+	   : SavedHealth(100.f)
+	   , SavedStamina(100.f)
+	   , SavedStage(0)
+	{}
 };
