@@ -105,7 +105,7 @@ bool ASOHAIMonster::HasLineOfSightToTarget(AActor* Target)
         Hit,
         Start,
         End,
-        ECC_Visibility,
+        ECC_GameTraceChannel1,
         Params
     );
 

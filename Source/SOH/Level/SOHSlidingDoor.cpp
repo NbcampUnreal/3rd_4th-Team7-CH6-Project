@@ -17,6 +17,7 @@ ASOHSlidingDoor::ASOHSlidingDoor()
 	if (DoorFrame)
 	{
 		DoorFrame->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+		DoorFrame->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
 	}
 }
 
@@ -81,6 +82,8 @@ void ASOHSlidingDoor::NotifyDoorMoveFinished(bool bNowOpen)
 {
 	bIsOpen = bNowOpen;
 	bIsMoving = false;
+
+	DoorFrame->SetCollisionResponseToChannel(ECC_GameTraceChannel1, bIsOpen ? ECR_Ignore : ECR_Block);
 }
 
 void ASOHSlidingDoor::UnlockSlidingDoor(AActor* Caller)
