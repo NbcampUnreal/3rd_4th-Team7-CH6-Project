@@ -75,30 +75,6 @@ void ASOHPlayerCharacter::BeginPlay()
 	GetWorldTimerManager().SetTimer(TraceTimerHandle, this, &ASOHPlayerCharacter::TraceForInteractable, 0.1f, true);
 }
 
-void ASOHPlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (bIsDead) return;
-
-	// 스테미너 처리
-	if (bIsRunning)
-	{
-		Stamina = FMath::Max(0.f, Stamina - StaminaDrainPerSec * DeltaTime);
-
-		// 스테미너 바닥나면 자동으로 달리기 해제
-		if (Stamina <= 0.f)
-		{
-			bIsRunning = false;
-			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-		}
-	}
-	else
-	{
-		Stamina = FMath::Min(MaxStamina, Stamina + StaminaRegenPerSec * DeltaTime);
-	}
-}
-
 void ASOHPlayerCharacter::TraceForInteractable()
 {
 	UCameraComponent* Camera = FindComponentByClass<UCameraComponent>();

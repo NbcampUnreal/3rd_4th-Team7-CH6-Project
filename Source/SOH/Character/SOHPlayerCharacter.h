@@ -28,7 +28,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override; // 틱함수 추가
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RotationRate = 500.f;
