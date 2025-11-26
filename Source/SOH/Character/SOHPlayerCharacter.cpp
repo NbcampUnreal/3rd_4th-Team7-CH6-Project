@@ -121,25 +121,6 @@ void ASOHPlayerCharacter::TraceForInteractable()
 			LastHighlightedItem = HitActor;
 		}
 	} 
-	//
-	// if (LastHighlightedItem && LastHighlightedItem != HitActor)
-	// {
-	// 	if (UStaticMeshComponent* ItemMesh = LastHighlightedItem->FindComponentByClass<UStaticMeshComponent>())
-	// 	{
-	// 		ItemMesh->SetRenderCustomDepth(false);
-	// 	}
-	// 	LastHighlightedItem = nullptr;
-	// }
-	//
-	// if (HitActor && HitActor->ActorHasTag("Item"))
-	// {
-	// 	if (UStaticMeshComponent* ItemMesh = HitActor->FindComponentByClass<UStaticMeshComponent>())
-	// 	{
-	// 		ItemMesh->SetRenderCustomDepth(true);
-	// 		ItemMesh->SetCustomDepthStencilValue(1); // ��Ƽ���󿡼� ����ϴ� ���ٽ� ��
-	// 	}
-	// 	LastHighlightedItem = HitActor;
-	// }
 }
 
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)

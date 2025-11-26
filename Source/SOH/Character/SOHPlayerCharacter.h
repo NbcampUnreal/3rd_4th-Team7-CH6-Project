@@ -114,6 +114,7 @@ protected:
 
 	void TraceForInteractable();
 
+	
 public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
