@@ -44,16 +44,20 @@ public:
 	// 4. 인벤토리 UI에 표시될 아이콘 이미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	UTexture2D* icon;
+	
+	// 5. UI에 표시될 텍스쳐 이미지
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
+	UTexture2D* detailTexture;
 
-	// 5. 월드에 떨어졌을 때 보일 3D 메쉬
+	// 6. 월드에 떨어졌을 때 보일 3D 메쉬
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	UStaticMesh* mesh;
-
-	// 6. 수치값 (회복량, 공격력 등 범용적으로 사용)
+	
+	// 7. 수치값 (회복량, 공격력 등 범용적으로 사용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	float value;
 	
-	// 7. 아이템 태그
+	// 8. 아이템 태그
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	TArray<FName> itemTags;
 };
