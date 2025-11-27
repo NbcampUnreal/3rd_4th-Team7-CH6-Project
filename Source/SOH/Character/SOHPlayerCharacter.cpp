@@ -88,7 +88,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	Params.AddIgnoredActor(this);
 
 	AActor* HitActor = nullptr;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel3, Params);
 	if (bHit)
 	{
 		HitActor = HitResult.GetActor();
