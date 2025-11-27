@@ -26,6 +26,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetStamina() const { return Stamina; }
 
+	UPROPERTY(BlueprintReadOnly)
+	bool bUIHit;
+
 protected:
 	virtual void BeginPlay() override;
 

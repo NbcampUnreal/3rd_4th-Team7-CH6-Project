@@ -92,6 +92,12 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	if (bHit)
 	{
 		HitActor = HitResult.GetActor();
+
+		bUIHit = bHit;
+	}
+	else
+	{
+		bUIHit = false;
 	}
 	
 	//DrawDebugLine(
