@@ -29,6 +29,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	int32 GetItemQuantity(FName targetItemID) const;
 
+	// 인벤 UI에 쓰임
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void GetInventoryContents_BP(TArray<FSOHInventoryItem>& OutItems) const;
+
 protected:
 	// 실제 아이템들이 저장될 배열 (우리들의 가방)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")

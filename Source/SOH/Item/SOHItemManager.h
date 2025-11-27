@@ -20,6 +20,10 @@ public:
 	// ID(RowName)를 주면 아이템 데이터 포인터를 반환하는 함수
 	FSOHItemTableRow* GetItemDataByID(FName key);
 
+	// 인벤 UI에 쓰임
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Item")
+	bool GetItemDataByID_BP(FName key, FSOHItemTableRow& OutData) const;
+
 protected:
 	// 우리가 만든 데이터 테이블을 저장할 변수
 	UPROPERTY()

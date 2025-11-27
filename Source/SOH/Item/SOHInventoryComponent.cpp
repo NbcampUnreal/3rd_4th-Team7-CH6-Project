@@ -61,3 +61,8 @@ int32 USOHInventoryComponent::GetItemQuantity(FName targetItemID) const
 	}
 	return 0;
 }
+
+void USOHInventoryComponent::GetInventoryContents_BP(TArray<FSOHInventoryItem>& OutItems) const
+{
+	OutItems = inventoryContents;
+}

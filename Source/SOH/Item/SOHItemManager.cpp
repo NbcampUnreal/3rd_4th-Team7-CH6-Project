@@ -40,3 +40,21 @@ FSOHItemTableRow* USOHItemManager::GetItemDataByID(FName key)
     
 	return itemDataTable->FindRow<FSOHItemTableRow>(key, contextString);
 }
+
+bool USOHItemManager::GetItemDataByID_BP(FName key, FSOHItemTableRow& OutData) const
+{
+	if (!itemDataTable)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetItemDataByID_BP: DataTable is null!"));
+		return false;
+	}
+
+	static const FString Context(TEXT("SOHItemManager::GetItemDataByID_BP"));
+
+	if (const FSOHItemTableRow* Row = itemDataTable->FindRow<FSOHItemTableRow>(key, Context))
+	{
+		OutData = *Row;
+		return true;
+	}
+	return false;
+}
