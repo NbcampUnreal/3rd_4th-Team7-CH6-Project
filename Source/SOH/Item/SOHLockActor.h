@@ -4,6 +4,8 @@
 #include "Interaction/SOHInteractableActor.h" // 탁완님 헤더
 #include "SOHLockActor.generated.h"
 
+class ASOHSlidingDoor;
+
 /**
  * 특정 열쇠가 있어야만 상호작용에 성공하는 자물쇠 액터
  */
@@ -24,6 +26,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
 	FName RequiredKeyID;
 
+	// 이 자물쇠를 열면 잠금이 해제될 문
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
+	ASOHSlidingDoor* TargetDoor;
+	
 protected:
 	// 자물쇠 외형
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lock System")

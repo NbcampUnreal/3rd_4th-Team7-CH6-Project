@@ -1,5 +1,6 @@
 #include "SOHLockActor.h"
 #include "SOHInventoryComponent.h" // 인벤토리 확인
+#include "Level/SOHSlidingDoor.h"
 #include "Components/StaticMeshComponent.h"
 
 ASOHLockActor::ASOHLockActor()
@@ -30,9 +31,13 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 		if (RequiredKeyID.IsNone())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[Lock] 이 자물쇠는 잠겨있지 않습니다. (KeyID 설정 안됨)"));
-			// 그냥 열림 처리
-			Destroy(); 
+			if (TargetDoor)
+			{
+				TargetDoor->UnlockSlidingDoor(Caller);
+			}
+			Destroy(); // 자물쇠 삭제
 			return;
+			
 		}
 
 		// 3. 인벤토리에 해당 열쇠가 몇 개 있는지 검사
@@ -41,7 +46,13 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 		if (KeyCount > 0)
 		{
 			UE_LOG(LogTemp, Log, TEXT("[Lock] 성공! 열쇠(%s)를 사용하여 잠금을 해제했습니다."), *RequiredKeyID.ToString());
-            
+
+			// 연결된 문에게 잠금 해제 명령
+			if (TargetDoor)
+			{
+				TargetDoor->UnlockSlidingDoor(Caller);
+			}
+			
 			// 4. 잠금 해제 연출
 			Destroy(); // 자물쇠 삭제
 		}
