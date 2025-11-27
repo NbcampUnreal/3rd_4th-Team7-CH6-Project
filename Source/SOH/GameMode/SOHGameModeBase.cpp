@@ -28,7 +28,27 @@ void ASOHGameModeBase::OnPlayerDied()
 	UE_LOG(LogTemp, Error, TEXT("Player Died!"));
 	ShowGameOverUI();
 
-	
+    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+    if (!PC) return;
+
+    if (!DeathWidgetClass) return;
+
+    if (!DeathWidgetInstance)
+    {
+        DeathWidgetInstance = CreateWidget<UUserWidget>(PC, DeathWidgetClass);
+    }
+
+    if (DeathWidgetInstance && !DeathWidgetInstance->IsInViewport())
+    {
+        DeathWidgetInstance->AddToViewport();
+
+        FInputModeUIOnly InputMode;
+        InputMode.SetWidgetToFocus(DeathWidgetInstance->TakeWidget());
+        InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+        PC->SetInputMode(InputMode);
+        PC->bShowMouseCursor = true;
+    }
 }
 
 void ASOHGameModeBase::LoadLevel(FName LevelName)
