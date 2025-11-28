@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Blueprint/UserWidget.h"
 #include "SOHGameModeBase.generated.h"
 
 UCLASS()
@@ -21,6 +22,12 @@ public:
 	// Called when player dies
 	UFUNCTION(BlueprintCallable, Category="Game")
 	void OnPlayerDied();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> DeathWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* DeathWidgetInstance;
 
 protected:
 	virtual void BeginPlay() override;

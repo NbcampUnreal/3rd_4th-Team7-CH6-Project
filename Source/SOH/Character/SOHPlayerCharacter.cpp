@@ -71,8 +71,6 @@ void ASOHPlayerCharacter::BeginPlay()
 			UpdateOverlay(Health, MaxHealth);  // UI도 업데이트
 		}
 	}
-
-	GetWorldTimerManager().SetTimer(TraceTimerHandle, this, &ASOHPlayerCharacter::TraceForInteractable, 0.1f, true);
 }
 
 void ASOHPlayerCharacter::TraceForInteractable()
