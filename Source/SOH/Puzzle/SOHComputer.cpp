@@ -27,12 +27,7 @@ void ASOHComputer::Interact_Implementation(AActor* Caller)
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC) return;
 	
-	float BlendTime = 0.5f;
-	EViewTargetBlendFunction BlendFunc = VTBlend_Linear;
-	float BlendExp = 0.f;
-	bool bLockOutgoing = false;
-	
-	PC->SetViewTargetWithBlend(this, BlendTime, BlendFunc, BlendExp, bLockOutgoing);
+	PC->SetViewTargetWithBlend(this, 0.5);
 	
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle,this,&ASOHComputer::ShowComputerWidget,0.5f,false);
 }
