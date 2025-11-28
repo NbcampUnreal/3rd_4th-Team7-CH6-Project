@@ -8,6 +8,15 @@ class UStaticMeshComponent;
 class UCameraComponent;
 class UUserWidget;
 
+USTRUCT(BlueprintType)
+struct FDigit
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	int32 CurrentDigit = 0;
+};
+
 UCLASS()
 class SOH_API ASOHCombinationLock : public ASOHInteractableActor
 {
@@ -15,8 +24,6 @@ class SOH_API ASOHCombinationLock : public ASOHInteractableActor
 	
 public:
     ASOHCombinationLock();
-
-    // 상호작용
     virtual void Interact_Implementation(AActor* Caller) override;
 
 protected:
@@ -36,26 +43,22 @@ protected:
     // Gears array
     UPROPERTY()
     TArray<UStaticMeshComponent*> Gears;
-	
     int32 CurrentGearIndex = 0;
-	
 	UPROPERTY()
 	TArray<int32> GearValues;
+	UPROPERTY(EditAnywhere)
+	TArray<FDigit> CorrectCombination;
 
-	// 정답 조합
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<int32> CorrectCombination;
-
+	
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
     TSubclassOf<UUserWidget> LockGuideWidgetClass;
     UPROPERTY()
     UUserWidget* LockGuideWidget;
 	
-	void CheckCombination();
 	void Up();
 	void Down();
 	void Left();
 	void Right();
 	void Exit();
-	bool bInputBound = false;
+	void CheckCombination();
 };

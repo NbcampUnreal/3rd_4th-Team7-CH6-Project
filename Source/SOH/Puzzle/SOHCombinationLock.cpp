@@ -14,9 +14,8 @@ ASOHCombinationLock::ASOHCombinationLock()
     Gear2 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gear2"));
     Gear3 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gear3"));
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-
-    RootComponent = Body;
-
+    
+    Body->SetupAttachment(RootComponent);
     Head->SetupAttachment(RootComponent);
     Gear1->SetupAttachment(RootComponent);
     Gear2->SetupAttachment(RootComponent);
@@ -170,9 +169,10 @@ void ASOHCombinationLock::CheckCombination()
 
     for (int32 i = 0; i < GearValues.Num(); ++i)
     {
-        if (GearValues[i] != CorrectCombination[i])
+        if (GearValues[i] != CorrectCombination[i].CurrentDigit)
             return;
     }
+    
     APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     if (!PC) return;
     ACharacter* PlayerChar = Cast<ACharacter>(PC->GetPawn());
