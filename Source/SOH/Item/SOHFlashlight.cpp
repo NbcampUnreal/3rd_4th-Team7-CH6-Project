@@ -5,6 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "SOHInventoryComponent.h"
 #include "Character/SOHPlayerCharacter.h"
+#include "UI/SOHMessageManager.h"
 
 ASOHFlashlight::ASOHFlashlight()
 {
@@ -63,7 +64,6 @@ void ASOHFlashlight::SetOn(bool bEnable)
 
     if (bOn) StartBatteryDrain();
     else     StopBatteryDrain();
-
 }
 
 void ASOHFlashlight::Toggle()
@@ -141,9 +141,19 @@ void ASOHFlashlight::DrainOnce()
         CurrentBattery = 0.f;
         SetOn(false);
         StopBatteryDrain();
+
+        if (OwnerChar)
+        {
+            if (USOHMessageManager* MsgMgr = OwnerChar->FindComponentByClass<USOHMessageManager>())
+            {
+                MsgMgr->ShowMessageText(
+                    FText::FromString(TEXT("배터리를 다 썼다.")),
+                    1.5f
+                );
+            }
+        }
         return;
     }
-
     UpdateLightFromBattery();
 }
 
