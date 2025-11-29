@@ -21,6 +21,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool AddToInventory(FName newItemID, int32 newQuantity);
 
+	// 아이템 제거 함수
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool ConsumeItem(FName ItemID, int32 Count);
+
 	// 현재 인벤토리 내용물 확인용 (디버깅 또는 UI용)
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	const TArray<FSOHInventoryItem>& GetInventoryContents() const { return inventoryContents; }

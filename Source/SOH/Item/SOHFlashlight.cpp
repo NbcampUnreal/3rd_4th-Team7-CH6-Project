@@ -28,7 +28,6 @@ ASOHFlashlight::ASOHFlashlight()
     Spot = CreateDefaultSubobject<USpotLightComponent>(TEXT("Spot"));
     Spot->SetupAttachment(Pivot);
     Spot->bUseInverseSquaredFalloff = false;
-    //Spot->SetIntensity(IntensityOn);
 
     bOn = false;
     bEquipped = false;
@@ -37,6 +36,8 @@ ASOHFlashlight::ASOHFlashlight()
 void ASOHFlashlight::BeginPlay()
 {
     Super::BeginPlay();
+
+    CurrentBattery = FMath::Clamp(InitialBattery, 0.f, MaxBattery);
 
     SetOn(bStartOn);
 
@@ -48,13 +49,21 @@ void ASOHFlashlight::BeginPlay()
 
 void ASOHFlashlight::SetOn(bool bEnable)
 {
+    if (bEnable && IsBatteryEmpty())
+        bEnable = false;
+
     bOn = bEnable;
 
     if (!Spot) return;
 
     Spot->SetVisibility(bOn, true);
     Spot->SetHiddenInGame(!bOn);
-    //Spot->SetIntensity(bOn ? IntensityOn : 0.f);
+
+    UpdateLightFromBattery();
+
+    if (bOn) StartBatteryDrain();
+    else     StopBatteryDrain();
+
 }
 
 void ASOHFlashlight::Toggle()
@@ -92,6 +101,83 @@ void ASOHFlashlight::SetEquipped(ACharacter* NewOwner)
     SetActorEnableCollision(false);
     HideInteractWidget();
     ApplyOverlayMaterial(nullptr);
+}
+
+void ASOHFlashlight::StartBatteryDrain()
+{
+    if (MaxBattery <= 0.f) return;
+
+    if (DrainInterval <= 0.f)
+        DrainInterval = 1.f;
+
+    if (GetWorldTimerManager().IsTimerActive(BatteryDrainTimer)) return;
+
+    GetWorldTimerManager().SetTimer(
+        BatteryDrainTimer,
+        this,
+        &ASOHFlashlight::DrainOnce,
+        DrainInterval,
+        true
+    );
+}
+
+void ASOHFlashlight::StopBatteryDrain()
+{
+    GetWorldTimerManager().ClearTimer(BatteryDrainTimer);
+}
+
+void ASOHFlashlight::DrainOnce()
+{
+    if (MaxBattery <= 0.f)
+    {
+        StopBatteryDrain();
+        return;
+    }
+
+    CurrentBattery = FMath::Clamp(CurrentBattery - DrainRate, 0.f, MaxBattery);
+
+    if (CurrentBattery <= 0.f)
+    {
+        CurrentBattery = 0.f;
+        SetOn(false);
+        StopBatteryDrain();
+        return;
+    }
+
+    UpdateLightFromBattery();
+}
+
+void ASOHFlashlight::UpdateLightFromBattery()
+{
+    if (!Spot)
+        return;
+
+    const float Ratio = (MaxBattery <= 0.f) ? 0.f : CurrentBattery / MaxBattery;
+}
+
+bool ASOHFlashlight::UseBatteryItem(float ChargeAmount)
+{
+    if (ChargeAmount <= 0.f || MaxBattery <= 0.f)
+        return false;
+
+    float Before = CurrentBattery;
+
+    CurrentBattery = FMath::Clamp(CurrentBattery + ChargeAmount, 0.f, MaxBattery);
+
+    UpdateLightFromBattery();
+
+    if (bOn && Before <= 0.f && CurrentBattery > 0.f)
+        StartBatteryDrain();
+
+    return CurrentBattery > Before;
+}
+
+float ASOHFlashlight::GetBatteryPercent() const
+{
+    if (MaxBattery <= 0.f)
+        return 0.f;
+
+    return FMath::Clamp(CurrentBattery / MaxBattery, 0.f, 1.f);
 }
 
 void ASOHFlashlight::Interact_Implementation(AActor* Caller)

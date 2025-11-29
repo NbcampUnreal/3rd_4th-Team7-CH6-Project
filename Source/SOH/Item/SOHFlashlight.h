@@ -21,6 +21,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Flashlight")
     void Toggle();
 
+    UFUNCTION(BlueprintCallable, Category = "Flashlight|Battery")
+    bool UseBatteryItem(float ChargeAmount);
+
+    UFUNCTION(BlueprintPure, Category = "Flashlight|Battery")
+    float GetBatteryPercent() const;
+
 protected:
     virtual void BeginPlay() override;
 
@@ -42,9 +48,6 @@ private:
     UPROPERTY(EditAnywhere, Category = "Flashlight")
     FName HandSocketName = TEXT("FlashlightSocket");
 
-    //UPROPERTY(EditAnywhere, Category = "Flashlight")
-    //float IntensityOn = 4000.f;
-
     UPROPERTY(EditAnywhere, Category = "Flashlight")
     bool bStartOn = false;
 
@@ -53,4 +56,33 @@ private:
 
     void SetOn(bool bEnable);
     void SetEquipped(ACharacter* NewOwner);
+
+    // 배터리
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Battery")
+    float MaxBattery = 100.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Battery")
+    float InitialBattery = 50.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Battery")
+    float DrainRate = 1.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Battery")
+    float DrainInterval = 1.0f;
+
+    UPROPERTY(VisibleInstanceOnly, Category = "Flashlight|Battery")
+    float CurrentBattery = 0.f;
+
+    bool IsBatteryEmpty() const { return CurrentBattery <= 0.f; }
+
+    void UpdateLightFromBattery();
+
+    void StartBatteryDrain();
+
+    void StopBatteryDrain();
+
+    void DrainOnce();
+
+    FTimerHandle BatteryDrainTimer;
 };

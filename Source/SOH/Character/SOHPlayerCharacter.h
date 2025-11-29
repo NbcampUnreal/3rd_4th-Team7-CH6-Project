@@ -26,6 +26,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetStamina() const { return Stamina; }
 
+	// Battery 호출용
+
+	void SetFlashlight(ASOHFlashlight* InLight) { Flashlight = InLight; }
+
+	ASOHFlashlight* GetFlashlight() const { return Flashlight; }
+
+	// CrossHair 호출용 bool 변수
+
 	UPROPERTY(BlueprintReadOnly)
 	bool bUIHit;
 
@@ -127,11 +135,7 @@ public:
 	void Interact();
 	void ToggleFlashlight();
 	void PlayUpperBodyMontage(UAnimMontage* Montage);
-
-	void SetFlashlight(ASOHFlashlight* NewFlashlight)
-	{
-		Flashlight = NewFlashlight;
-	}
+	void UseBattery();
 
 	// 체력 관련 UI
 
