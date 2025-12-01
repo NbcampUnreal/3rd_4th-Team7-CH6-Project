@@ -157,11 +157,20 @@ void ASOHAIMonsterController::OnMoveCompleted(FAIRequestID RequestID, const FPat
 
 	if (!BlackboardComp) return;
 
+	const bool bPlayerInRange = BlackboardComp->GetValueAsBool(Key_PlayerInRange);
+	const bool bPathFail = BlackboardComp->GetValueAsBool(Key_PathFailing);
+	const bool bIsSearching = BlackboardComp->GetValueAsBool(Key_IsSearching);
+
+	const bool bIsChasing = (bPlayerInRange && !bPathFail && !bIsSearching);
+
 	if (Result.IsSuccess())
 	{
-		if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
+		if (!bIsChasing)
 		{
-			Monster->PlayLookAroundMontage();
+			if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
+			{
+				Monster->PlayLookAroundMontage();
+			}
 		}
 	}
 
