@@ -124,7 +124,10 @@ protected:
 	ASOHFlashlight* Flashlight;
 
 	void TraceForInteractable();
-
+	
+	// 상호작용 거리
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
+	float TraceDistance = 300.f;
 	
 public:
 	void Move(const FInputActionValue& Value);
