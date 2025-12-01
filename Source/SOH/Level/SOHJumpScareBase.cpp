@@ -150,6 +150,8 @@ void ASOHJumpScareBase::InternalStartJumpScare(AActor* TriggeringActor)
         FActorSpawnParameters Params;
         Params.Owner = this;
 
+        Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
         if (AActor* NewActor = World->SpawnActor<AActor>(ScareActorClass, SpawnTransform, Params))
         {
             SpawnedScareActor = NewActor;
