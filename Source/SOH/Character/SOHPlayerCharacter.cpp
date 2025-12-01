@@ -83,7 +83,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	if (!Camera) return;
 
 	FVector Start = Camera->GetComponentLocation();
-	FVector End = Start + (Camera->GetForwardVector() * 1000.0f);
+	FVector End = Start + (Camera->GetForwardVector() * TraceDistance);
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
