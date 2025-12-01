@@ -9,6 +9,7 @@ class USpotLightComponent;
 class UCameraComponent;
 class USkeletalMeshComponent;
 class ACharacter;
+class ASOHJumpScareBase;
 
 UCLASS()
 class SOH_API ASOHFlashlight : public ASOHBaseItem
@@ -85,4 +86,12 @@ private:
     void DrainOnce();
 
     FTimerHandle BatteryDrainTimer;
+
+    // 점프스퀘어용
+
+    UPROPERTY(EditAnywhere, Category = "JumpScare")
+    ASOHJumpScareBase* PickupJumpScare = nullptr;
+
+    UPROPERTY(VisibleInstanceOnly, Category = "JumpScare")
+    bool bPickupJumpScarePlayed = false;
 };

@@ -6,6 +6,7 @@
 #include "SOHInventoryComponent.h"
 #include "Character/SOHPlayerCharacter.h"
 #include "UI/SOHMessageManager.h"
+#include "Level/SOHJumpScareBase.h"
 
 ASOHFlashlight::ASOHFlashlight()
 {
@@ -218,5 +219,11 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
         {
             PC->SetFlashlight(this);
         }
+    }
+
+    if (!bPickupJumpScarePlayed && PickupJumpScare)
+    {
+        PickupJumpScare->StartJumpScare(Caller);
+        bPickupJumpScarePlayed = true;
     }
 }
