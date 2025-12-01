@@ -20,6 +20,7 @@ void ASOHLampSwitch::Interact_Implementation(AActor* Caller)
     Super::Interact_Implementation(Caller);
 
     ToggleAllLamps();
+    PlaySwitchAnimation();
 }
 
 bool ASOHLampSwitch::CanReceiveTrace_Implementation(AActor* Caller, bool bCanInteract)

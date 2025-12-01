@@ -50,6 +50,32 @@ bool USOHInventoryComponent::AddToInventory(FName newItemID, int32 newQuantity)
 	return true;
 }
 
+bool USOHInventoryComponent::ConsumeItem(FName ItemID, int32 Count)
+{
+	if (Count <= 0) return false;
+
+	for (int32 i = 0; i < inventoryContents.Num(); i++)
+	{
+		FSOHInventoryItem& Slot = inventoryContents[i];
+
+		if (Slot.itemID == ItemID)
+		{
+			// 수량 부족
+			if (Slot.quantity < Count) return false;
+
+			Slot.quantity -= Count;
+
+			// 0개 되면 슬롯 삭제
+			if (Slot.quantity <= 0)
+			{
+				inventoryContents.RemoveAt(i);
+			}
+			return true;
+		}
+	}
+	return false; // 해당 아이템 없음
+}
+
 int32 USOHInventoryComponent::GetItemQuantity(FName targetItemID) const
 {
 	for (const FSOHInventoryItem& slot : inventoryContents)

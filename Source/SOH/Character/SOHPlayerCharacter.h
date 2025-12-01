@@ -26,6 +26,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetStamina() const { return Stamina; }
 
+	// Battery 호출용
+
+	void SetFlashlight(ASOHFlashlight* InLight) { Flashlight = InLight; }
+
+	ASOHFlashlight* GetFlashlight() const { return Flashlight; }
+
+	// CrossHair 호출용 bool 변수
+
 	UPROPERTY(BlueprintReadOnly)
 	bool bUIHit;
 
@@ -116,7 +124,10 @@ protected:
 	ASOHFlashlight* Flashlight;
 
 	void TraceForInteractable();
-
+	
+	// 상호작용 거리
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
+	float TraceDistance = 300.f;
 	
 public:
 	void Move(const FInputActionValue& Value);
@@ -127,11 +138,7 @@ public:
 	void Interact();
 	void ToggleFlashlight();
 	void PlayUpperBodyMontage(UAnimMontage* Montage);
-
-	void SetFlashlight(ASOHFlashlight* NewFlashlight)
-	{
-		Flashlight = NewFlashlight;
-	}
+	void UseBattery();
 
 	// 체력 관련 UI
 

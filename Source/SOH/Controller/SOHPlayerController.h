@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -39,6 +37,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputAction* IA_ToggleFlashlight;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* IA_UseBattery;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void StartRun(const FInputActionValue& Value);
@@ -46,4 +47,5 @@ protected:
 	void ToggleCrouch(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 	void ToggleFlashlight(const FInputActionValue& Value);
+	void UseBattery(const FInputActionValue& Value);
 };

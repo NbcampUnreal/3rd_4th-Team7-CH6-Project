@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 #include "SOH/Item/SOHFlashlight.h"
+#include "Item/SOHBattery.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interaction/SOHInteractInterface.h"
@@ -12,10 +13,13 @@
 #include "GameMode/SOHGameModeBase.h"
 #include "GameMode/SOHGameInstance.h"
 #include "Blueprint/UserWidget.h"
+#include "Item/SOHInventoryComponent.h"
+#include "Item/SOHItemDataStructs.h"
+#include "Item/SOHItemManager.h"
 
 ASOHPlayerCharacter::ASOHPlayerCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -79,7 +83,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	if (!Camera) return;
 
 	FVector Start = Camera->GetComponentLocation();
-	FVector End = Start + (Camera->GetForwardVector() * 1000.0f); // ���� �Ÿ� 30cm //1000���� ����
+	FVector End = Start + (Camera->GetForwardVector() * TraceDistance);
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
@@ -97,17 +101,6 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	{
 		bUIHit = false;
 	}
-	
-	//DrawDebugLine(
-	//	GetWorld(),
-	//	Start,
-	//	End,
-	//	bHit ? FColor::Red : FColor::Green,
-	//	false,
-	//	0.05f,
-	//	0,
-	//	1.5f
-	//);
 
 	if (LastHighlightedItem != HitActor)
 	{
@@ -205,6 +198,51 @@ void ASOHPlayerCharacter::ToggleFlashlight()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Flashlight assigned!"));
+	}
+}
+
+void ASOHPlayerCharacter::UseBattery()
+{
+	if (!Flashlight) return;
+
+	USOHInventoryComponent* InventoryComp = FindComponentByClass<USOHInventoryComponent>();
+	if (!InventoryComp) return;
+
+	TArray<FSOHInventoryItem> Items;
+	InventoryComp->GetInventoryContents_BP(Items);
+
+	FName BatteryItemID = NAME_None;
+
+	USOHItemManager* ItemManager = GetGameInstance()->GetSubsystem<USOHItemManager>();
+	if (!ItemManager) return;
+
+	for (const FSOHInventoryItem& Item : Items)
+	{
+		FSOHItemTableRow Row;
+		if (ItemManager->GetItemDataByID_BP(Item.itemID, Row))
+		{
+			if (Row.itemTags.Contains("Battery"))
+			{
+				BatteryItemID = Item.itemID;
+				break;
+			}
+		}
+	}
+
+	if (BatteryItemID.IsNone()) return;
+
+	FSOHItemTableRow BatteryData;
+	if (!ItemManager->GetItemDataByID_BP(BatteryItemID, BatteryData))
+		return;
+
+	float Charge = BatteryData.value;
+	float BeforePercent = Flashlight->GetBatteryPercent();
+	Flashlight->UseBatteryItem(Charge);
+	float AfterPercent = Flashlight->GetBatteryPercent();
+
+	if (AfterPercent > BeforePercent)
+	{
+		InventoryComp->ConsumeItem(BatteryItemID, 1);
 	}
 }
 

@@ -24,6 +24,9 @@ protected:
 
     void ToggleAllLamps();
 
+    UFUNCTION(BlueprintImplementableEvent, Category = "Lamp")
+    void PlaySwitchAnimation();
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* SwitchMesh;

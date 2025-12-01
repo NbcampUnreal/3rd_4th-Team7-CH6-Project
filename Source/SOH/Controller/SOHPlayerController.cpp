@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "SOHPlayerController.h"
 #include "SOH/Character/SOHPlayerCharacter.h"
 #include "EnhancedInputComponent.h"
@@ -54,7 +51,10 @@ void ASOHPlayerController::SetupInputComponent()
 			EnhancedInput->BindAction(IA_ToggleFlashlight, ETriggerEvent::Started, this, &ASOHPlayerController::ToggleFlashlight);
 		}
 
-		
+		if (IA_UseBattery)
+		{
+			EnhancedInput->BindAction(IA_UseBattery, ETriggerEvent::Triggered, this, &ASOHPlayerController::UseBattery);
+		}
 	}
 }
 
@@ -113,4 +113,13 @@ void ASOHPlayerController::ToggleFlashlight(const FInputActionValue& Value)
 		MyChar->ToggleFlashlight();
 	}
 	
+}
+
+void ASOHPlayerController::UseBattery(const FInputActionValue& Value)
+{
+	ASOHPlayerCharacter* PC = Cast<ASOHPlayerCharacter>(GetPawn());
+	if (PC)
+	{
+		PC->UseBattery();
+	}
 }
