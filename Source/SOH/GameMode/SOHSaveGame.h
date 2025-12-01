@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/SaveGame.h"
 #include "SOHSaveGame.generated.h"
 
@@ -26,7 +27,7 @@ public:
 	int32 SavedStage;
 
 	UPROPERTY(BlueprintReadWrite)
-	TArray<FName> SavedConditions;
+	FGameplayTagContainer SavedConditions;
 
 	USOHSaveGame()
 	   : SavedHealth(100.f)
