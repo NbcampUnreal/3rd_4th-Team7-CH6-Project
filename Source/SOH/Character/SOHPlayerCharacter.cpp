@@ -25,8 +25,9 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.f, RotationRate, 0.f);
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;  // 추가!
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 270.f, 0.f);  // 속도 조절
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -123,6 +124,10 @@ void ASOHPlayerCharacter::TraceForInteractable()
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D Axis = Value.Get<FVector2D>();
+
+	// 현재 이동 방향 저장 (헤더에 변수 추가 필요)
+	CurrentMoveInput = Axis;
+
 	if (Controller)
 	{
 		// Forward
@@ -145,12 +150,30 @@ void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 void ASOHPlayerCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D Axis = Value.Get<FVector2D>();
-	AddControllerYawInput(Axis.X);
-	AddControllerPitchInput(Axis.Y);
+
+	if (Controller)
+	{
+		// Pitch만 제한
+		FRotator CurrentRotation = Controller->GetControlRotation();
+		float NewPitch = FMath::ClampAngle(CurrentRotation.Pitch - Axis.Y, MinPitchAngle, MaxPitchAngle);
+
+		FRotator NewRotation = CurrentRotation;
+		NewRotation.Pitch = NewPitch;
+		NewRotation.Yaw = CurrentRotation.Yaw + Axis.X;  // Yaw는 제한 없음
+
+		Controller->SetControlRotation(NewRotation);
+	}
 }
 
 void ASOHPlayerCharacter::StartRun(const FInputActionValue& Value)
 {
+	// 뒤로 가는 중이면 달리기 불가
+	if (CurrentMoveInput.Y < 0.f)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't run backwards!"));
+		return;
+	}
+
 	bIsRunning = true;
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
@@ -166,12 +189,55 @@ void ASOHPlayerCharacter::ToggleCrouch()
 	if (bIsCrouched)
 	{
 		UnCrouch();
+
+		// 일어섰을 때
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+
+		// 타이머 정지
+		GetWorldTimerManager().ClearTimer(CrouchMovementCheckTimer);
+
 		UE_LOG(LogTemp, Warning, TEXT("UnCrouch Called"));
 	}
 	else
 	{
 		Crouch();
+
+		// 앉았을 때
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+
+		// 타이머 시작 (0.1초마다 체크)
+		GetWorldTimerManager().SetTimer(CrouchMovementCheckTimer, this, &ASOHPlayerCharacter::CheckCrouchMovement, 0.1f, true);
+
 		UE_LOG(LogTemp, Warning, TEXT("Crouch Called"));
+	}
+}
+
+void ASOHPlayerCharacter::CheckCrouchMovement()
+{
+	if (!bIsCrouched) return;
+
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;  // 수직 속도 제외
+
+	// 움직이고 있으면 회전 활성화
+	if (Velocity.SizeSquared() > 1.f)
+	{
+		if (!bUseControllerRotationYaw)
+		{
+			bUseControllerRotationYaw = true;
+			GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		}
+	}
+	// 멈춰있으면 회전 비활성화
+	else
+	{
+		if (bUseControllerRotationYaw)
+		{
+			bUseControllerRotationYaw = false;
+			GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		}
 	}
 }
 

@@ -36,6 +36,10 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jumpscare|Animation")
     UAnimMontage* JumpScareMontage = nullptr;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Sound")
+    USoundBase* JumpScareSound = nullptr;
+
+
 public:
     // 트리거 박스 오버랩만으로 자동 발동할지
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Options")

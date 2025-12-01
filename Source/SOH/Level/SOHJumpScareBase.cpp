@@ -150,6 +150,8 @@ void ASOHJumpScareBase::InternalStartJumpScare(AActor* TriggeringActor)
         FActorSpawnParameters Params;
         Params.Owner = this;
 
+        Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
         if (AActor* NewActor = World->SpawnActor<AActor>(ScareActorClass, SpawnTransform, Params))
         {
             SpawnedScareActor = NewActor;
@@ -169,6 +171,16 @@ void ASOHJumpScareBase::InternalStartJumpScare(AActor* TriggeringActor)
                 }
             }
         }
+    }
+
+    if (JumpScareSound)
+    {
+        // 스폰 위치 기준 재생
+        FVector SoundLoc = SpawnedScareActor.IsValid()
+            ? SpawnedScareActor->GetActorLocation()
+            : GetActorLocation();
+
+        UGameplayStatics::PlaySoundAtLocation(this, JumpScareSound, SoundLoc);
     }
 
     // 연출 시간 타이머

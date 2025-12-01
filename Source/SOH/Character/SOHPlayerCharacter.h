@@ -40,6 +40,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RotationRate = 500.f;
 
@@ -50,6 +51,8 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RunSpeed = 400.f;
+
+	FVector2D CurrentMoveInput;
 
 	// 여기서부터
 
@@ -113,6 +116,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+    float MinPitchAngle = -60.f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+    float MaxPitchAngle = 60.f;
+
 	// Flashlight 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight")
 	bool bFlashlightOn = false;
@@ -156,4 +165,6 @@ private:
 	AActor* LastHighlightedItem = nullptr;
 
 	FTimerHandle TraceTimerHandle;
+	FTimerHandle CrouchMovementCheckTimer;
+	void CheckCrouchMovement();
 };
