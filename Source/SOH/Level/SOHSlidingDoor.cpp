@@ -32,23 +32,8 @@ void ASOHSlidingDoor::Interact_Implementation(AActor* Caller)
 
 	if (bLocked)
 	{
-		if (LinkedLockActor)
-		{
-			if (IsValid(LinkedLockActor))
-			{
-				BP_OnLocked(Caller);
-				return;
-			}
-			else
-			{
-				bLocked = false;
-			}
-		}
-		else
-		{
-			BP_OnLocked(Caller);
-			return;
-		}
+		BP_OnLocked(Caller);
+		return;
 	}
 
 	bIsMoving = true;
