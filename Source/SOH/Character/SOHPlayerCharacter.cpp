@@ -165,7 +165,7 @@ void ASOHPlayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void ASOHPlayerCharacter::StartRun(const FInputActionValue& Value)
+void ASOHPlayerCharacter::StartRun()
 {
 	// 뒤로 가는 중이면 달리기 불가
 	if (CurrentMoveInput.Y < 0.f)
@@ -178,7 +178,7 @@ void ASOHPlayerCharacter::StartRun(const FInputActionValue& Value)
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
-void ASOHPlayerCharacter::StopRun(const FInputActionValue& Value)
+void ASOHPlayerCharacter::StopRun()
 {
 	bIsRunning = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;

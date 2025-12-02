@@ -141,8 +141,12 @@ protected:
 public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void StartRun(const FInputActionValue& Value);
-	void StopRun(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void StartRun();
+	UFUNCTION(BlueprintCallable)
+	void StopRun();
+
 	void ToggleCrouch();
 	void Interact();
 	void ToggleFlashlight();

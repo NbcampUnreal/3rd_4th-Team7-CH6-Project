@@ -78,7 +78,7 @@ void ASOHPlayerController::StartRun(const FInputActionValue& Value)
 {
 	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
 	{
-		MyChar->StartRun(Value);
+		MyChar->StartRun();
 	}
 }
 
@@ -86,7 +86,7 @@ void ASOHPlayerController::StopRun(const FInputActionValue& Value)
 {
 	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
 	{
-		MyChar->StopRun(Value);
+		MyChar->StopRun();
 	}
 }
 
