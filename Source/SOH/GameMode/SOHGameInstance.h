@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "GameplayTagContainer.h"
 #include "SOHStageData.h"
 #include "SOHGameInstance.generated.h"
 
@@ -14,33 +15,27 @@ class SOH_API USOHGameInstance : public UGameInstance
 public:
 	USOHGameInstance();
 
-	//현재 스테이지
-	UPROPERTY(BlueprintReadWrite, Category = "Stage")
+	// 현재 스테이지
+	UPROPERTY(BlueprintReadOnly)
 	int32 CurrentStage = 0;
 
-	//완료조건
-	UPROPERTY(BlueprintReadWrite, Category = "Stage")
-	TArray<FName> CompletedConditions;
+	// 완료된 조건 GameplayTag 모음
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTagContainer CompletedConditions;
 
-	// DataTable
-	UPROPERTY(EditAnywhere , BlueprintReadOnly, Category = "Stage")
-	TObjectPtr<UDataTable> StageDataTable;
+	// Stage DataTable
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UDataTable* StageDataTable;
 
 public:
+	UFUNCTION(BlueprintCallable)
+	void CompleteCondition(FGameplayTag ConditionTag);
 
-	UFUNCTION(BlueprintCallable, Category = "Stage")
-	void CompleteCondition(FName Condition);
+	UFUNCTION(BlueprintCallable)
+	bool HasCondition(FGameplayTag ConditionTag) const;
 
-	// 특정 조건 완료 여부 확인
-	UFUNCTION(BlueprintCallable, Category="Stage")
-	bool HasCondition(FName Condition) const;
-
-	// Stage 완료 조건 총 충족 여부
-	UFUNCTION(BlueprintCallable, Category="Stage")
 	bool IsStageCompleted(int32 StageID);
 
-	// Stage를 완료하고 다음 Stage로 
-	UFUNCTION(BlueprintCallable, Category="Stage")
 	void AdvanceStage();
 
 	UFUNCTION(BlueprintCallable)
@@ -49,6 +44,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool LoadGameData();
 
+	void DebugPrint();
+	
 	//SaveGame 로드 후 임시 저장용
 	UPROPERTY()
 	FTransform LoadedPlayerTransform;
@@ -61,4 +58,6 @@ public:
 
 	UPROPERTY()
 	bool bLoadedFromSave = false;
+
+	
 };
