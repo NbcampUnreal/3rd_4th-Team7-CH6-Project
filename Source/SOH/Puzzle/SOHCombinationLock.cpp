@@ -206,7 +206,7 @@ void ASOHCombinationLock::CheckCombination()
 void ASOHCombinationLock::PlayUnlockAnimation()
 {
     if (!Head) return;
-    HeadTargetLocation = HeadStartLocation + FVector(0, 0, 10.f);
+    HeadTargetLocation = HeadStartLocation + FVector(0, 0, 1.f);
     bIsHeadMoving = true;
 
     if (UnlockSound)
@@ -236,8 +236,15 @@ void ASOHCombinationLock::UnlockComplete()
         LockGuideWidget = nullptr;
     }
 
-    GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
+
+    FTimerHandle DestroyTimerHandle;
+    FTimerDelegate DestroyDelegate;
+    DestroyDelegate.BindLambda([this]()
     {
-        Destroy();
+        if (IsValid(this))
+        {
+            Destroy();
+        }
     });
+    GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle,DestroyDelegate,0.5,false );
 }
