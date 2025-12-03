@@ -3,6 +3,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Level/SOHOpenDoor.h"
 
 // Constructor
 ASOHCombinationLock::ASOHCombinationLock()
@@ -236,6 +237,10 @@ void ASOHCombinationLock::UnlockComplete()
         LockGuideWidget = nullptr;
     }
 
+    if (LinkedDoor)
+    {
+        LinkedDoor->UnlockOpenDoor(this);
+    }
 
     FTimerHandle DestroyTimerHandle;
     FTimerDelegate DestroyDelegate;

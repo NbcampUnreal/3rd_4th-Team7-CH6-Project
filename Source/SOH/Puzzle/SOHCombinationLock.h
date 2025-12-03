@@ -8,6 +8,7 @@
 
 class UStaticMeshComponent;
 class USoundBase;
+class ASOHOpenDoor;
 
 USTRUCT(BlueprintType)
 struct FDigit
@@ -68,6 +69,10 @@ protected:
     TSubclassOf<UUserWidget> LockGuideWidgetClass;
     UPROPERTY()
     UUserWidget* LockGuideWidget;
+
+    // Door Class
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Lock")
+    ASOHOpenDoor* LinkedDoor;
 
     // Materials & Sounds
     UPROPERTY(EditAnywhere, Category="Sound")
