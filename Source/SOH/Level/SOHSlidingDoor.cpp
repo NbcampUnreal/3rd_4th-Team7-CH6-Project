@@ -3,6 +3,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/SOHMessageManager.h"
 
 ASOHSlidingDoor::ASOHSlidingDoor()
 {
@@ -32,7 +33,16 @@ void ASOHSlidingDoor::Interact_Implementation(AActor* Caller)
 
 	if (bLocked)
 	{
-		BP_OnLocked(Caller);
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (PC)
+		{
+			USOHMessageManager* MsgManager = PC->FindComponentByClass<USOHMessageManager>();
+			if (MsgManager)
+			{
+				MsgManager->ShowMessageText(FText::FromString(TEXT("문이 잠겨 있습니다.")), 1.5f);
+			}
+		}
+
 		return;
 	}
 
@@ -79,14 +89,4 @@ void ASOHSlidingDoor::UnlockSlidingDoor(AActor* Caller)
 	}
 
 	bLocked = false;
-
-	if (!bIsOpen)
-	{
-		if (OpenSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, OpenSound, GetActorLocation());
-		}
-
-		//BP_OpenDoor(Caller);
-	}
 }
