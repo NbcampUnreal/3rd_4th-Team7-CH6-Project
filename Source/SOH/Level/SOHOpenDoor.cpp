@@ -4,6 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/SOHMessageManager.h"
+#include "GameFramework/Character.h"
 
 ASOHOpenDoor::ASOHOpenDoor()
 {
@@ -32,39 +33,20 @@ void ASOHOpenDoor::Interact_Implementation(AActor* Caller)
 
 	if (bLocked)
 	{
-		if (LinkedLockActor)
+		ACharacter* PlayerChar = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		if (PlayerChar)
 		{
-			if (IsValid(LinkedLockActor))
+			if (USOHMessageManager* MsgMgr = PlayerChar->FindComponentByClass<USOHMessageManager>())
 			{
-				BP_OnLocked(Caller);
-				return;
-			}
-			else
-			{
-				bLocked = false;
-			}
-		}
-		else
-		{
-			BP_OnLocked(Caller);
-			return;
-		}
-	}
-
-	if (bLocked)
-	{
-		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		if (PC)
-		{
-			USOHMessageManager* MsgManager = PC->FindComponentByClass<USOHMessageManager>();
-			if (MsgManager)
-			{
-				MsgManager->ShowMessageText(FText::FromString(TEXT("문이 잠겨 있습니다.")), 1.5f);
+				MsgMgr->ShowMessageText(
+					FText::FromString(TEXT("문이 잠겨 있다.")),
+					1.5f
+				);
 			}
 		}
-
 		return;
 	}
+
 
 	bIsMoving = true;
 

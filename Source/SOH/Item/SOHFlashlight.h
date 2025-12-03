@@ -67,7 +67,7 @@ private:
     float InitialBattery = 50.f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight|Battery")
-    float DrainRate = 1.f;
+    float DrainRate = 0.5f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight|Battery")
     float DrainInterval = 1.0f;
@@ -86,12 +86,4 @@ private:
     void DrainOnce();
 
     FTimerHandle BatteryDrainTimer;
-
-    // 점프스퀘어용
-
-    UPROPERTY(EditAnywhere, Category = "JumpScare")
-    ASOHJumpScareBase* PickupJumpScare = nullptr;
-
-    UPROPERTY(VisibleInstanceOnly, Category = "JumpScare")
-    bool bPickupJumpScarePlayed = false;
 };
