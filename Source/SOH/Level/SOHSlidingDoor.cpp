@@ -87,6 +87,6 @@ void ASOHSlidingDoor::UnlockSlidingDoor(AActor* Caller)
 			UGameplayStatics::PlaySoundAtLocation(this, OpenSound, GetActorLocation());
 		}
 
-		BP_OpenDoor(Caller);
+		//BP_OpenDoor(Caller);
 	}
 }

@@ -1,6 +1,7 @@
 #include "SOHLockActor.h"
 #include "SOHInventoryComponent.h" // 인벤토리 확인
 #include "Level/SOHSlidingDoor.h"
+#include "Level/SOHOpenDoor.h"
 #include "Components/StaticMeshComponent.h"
 
 ASOHLockActor::ASOHLockActor()
@@ -31,9 +32,21 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 		if (RequiredKeyID.IsNone())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[Lock] 이 자물쇠는 잠겨있지 않습니다. (KeyID 설정 안됨)"));
-			if (TargetDoor)
+			for (ASOHSlidingDoor* Door : TargetSlidingDoor)
 			{
-				TargetDoor->UnlockSlidingDoor(Caller);
+				if (Door)
+				{
+					Door->UnlockSlidingDoor(Caller);
+				}
+			}
+
+			// 일반 문 해제
+			for (ASOHOpenDoor* Door : TargetOpenDoor)
+			{
+				if (Door)
+				{
+					Door->UnlockOpenDoor(Caller); // 해당 함수가 ASOHOpenDoor에 정의되어 있어야 함
+				}
 			}
 			Destroy(); // 자물쇠 삭제
 			return;
@@ -48,11 +61,22 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 			UE_LOG(LogTemp, Log, TEXT("[Lock] 성공! 열쇠(%s)를 사용하여 잠금을 해제했습니다."), *RequiredKeyID.ToString());
 
 			// 연결된 문에게 잠금 해제 명령
-			if (TargetDoor)
+			for (ASOHSlidingDoor* Door : TargetSlidingDoor)
 			{
-				TargetDoor->UnlockSlidingDoor(Caller);
+				if (Door)
+				{
+					Door->UnlockSlidingDoor(Caller);
+				}
 			}
-			
+
+			// 일반 문 해제
+			for (ASOHOpenDoor* Door : TargetOpenDoor)
+			{
+				if (Door)
+				{
+					Door->UnlockOpenDoor(Caller); // 해당 함수가 ASOHOpenDoor에 정의되어 있어야 함
+				}
+			}
 			// 4. 잠금 해제 연출
 			Destroy(); // 자물쇠 삭제
 		}

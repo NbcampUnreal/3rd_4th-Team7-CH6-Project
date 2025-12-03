@@ -4,6 +4,7 @@
 #include "Interaction/SOHInteractableActor.h" // 탁완님 헤더
 #include "SOHLockActor.generated.h"
 
+class ASOHOpenDoor;
 class ASOHSlidingDoor;
 
 /**
@@ -28,7 +29,10 @@ public:
 
 	// 이 자물쇠를 열면 잠금이 해제될 문
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
-	ASOHSlidingDoor* TargetDoor;
+	TArray<ASOHSlidingDoor*> TargetSlidingDoor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
+	TArray<ASOHOpenDoor*> TargetOpenDoor;
 	
 protected:
 	// 자물쇠 외형
