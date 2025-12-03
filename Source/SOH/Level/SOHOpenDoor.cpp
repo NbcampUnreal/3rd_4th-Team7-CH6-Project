@@ -3,6 +3,8 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/SOHMessageManager.h"
+#include "GameFramework/Character.h"
 
 ASOHOpenDoor::ASOHOpenDoor()
 {
@@ -31,30 +33,20 @@ void ASOHOpenDoor::Interact_Implementation(AActor* Caller)
 
 	if (bLocked)
 	{
-		if (LinkedLockActor)
+		ACharacter* PlayerChar = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		if (PlayerChar)
 		{
-			if (IsValid(LinkedLockActor))
+			if (USOHMessageManager* MsgMgr = PlayerChar->FindComponentByClass<USOHMessageManager>())
 			{
-				BP_OnLocked(Caller);
-				return;
-			}
-			else
-			{
-				bLocked = false;
+				MsgMgr->ShowMessageText(
+					FText::FromString(TEXT("문이 잠겨 있다.")),
+					1.5f
+				);
 			}
 		}
-		else
-		{
-			BP_OnLocked(Caller);
-			return;
-		}
-	}
-
-	if (bLocked)
-	{
-		BP_OnLocked(Caller);
 		return;
 	}
+
 
 	bIsMoving = true;
 
@@ -95,14 +87,4 @@ void ASOHOpenDoor::UnlockOpenDoor(AActor* Caller)
 	}
 
 	bLocked = false;
-
-	if (!bIsOpen)
-	{
-		if (OpenSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, OpenSound, GetActorLocation());
-		}
-
-		BP_OpenDoor(Caller);
-	}
 }

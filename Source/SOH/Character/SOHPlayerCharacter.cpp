@@ -125,8 +125,15 @@ void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D Axis = Value.Get<FVector2D>();
 
-	// 현재 이동 방향 저장 (헤더에 변수 추가 필요)
+	// 현재 이동 방향 저장
 	CurrentMoveInput = Axis;
+
+	// 달리는 중에 뒤로 가려고 하면 달리기 취소
+	if (bIsRunning && CurrentMoveInput.Y < 0.f)
+	{
+		StopRun();
+		UE_LOG(LogTemp, Warning, TEXT("Sprint stopped - moving backwards"));
+	}
 
 	if (Controller)
 	{

@@ -143,16 +143,6 @@ void ASOHFlashlight::DrainOnce()
         SetOn(false);
         StopBatteryDrain();
 
-        if (OwnerChar)
-        {
-            if (USOHMessageManager* MsgMgr = OwnerChar->FindComponentByClass<USOHMessageManager>())
-            {
-                MsgMgr->ShowMessageText(
-                    FText::FromString(TEXT("배터리를 다 썼다.")),
-                    1.5f
-                );
-            }
-        }
         return;
     }
     UpdateLightFromBattery();
@@ -219,11 +209,5 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
         {
             PC->SetFlashlight(this);
         }
-    }
-
-    if (!bPickupJumpScarePlayed && PickupJumpScare)
-    {
-        PickupJumpScare->StartJumpScare(Caller);
-        bPickupJumpScarePlayed = true;
     }
 }
