@@ -2,6 +2,7 @@
 #include "SOHInventoryComponent.h" // 인벤토리 확인
 #include "Level/SOHSlidingDoor.h"
 #include "Level/SOHOpenDoor.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
 
 ASOHLockActor::ASOHLockActor()
@@ -77,6 +78,17 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 					Door->UnlockOpenDoor(Caller); // 해당 함수가 ASOHOpenDoor에 정의되어 있어야 함
 				}
 			}
+
+			// 잠금해제 사운드
+			if (UnlockSound)
+			{
+				UGameplayStatics::SpawnSoundAtLocation(
+					this,
+					UnlockSound,
+					GetActorLocation()
+				);
+			}
+
 			// 4. 잠금 해제 연출
 			Destroy(); // 자물쇠 삭제
 		}

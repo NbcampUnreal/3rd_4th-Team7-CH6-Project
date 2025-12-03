@@ -38,4 +38,8 @@ protected:
 	// 자물쇠 외형
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lock System")
 	UStaticMeshComponent* LockMesh;
+
+	// 잠금해제 사운드
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* UnlockSound;
 };
