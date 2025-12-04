@@ -16,7 +16,8 @@ enum class ESOHItemType : uint8
 	Consumable  UMETA(DisplayName = "Consumable"), // 포션, 음식 등
 	Equip       UMETA(DisplayName = "Equip"),      // 무기, 장비 등
 	Quest       UMETA(DisplayName = "Quest"),      // 퀘스트 아이템
-	Puzzle      UMETA(DisplayName = "Puzzle")      // 퍼즐용 아이템
+	Puzzle      UMETA(DisplayName = "Puzzle"),     // 퍼즐용 아이템
+	Notes       UMETA(DisplayName = "Notes")       // 메모 아이템
 };
 
 /**
