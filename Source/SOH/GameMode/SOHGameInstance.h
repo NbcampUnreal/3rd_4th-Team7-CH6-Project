@@ -6,6 +6,7 @@
 #include "SOHStageData.h"
 #include "SOHGameInstance.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConditionCompleted, FGameplayTag, CompletedTag);
 
 UCLASS()
 class SOH_API USOHGameInstance : public UGameInstance
@@ -22,6 +23,9 @@ public:
 	// 완료된 조건 GameplayTag 모음
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTagContainer CompletedConditions;
+
+	UPROPERTY(BlueprintAssignable, Category="Stage")
+	FOnConditionCompleted OnConditionCompleted;
 
 	// Stage DataTable
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

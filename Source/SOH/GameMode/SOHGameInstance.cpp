@@ -11,21 +11,33 @@ USOHGameInstance::USOHGameInstance()
 
 void USOHGameInstance::CompleteCondition(FGameplayTag ConditionTag)
 {
+	// None 태그 방어
+	if (!ConditionTag.IsValid() || ConditionTag.ToString() == "None")
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Condition] None 태그로 호출됨! 무시됨"));
+		return;
+	}
+
 	if (CompletedConditions.HasTagExact(ConditionTag))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[Condition] 이미 완료됨: %s"), *ConditionTag.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("[Condition] 이미 완료됨: %s (재브로드캐스트)"), 
+			*ConditionTag.ToString());
+        
+		// 이미 완료된 조건도 Broadcast!
+		OnConditionCompleted.Broadcast(ConditionTag);
 		return;
 	}
 
 	CompletedConditions.AddTag(ConditionTag);
 	UE_LOG(LogTemp, Warning, TEXT("[Condition] 완료: %s"), *ConditionTag.ToString());
 
+	OnConditionCompleted.Broadcast(ConditionTag);
+    
 	if (IsStageCompleted(CurrentStage))
 	{
 		AdvanceStage();
 	}
 }
-
 bool USOHGameInstance::HasCondition(FGameplayTag ConditionTag) const
 {
 	return CompletedConditions.HasTagExact(ConditionTag);
