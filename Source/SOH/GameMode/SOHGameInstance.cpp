@@ -20,6 +20,8 @@ void USOHGameInstance::CompleteCondition(FGameplayTag ConditionTag)
 	CompletedConditions.AddTag(ConditionTag);
 	UE_LOG(LogTemp, Warning, TEXT("[Condition] 완료: %s"), *ConditionTag.ToString());
 
+	OnConditionCompleted.Broadcast(ConditionTag);
+	
 	if (IsStageCompleted(CurrentStage))
 	{
 		AdvanceStage();
