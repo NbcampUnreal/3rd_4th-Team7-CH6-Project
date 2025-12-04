@@ -3,6 +3,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 
+ASOHGhostSpawner::ASOHGhostSpawner()
+{
+    PrimaryActorTick.bCanEverTick = false;
+}
+
 void ASOHGhostSpawner::BeginPlay()
 {
     Super::BeginPlay();
