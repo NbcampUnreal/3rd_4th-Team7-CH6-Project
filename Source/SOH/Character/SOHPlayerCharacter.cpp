@@ -59,7 +59,7 @@ void ASOHPlayerCharacter::BeginPlay()
 			UpdateOverlay(Health, MaxHealth);
 		}
 	}
-
+	GetWorldTimerManager().SetTimer(StaminaUpdateTimer, this, &ASOHPlayerCharacter::UpdateStamina, 0.1f, true);
 	GetWorldTimerManager().SetTimer(TraceTimerHandle, this, &ASOHPlayerCharacter::TraceForInteractable, 0.1f, true);
 
 	// ============================
@@ -180,6 +180,11 @@ void ASOHPlayerCharacter::StartRun()
 		UE_LOG(LogTemp, Warning, TEXT("Can't run backwards!"));
 		return;
 	}
+	if (bIsExhausted || Stamina < MinStaminaToRun)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Too exhausted to run!"));
+		return;
+	}
 
 	bIsRunning = true;
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
@@ -189,6 +194,7 @@ void ASOHPlayerCharacter::StopRun()
 {
 	bIsRunning = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	TimeSinceLastStaminaUse = 0.f;
 }
 
 void ASOHPlayerCharacter::ToggleCrouch()
@@ -247,6 +253,62 @@ void ASOHPlayerCharacter::CheckCrouchMovement()
 		}
 	}
 }
+
+//스태미너 업데이트
+void ASOHPlayerCharacter::UpdateStamina()
+{
+	if (bIsDead) return;
+
+	// 달리는 중이면 스태미너 소모
+	if (bIsRunning)
+	{
+		Stamina -= StaminaDrainPerSec * 0.1f; // 0.1초마다 호출되므로
+		Stamina = FMath::Clamp(Stamina, 0.f, MaxStamina);
+		TimeSinceLastStaminaUse = 0.f;
+
+		// 스태미너가 최소값 이하가 되면 탈진
+		if (Stamina < MinStaminaToRun)
+		{
+			Stamina = 0.f;
+			bIsExhausted = true;
+			bCanSprint = false;
+			StopRun(); // 강제로 달리기 중지
+			OnExhausted();
+		}
+	}
+	// 달리지 않으면 회복
+	else
+	{
+		TimeSinceLastStaminaUse += 0.1f;
+
+		// 대기 시간이 지나면 회복 시작
+		if (TimeSinceLastStaminaUse >= StaminaRegenDelay)
+		{
+			Stamina += StaminaRegenPerSec * 0.1f;
+			Stamina = FMath::Clamp(Stamina, 0.f, MaxStamina);
+
+			// 탈진 상태 해제 (50% 회복 시)
+			if (bIsExhausted && Stamina >= MaxStamina * 0.5f)
+			{
+				bIsExhausted = false;
+				bCanSprint = true;
+				OnRecovered();
+			}
+		}
+	}
+}
+
+void ASOHPlayerCharacter::OnExhausted()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player is exhausted!"));
+}
+
+void ASOHPlayerCharacter::OnRecovered()
+{
+	UE_LOG(LogTemp, Log, TEXT("Player recovered from exhaustion"));
+}
+
+
 
 void ASOHPlayerCharacter::Interact()
 {
@@ -367,13 +429,15 @@ void ASOHPlayerCharacter::Die()
 	// 움직임/회전 멈추기
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->DisableMovement();
-
+	// 스태미너 업데이트 타이머 정지
+	GetWorldTimerManager().ClearTimer(StaminaUpdateTimer);
 	// 입력 막기
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		PC->SetIgnoreLookInput(true);
 		PC->SetIgnoreMoveInput(true);
 	}
+
 
 	// 죽음 몽타주 재생
 	if (DeathMontage)
