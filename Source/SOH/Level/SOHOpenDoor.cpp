@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/SOHMessageManager.h"
 #include "GameFramework/Character.h"
+#include "AI/SOHNoiseSound.h"
 
 ASOHOpenDoor::ASOHOpenDoor()
 {
@@ -55,6 +56,19 @@ void ASOHOpenDoor::Interact_Implementation(AActor* Caller)
 		if (OpenSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, OpenSound, GetActorLocation());
+
+			if (bUseNoiseEvent)
+			{
+				USOHNoiseSound::PlaySoundWithNoise(
+					this,
+					OpenSound,
+					GetActorLocation(),
+					NoiseLoudness,
+					NoiseMaxRange,
+					NoiseTag,
+					Caller
+				);
+			}
 		}
 		BP_OpenDoor(Caller);
 	}
@@ -63,6 +77,19 @@ void ASOHOpenDoor::Interact_Implementation(AActor* Caller)
 		if (CloseSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, CloseSound, GetActorLocation());
+
+			if (bUseNoiseEvent)
+			{
+				USOHNoiseSound::PlaySoundWithNoise(
+					this,
+					CloseSound,
+					GetActorLocation(),
+					NoiseLoudness,
+					NoiseMaxRange,
+					NoiseTag,
+					Caller
+				);
+			}
 		}
 		BP_CloseDoor(Caller);
 	}
