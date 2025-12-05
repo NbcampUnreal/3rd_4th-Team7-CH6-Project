@@ -42,7 +42,7 @@ void ASOHCombinationLock::BeginPlay()
         HeadStartLocation = Head->GetRelativeLocation();
 
     HeadTargetLocation = HeadStartLocation;
-    UpdateHighlight();
+    // UpdateHighlight();
 }
 
 // Tick
@@ -111,7 +111,7 @@ void ASOHCombinationLock::Interact_Implementation(AActor* Caller)
         if (Gear)
             Gear->SetOverlayMaterial(nullptr);
     }
-    UpdateHighlight();
+    // UpdateHighlight();
 
     if (LockGuideWidgetClass && !LockGuideWidget)
     {
@@ -125,13 +125,13 @@ void ASOHCombinationLock::Interact_Implementation(AActor* Caller)
 void ASOHCombinationLock::Up()
 {
     CurrentGearIndex = (CurrentGearIndex - 1 + Gears.Num()) % Gears.Num();
-    UpdateHighlight();
+    // UpdateHighlight();
 }
 
 void ASOHCombinationLock::Down()
 {
     CurrentGearIndex = (CurrentGearIndex + 1) % Gears.Num();
-    UpdateHighlight();
+    // UpdateHighlight();
 }
 
 void ASOHCombinationLock::Left()
@@ -182,14 +182,14 @@ void ASOHCombinationLock::Exit()
 }
 
 // Update gear highlight
-void ASOHCombinationLock::UpdateHighlight()
-{
-    for (int32 i = 0; i < Gears.Num(); ++i)
-    {
-        if (Gears[i])
-            Gears[i]->SetOverlayMaterial(i == CurrentGearIndex ? OutlineMaterial : nullptr);
-    }
-}
+// void ASOHCombinationLock::UpdateHighlight()
+// {
+//     for (int32 i = 0; i < Gears.Num(); ++i)
+//     {
+//         if (Gears[i])
+//             Gears[i]->SetOverlayMaterial(i == CurrentGearIndex ? OutlineMaterial : nullptr);
+//     }
+// }
 
 // Check combination
 void ASOHCombinationLock::CheckCombination()
