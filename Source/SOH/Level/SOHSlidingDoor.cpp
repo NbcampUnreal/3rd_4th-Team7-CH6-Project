@@ -57,18 +57,18 @@ void ASOHSlidingDoor::Interact_Implementation(AActor* Caller)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, OpenSound, GetActorLocation());
 
-			if (bUseNoiseEvent)
-			{
-				USOHNoiseSound::PlaySoundWithNoise(
-					this,
-					OpenSound,
-					GetActorLocation(),
-					NoiseLoudness,
-					NoiseMaxRange,
-					NoiseTag,
-					Caller
-				);
-			}
+			//if (bUseNoiseEvent)
+			//{
+			//	USOHNoiseSound::PlaySoundWithNoise(
+			//		this,
+			//		OpenSound,
+			//		GetActorLocation(),
+			//		NoiseLoudness,
+			//		NoiseMaxRange,
+			//		NoiseTag,
+			//		Caller
+			//	);
+			//}
 		}
 
 		BP_OpenDoor(Caller);
@@ -79,18 +79,18 @@ void ASOHSlidingDoor::Interact_Implementation(AActor* Caller)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, CloseSound, GetActorLocation());
 
-			if (bUseNoiseEvent)
-			{
-				USOHNoiseSound::PlaySoundWithNoise(
-					this,
-					CloseSound,
-					GetActorLocation(),
-					NoiseLoudness,
-					NoiseMaxRange,
-					NoiseTag,
-					Caller
-				);
-			}
+			//if (bUseNoiseEvent)
+			//{
+			//	USOHNoiseSound::PlaySoundWithNoise(
+			//		this,
+			//		CloseSound,
+			//		GetActorLocation(),
+			//		NoiseLoudness,
+			//		NoiseMaxRange,
+			//		NoiseTag,
+			//		Caller
+			//	);
+			//}
 		}
 
 		BP_CloseDoor(Caller);
