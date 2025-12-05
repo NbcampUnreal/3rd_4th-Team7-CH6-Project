@@ -90,6 +90,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Stamina")
 	bool bCanSprint = true; // 달리기 가능 여부
 
+	// 스태미너 오디오
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina|Audio")
+	USoundBase* HeavyBreathingSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina|Audio")
+	USoundBase* ExhaustedSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina|Audio")
+	float LowStaminaThreshold = 30.f;
 
 	// 체력 감소/죽음 처리
 
@@ -181,6 +190,12 @@ private:
 	void UpdateStamina();
 	void OnExhausted();
 	void OnRecovered();
+
+	UPROPERTY()
+	class UAudioComponent* BreathingAudioComponent;
+
+	void StartHeavyBreathing();
+	void StopHeavyBreathing();
 
 	FTimerHandle TraceTimerHandle;
 	FTimerHandle CrouchMovementCheckTimer;

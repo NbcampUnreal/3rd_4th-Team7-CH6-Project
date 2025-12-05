@@ -3,6 +3,7 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/AudioComponent.h"
 #include "TimerManager.h"
 #include "SOH/Item/SOHFlashlight.h"
 #include "Item/SOHBattery.h"
@@ -55,25 +56,38 @@ void ASOHPlayerCharacter::BeginPlay()
 		if (PlayerHUD)
 		{
 			PlayerHUD->AddToViewport();
-
 			UpdateOverlay(Health, MaxHealth);
 		}
 	}
+
+	// 타이머 시작
 	GetWorldTimerManager().SetTimer(StaminaUpdateTimer, this, &ASOHPlayerCharacter::UpdateStamina, 0.1f, true);
 	GetWorldTimerManager().SetTimer(TraceTimerHandle, this, &ASOHPlayerCharacter::TraceForInteractable, 0.1f, true);
+
+	// 숨소리 오디오 컴포넌트 생성
+	if (HeavyBreathingSound)
+	{
+		BreathingAudioComponent = NewObject<UAudioComponent>(this);
+		if (BreathingAudioComponent)
+		{
+			BreathingAudioComponent->SetSound(HeavyBreathingSound);
+			BreathingAudioComponent->bAutoActivate = false;
+			BreathingAudioComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			BreathingAudioComponent->RegisterComponent();
+		}
+	}
 
 	// ============================
 	// LOAD GAME RESTORE (추가)
 	// ============================
 	if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
 	{
-		if (GI->bLoadedFromSave)   // 로드한 상태인지 체크
+		if (GI->bLoadedFromSave)
 		{
 			SetActorTransform(GI->LoadedPlayerTransform);
 			Health = GI->LoadedHealth;
 			Stamina = GI->LoadedStamina;
-
-			UpdateOverlay(Health, MaxHealth);  // UI도 업데이트
+			UpdateOverlay(Health, MaxHealth);
 		}
 	}
 }
@@ -262,7 +276,7 @@ void ASOHPlayerCharacter::UpdateStamina()
 	// 달리는 중이면 스태미너 소모
 	if (bIsRunning)
 	{
-		Stamina -= StaminaDrainPerSec * 0.1f; // 0.1초마다 호출되므로
+		Stamina -= StaminaDrainPerSec * 0.1f;
 		Stamina = FMath::Clamp(Stamina, 0.f, MaxStamina);
 		TimeSinceLastStaminaUse = 0.f;
 
@@ -272,8 +286,19 @@ void ASOHPlayerCharacter::UpdateStamina()
 			Stamina = 0.f;
 			bIsExhausted = true;
 			bCanSprint = false;
-			StopRun(); // 강제로 달리기 중지
+			StopRun();
 			OnExhausted();
+		}
+
+		// ============================
+		// 낮은 스태미너 상태에서 헥헥대기
+		// ============================
+		if (Stamina <= LowStaminaThreshold)
+		{
+			if (BreathingAudioComponent && !BreathingAudioComponent->IsPlaying())
+			{
+				StartHeavyBreathing();
+			}
 		}
 	}
 	// 달리지 않으면 회복
@@ -294,6 +319,17 @@ void ASOHPlayerCharacter::UpdateStamina()
 				bCanSprint = true;
 				OnRecovered();
 			}
+
+			// ============================
+			// 스태미너가 충분히 회복되면 숨소리 중지
+			// ============================
+			if (Stamina > LowStaminaThreshold)
+			{
+				if (BreathingAudioComponent && BreathingAudioComponent->IsPlaying())
+				{
+					StopHeavyBreathing();
+				}
+			}
 		}
 	}
 }
@@ -301,6 +337,14 @@ void ASOHPlayerCharacter::UpdateStamina()
 void ASOHPlayerCharacter::OnExhausted()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player is exhausted!"));
+
+	// ============================
+	// 탈진 사운드 재생
+	// ============================
+	if (ExhaustedSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ExhaustedSound, GetActorLocation());
+	}
 }
 
 void ASOHPlayerCharacter::OnRecovered()
@@ -308,6 +352,27 @@ void ASOHPlayerCharacter::OnRecovered()
 	UE_LOG(LogTemp, Log, TEXT("Player recovered from exhaustion"));
 }
 
+// ===================================
+// 숨소리 관련 함수
+// ===================================
+
+void ASOHPlayerCharacter::StartHeavyBreathing()
+{
+	if (BreathingAudioComponent && !BreathingAudioComponent->IsPlaying())
+	{
+		BreathingAudioComponent->Play();
+		UE_LOG(LogTemp, Log, TEXT("Heavy breathing started"));
+	}
+}
+
+void ASOHPlayerCharacter::StopHeavyBreathing()
+{
+	if (BreathingAudioComponent && BreathingAudioComponent->IsPlaying())
+	{
+		BreathingAudioComponent->FadeOut(1.0f, 0.0f); // 1초에 걸쳐 페이드아웃
+		UE_LOG(LogTemp, Log, TEXT("Heavy breathing stopped"));
+	}
+}
 
 
 void ASOHPlayerCharacter::Interact()
@@ -431,6 +496,8 @@ void ASOHPlayerCharacter::Die()
 	GetCharacterMovement()->DisableMovement();
 	// 스태미너 업데이트 타이머 정지
 	GetWorldTimerManager().ClearTimer(StaminaUpdateTimer);
+	// 숨소리 중지
+	StopHeavyBreathing();
 	// 입력 막기
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
