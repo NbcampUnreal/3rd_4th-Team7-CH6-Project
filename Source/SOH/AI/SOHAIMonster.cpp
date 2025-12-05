@@ -42,6 +42,28 @@ void ASOHAIMonster::BeginPlay()
 {
 	Super::BeginPlay();
 
+    if (!PatrolRouteActor)
+    {
+        TArray<AActor*> FoundRoutes;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASOHPatrolRoute::StaticClass(), FoundRoutes);
+
+        if (FoundRoutes.Num() > 0)
+        {
+            PatrolRouteActor = Cast<ASOHPatrolRoute>(FoundRoutes[0]);
+
+            float MinDist = FLT_MAX;
+            for (AActor* Actor : FoundRoutes)
+            {
+                float Dist = FVector::Dist(GetActorLocation(), Actor->GetActorLocation());
+                if (Dist < MinDist)
+                {
+                    MinDist = Dist;
+                    PatrolRouteActor = Cast<ASOHPatrolRoute>(Actor);
+                }
+            }
+        }
+    }
+
     if (PatrolTargets.Num() == 0 && PatrolRouteActor)
     {
         PatrolTargets = PatrolRouteActor->PatrolPoints;

@@ -39,6 +39,30 @@ void ASOHSoundMonster::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!PatrolRouteActor)
+	{
+		TArray<AActor*> FoundRoutes;
+		UGameplayStatics::GetAllActorsOfClass(
+			GetWorld(),
+			ASOHSoundMonsterPatrolRoute::StaticClass(),
+			FoundRoutes
+		);
+
+		if (FoundRoutes.Num() > 0)
+		{
+			float MinDist = FLT_MAX;
+			for (AActor* Actor : FoundRoutes)
+			{
+				float Dist = FVector::DistSquared(GetActorLocation(), Actor->GetActorLocation());
+				if (Dist < MinDist)
+				{
+					MinDist = Dist;
+					PatrolRouteActor = Cast<ASOHSoundMonsterPatrolRoute>(Actor);
+				}
+			}
+		}
+	}
+
 	if (PatrolTargets.Num() == 0 && PatrolRouteActor)
 	{
 		PatrolTargets = PatrolRouteActor->PatrolPoints;
