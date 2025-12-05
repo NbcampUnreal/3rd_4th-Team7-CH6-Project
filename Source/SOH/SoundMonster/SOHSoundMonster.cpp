@@ -1,5 +1,5 @@
 #include "SOHSoundMonster.h"
-#include "SOHSoundMonster.h"
+#include "SOHSoundMonsterPatrolRoute.h"
 #include "SOHSoundMonsterAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -33,21 +33,16 @@ ASOHSoundMonster::ASOHSoundMonster()
 	PeripheralVisionAngle = 80.f;
 
 	HearingRange = 1500.f;
-
-	//if (GetMesh())
-	//{
-	//	GetMesh()->SetHiddenInGame(true);
-	//}
-
-	//if (UCapsuleComponent* Capsule = GetCapsuleComponent())
-	//{
-	//	Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//}
 }
 
 void ASOHSoundMonster::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (PatrolTargets.Num() == 0 && PatrolRouteActor)
+	{
+		PatrolTargets = PatrolRouteActor->PatrolPoints;
+	}
 
 	SetMoveSpeed(PatrolSpeed);
 }
@@ -98,12 +93,27 @@ bool ASOHSoundMonster::HasLineOfSightToTarget(AActor* Target)
 		return true;
 	}
 
-	//if (HitActor->GetClass()->ImplementsInterface(USOHDoorInterface::StaticClass()))
-	//{
-	//	ISOHDoorInterface::Execute_OpenDoorForAI(HitActor, this);
-	//	return false;
-	//}
-
 	return false;
 }
 
+void ASOHSoundMonster::TryAttack()
+{
+	AActor* Target = nullptr;
+
+	if (AAIController* AIC = Cast<AAIController>(GetController()))
+	{
+		if (UBlackboardComponent* BB = AIC->GetBlackboardComponent())
+		{
+			Target = Cast<AActor>(BB->GetValueAsObject(TEXT("PlayerActor")));
+		}
+	}
+
+	if (!Target || Target == this)
+		return;
+
+	float DistSq = FVector::DistSquared(Target->GetActorLocation(), GetActorLocation());
+	if (DistSq > FMath::Square(AttackRange))
+		return;
+
+	UGameplayStatics::ApplyDamage(Target, AttackDamage, GetController(), this, nullptr);
+}

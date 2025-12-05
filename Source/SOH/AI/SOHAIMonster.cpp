@@ -3,6 +3,7 @@
 #include "Engine/TargetPoint.h"
 #include "SOHAIMonsterController.h"
 #include "AIController.h"
+#include "SOHPatrolRoute.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -40,6 +41,12 @@ ASOHAIMonster::ASOHAIMonster()
 void ASOHAIMonster::BeginPlay()
 {
 	Super::BeginPlay();
+
+    if (PatrolTargets.Num() == 0 && PatrolRouteActor)
+    {
+        PatrolTargets = PatrolRouteActor->PatrolPoints;
+    }
+
 	SetMoveSpeed(PatrolSpeed);
 }
 
