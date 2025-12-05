@@ -62,4 +62,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Door|Lock")
 	void UnlockSlidingDoor(AActor* Caller);
 
+	// Noise Settings
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door|Noise")
+	bool bUseNoiseEvent = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door|Noise")
+	float NoiseLoudness = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door|Noise")
+	float NoiseMaxRange = 1500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door|Noise")
+	FName NoiseTag = "Door";
+
 };
