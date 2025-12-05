@@ -2,11 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagContainer.h"
 #include "SOHJumpScareBase.generated.h"
 
 class UBoxComponent;
 class UCameraComponent;
 class UArrowComponent;
+class USOHGameInstance;
 
 UCLASS()
 class SOH_API ASOHJumpScareBase : public AActor
@@ -73,6 +75,23 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Options")
     bool bOneShot = true;
 
+    //태그
+
+    // 조건 태그를 사용할지 여부
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Conditions")
+    bool bUseActivationTag = false;
+
+    // 이 태그가 GameInstance에서 완료되면 점프스퀘어 활성 가능
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Conditions", meta = (EditCondition = "bUseActivationTag"))
+    FGameplayTag ActivationConditionTag;
+
+    // 특정 태그가 완료되면 이 점프스퀘어를 영구 비활성화
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Conditions")
+    bool bUseDeactivationTag = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Conditions", meta = (EditCondition = "bUseDeactivationTag"))
+    FGameplayTag DeactivationConditionTag;
+
 protected:
     // 점프스퀘어 진행 중인지
     UPROPERTY(BlueprintReadOnly, Category = "JumpScare|State")
@@ -81,6 +100,10 @@ protected:
     // 한 번이라도 발동했는지
     UPROPERTY(BlueprintReadOnly, Category = "JumpScare|State")
     bool bAlreadyTriggered = false;
+
+    // 태그 충족 여부
+    UPROPERTY(BlueprintReadOnly, Category = "JumpScare|State")
+    bool bCanActivateByTag = false;
 
     // 플레이어 / 컨트롤러 저장
     TWeakObjectPtr<class APlayerController> CachedPlayerController;
@@ -104,6 +127,10 @@ protected:
         bool bFromSweep,
         const FHitResult& SweepResult
     );
+
+    // 태그 조건 이벤트
+    UFUNCTION()
+    void OnConditionCompleted(FGameplayTag CompletedTag);
 
     // C++/BP에서 시작 처리
     void InternalStartJumpScare(AActor* TriggeringActor);

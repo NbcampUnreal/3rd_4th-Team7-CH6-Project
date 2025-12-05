@@ -102,5 +102,5 @@ protected:
     void PlayUnlockAnimation();
     void UnlockComplete();
 
-    void UpdateHighlight();
+    // void UpdateHighlight();
 };
