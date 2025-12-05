@@ -7,7 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
-#include "SOH/Interface/SOHDoorInterface.h"
+#include "Interaction/SOHInteractInterface.h"
 
 ASOHSoundMonster::ASOHSoundMonster()
 {
@@ -116,4 +116,36 @@ void ASOHSoundMonster::TryAttack()
 		return;
 
 	UGameplayStatics::ApplyDamage(Target, AttackDamage, GetController(), this, nullptr);
+}
+
+void ASOHSoundMonster::CheckDoorAhead()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	FVector Start = GetActorLocation();
+	FVector Forward = GetActorForwardVector();
+	FVector End = Start + Forward * 150.f;
+
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(SoundMonsterDoorCheck), false);
+	Params.AddIgnoredActor(this);
+
+	const bool bHit = World->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_GameTraceChannel1,
+		Params
+	);
+
+	if (!bHit) return;
+
+	AActor* HitActor = Hit.GetActor();
+	if (!HitActor) return;
+
+	if (HitActor->GetClass()->ImplementsInterface(USOHInteractInterface::StaticClass()))
+	{
+		ISOHInteractInterface::Execute_Interact(HitActor, this);
+	}
 }

@@ -77,12 +77,10 @@ void ASOHSoundMonsterAIController::OnPossess(APawn* InPawn)
 
 void ASOHSoundMonsterAIController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	if (!Actor || !BlackboardComp)
-		return;
+	if (!Actor || !BlackboardComp) return;
 
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-	if (Actor != PlayerPawn)
-		return;
+	if (Actor != PlayerPawn) return;
 
 	const bool bSensed = Stimulus.WasSuccessfullySensed();
 
@@ -91,6 +89,17 @@ void ASOHSoundMonsterAIController::HandleTargetPerceptionUpdated(AActor* Actor, 
 
 		BlackboardComp->SetValueAsObject(Key_PlayerActor, PlayerPawn);
 		BlackboardComp->SetValueAsBool(Key_PlayerInRange, true);
+
+		static const FAISenseID HearingSenseID =
+			UAISense::GetSenseID(UAISense_Hearing::StaticClass());
+
+		if (Stimulus.Type == HearingSenseID)
+		{
+			BlackboardComp->SetValueAsVector(
+				TEXT("HeardSoundLocation"),
+				Stimulus.StimulusLocation
+			);
+		}
 	}
 	else
 	{

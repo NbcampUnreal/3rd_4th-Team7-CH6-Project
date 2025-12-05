@@ -91,4 +91,7 @@ public:
 
 	bool HasLineOfSightToTarget(AActor* Target);
 
+	UFUNCTION()
+	void CheckDoorAhead();
+
 };

@@ -30,6 +30,11 @@ void USOHSoundMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	UObject* PlayerObj = BB->GetValueAsObject(ASOHSoundMonsterAIController::Key_PlayerActor);
 	AActor* PlayerActor = Cast<AActor>(PlayerObj);
 
+	if (Monster)
+	{
+		Monster->CheckDoorAhead();
+	}
+
 	if (bPlayerInRange && PlayerActor)
 	{
 		MonsterController->SetFocus(PlayerActor);

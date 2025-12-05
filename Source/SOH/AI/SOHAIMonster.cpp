@@ -139,6 +139,38 @@ bool ASOHAIMonster::HasLineOfSightToTarget(AActor* Target)
     return false;
 }
 
+void ASOHAIMonster::CheckDoorAhead()
+{
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    FVector Start = GetActorLocation();
+    FVector Forward = GetActorForwardVector();
+    FVector End = Start + Forward * 150.f; // 앞쪽 150 거리 확인
+
+    FHitResult Hit;
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(MonsterDoorCheck), false);
+    Params.AddIgnoredActor(this);
+
+    bool bHit = World->LineTraceSingleByChannel(
+        Hit,
+        Start,
+        End,
+        ECC_GameTraceChannel1,
+        Params
+    );
+
+    if (!bHit) return;
+
+    AActor* HitActor = Hit.GetActor();
+    if (!HitActor) return;
+
+    if (HitActor->GetClass()->ImplementsInterface(USOHDoorInterface::StaticClass()))
+    {
+        ISOHDoorInterface::Execute_OpenDoorForAI(HitActor, this);
+    }
+}
+
 void ASOHAIMonster::PlayDetectPlayerSound()
 {
     if (!DetectPlayerSound)

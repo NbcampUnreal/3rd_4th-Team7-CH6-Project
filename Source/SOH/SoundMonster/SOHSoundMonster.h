@@ -57,4 +57,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AI|Combat")
 	void TryAttack();
 
+	UFUNCTION(BlueprintCallable, Category = "AI|Door")
+	void CheckDoorAhead();
+
 };
