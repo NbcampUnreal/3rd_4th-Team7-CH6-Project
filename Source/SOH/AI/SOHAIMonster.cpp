@@ -3,6 +3,7 @@
 #include "Engine/TargetPoint.h"
 #include "SOHAIMonsterController.h"
 #include "AIController.h"
+#include "SOHPatrolRoute.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -40,6 +41,34 @@ ASOHAIMonster::ASOHAIMonster()
 void ASOHAIMonster::BeginPlay()
 {
 	Super::BeginPlay();
+
+    if (!PatrolRouteActor)
+    {
+        TArray<AActor*> FoundRoutes;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASOHPatrolRoute::StaticClass(), FoundRoutes);
+
+        if (FoundRoutes.Num() > 0)
+        {
+            PatrolRouteActor = Cast<ASOHPatrolRoute>(FoundRoutes[0]);
+
+            float MinDist = FLT_MAX;
+            for (AActor* Actor : FoundRoutes)
+            {
+                float Dist = FVector::Dist(GetActorLocation(), Actor->GetActorLocation());
+                if (Dist < MinDist)
+                {
+                    MinDist = Dist;
+                    PatrolRouteActor = Cast<ASOHPatrolRoute>(Actor);
+                }
+            }
+        }
+    }
+
+    if (PatrolTargets.Num() == 0 && PatrolRouteActor)
+    {
+        PatrolTargets = PatrolRouteActor->PatrolPoints;
+    }
+
 	SetMoveSpeed(PatrolSpeed);
 }
 
@@ -130,6 +159,38 @@ bool ASOHAIMonster::HasLineOfSightToTarget(AActor* Target)
     }
 
     return false;
+}
+
+void ASOHAIMonster::CheckDoorAhead()
+{
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    FVector Start = GetActorLocation();
+    FVector Forward = GetActorForwardVector();
+    FVector End = Start + Forward * 150.f; // 앞쪽 150 거리 확인
+
+    FHitResult Hit;
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(MonsterDoorCheck), false);
+    Params.AddIgnoredActor(this);
+
+    bool bHit = World->LineTraceSingleByChannel(
+        Hit,
+        Start,
+        End,
+        ECC_GameTraceChannel1,
+        Params
+    );
+
+    if (!bHit) return;
+
+    AActor* HitActor = Hit.GetActor();
+    if (!HitActor) return;
+
+    if (HitActor->GetClass()->ImplementsInterface(USOHDoorInterface::StaticClass()))
+    {
+        ISOHDoorInterface::Execute_OpenDoorForAI(HitActor, this);
+    }
 }
 
 void ASOHAIMonster::PlayDetectPlayerSound()

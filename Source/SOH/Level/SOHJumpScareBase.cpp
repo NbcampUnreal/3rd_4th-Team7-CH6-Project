@@ -9,6 +9,7 @@
 #include "Animation/AnimInstance.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "GameMode/SOHGameInstance.h"
 
 ASOHJumpScareBase::ASOHJumpScareBase()
 {
@@ -56,6 +57,47 @@ void ASOHJumpScareBase::BeginPlay()
             }
         }
     }
+
+    if (UWorld* World = GetWorld())
+    {
+        if (USOHGameInstance* GI = World->GetGameInstance<USOHGameInstance>())
+        {
+            GI->OnConditionCompleted.AddDynamic(
+                this,
+                &ASOHJumpScareBase::OnConditionCompleted
+            );
+
+            // 초기 상태 체크
+            if (bUseActivationTag && GI->HasCondition(ActivationConditionTag))
+            {
+                bCanActivateByTag = true;
+            }
+            if (bUseDeactivationTag && GI->HasCondition(DeactivationConditionTag))
+            {
+                bCanActivateByTag = false;
+                bAlreadyTriggered = true;
+            }
+        }
+    }
+}
+
+void ASOHJumpScareBase::OnConditionCompleted(FGameplayTag CompletedTag)
+{
+    if (bUseActivationTag && CompletedTag.MatchesTagExact(ActivationConditionTag))
+    {
+        bCanActivateByTag = true;
+    }
+
+    if (bUseDeactivationTag && CompletedTag.MatchesTagExact(DeactivationConditionTag))
+    {
+        bCanActivateByTag = false;
+        bAlreadyTriggered = true;
+
+        if (bIsJumpScarePlaying)
+        {
+            FinishJumpScare();
+        }
+    }
 }
 
 void ASOHJumpScareBase::OnTriggerBeginOverlap(
@@ -72,6 +114,8 @@ void ASOHJumpScareBase::OnTriggerBeginOverlap(
 
     if (!OtherActor) return;
 
+    if (bUseActivationTag && !bCanActivateByTag) return;
+
     if (CachedPlayerCharacter.IsValid() && OtherActor == CachedPlayerCharacter.Get())
     {
         StartJumpScare(OtherActor);
@@ -81,6 +125,8 @@ void ASOHJumpScareBase::OnTriggerBeginOverlap(
 // BP나 다른 C++에서 호출해 점프스퀘어 실행가능
 void ASOHJumpScareBase::StartJumpScare(AActor* TriggeringActor)
 {
+    if (bUseActivationTag && !bCanActivateByTag) return;
+
     if (bAlreadyTriggered && bOneShot) return;
 
     if (bIsJumpScarePlaying) return;

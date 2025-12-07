@@ -7,7 +7,7 @@
 
 USOHSoundMonsterBTService::USOHSoundMonsterBTService()
 {
-	NodeName = TEXT("SoundMonster Patrol Or Chase");
+	NodeName = TEXT("SoundMonster Service");
 	Interval = 0.3f;
 	RandomDeviation = 0.05f;
 }
@@ -17,29 +17,43 @@ void USOHSoundMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
 	ASOHSoundMonsterAIController* MonsterController = Cast<ASOHSoundMonsterAIController>(OwnerComp.GetAIOwner());
-	if (!MonsterController)
-		return;
+	if (!MonsterController) return;
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-	if (!BB)
-		return;
+	if (!BB) return;
 
 	APawn* ControlledPawn = MonsterController->GetPawn();
 	ASOHSoundMonster* Monster = ControlledPawn ? Cast<ASOHSoundMonster>(ControlledPawn) : nullptr;
-	if (!Monster)
-		return;
+	if (!Monster) return;
 
 	const bool bPlayerInRange = BB->GetValueAsBool(ASOHSoundMonsterAIController::Key_PlayerInRange);
 	UObject* PlayerObj = BB->GetValueAsObject(ASOHSoundMonsterAIController::Key_PlayerActor);
 	AActor* PlayerActor = Cast<AActor>(PlayerObj);
+
+	if (Monster)
+	{
+		Monster->CheckDoorAhead();
+	}
 
 	if (bPlayerInRange && PlayerActor)
 	{
 		MonsterController->SetFocus(PlayerActor);
 
 		BB->ClearValue(ASOHSoundMonsterAIController::Key_PatrolTarget);
-		return;
 	}
+
+	bool bInAttackRange = false;
+
+	if (PlayerActor && Monster)
+	{
+		const float DistSq = FVector::DistSquared(
+			PlayerActor->GetActorLocation(),
+			Monster->GetActorLocation()
+		);
+		bInAttackRange = (DistSq <= FMath::Square(Monster->AttackRange));
+	}
+
+	BB->SetValueAsBool(TEXT("AttackRange"), bInAttackRange);
 
 	MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
 

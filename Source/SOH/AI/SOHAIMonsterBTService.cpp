@@ -40,6 +40,11 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 
     bool bInAttackRange = false;
 
+    if (Monster)
+    {
+        Monster->CheckDoorAhead();
+    }
+
     if (PlayerActor)
     {
         const float DistSq = FVector::DistSquared(PlayerActor->GetActorLocation(), Monster->GetActorLocation());

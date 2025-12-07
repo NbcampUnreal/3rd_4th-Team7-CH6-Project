@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "SOHSoundMonster.generated.h"
 
+class ASOHSoundMonsterPatrolRoute;
 class ATargetPoint;
 
 UCLASS()
@@ -18,7 +19,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI|Patrol")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol")
+	ASOHSoundMonsterPatrolRoute* PatrolRouteActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Patrol")
 	TArray<ATargetPoint*> PatrolTargets;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Movement")
@@ -43,5 +47,17 @@ public:
 	void SetMoveSpeed(float NewSpeed);
 
 	bool HasLineOfSightToTarget(AActor* Target);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Combat")
+	float AttackRange = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Combat")
+	float AttackDamage = 20.0f;
+
+	UFUNCTION(BlueprintCallable, Category = "AI|Combat")
+	void TryAttack();
+
+	UFUNCTION(BlueprintCallable, Category = "AI|Door")
+	void CheckDoorAhead();
 
 };

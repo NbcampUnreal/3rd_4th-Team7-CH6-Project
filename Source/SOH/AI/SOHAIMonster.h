@@ -7,6 +7,7 @@
 class ATargetPoint;
 class UAudioComponent;
 class USoundBase;
+class ASOHPatrolRoute;
 
 UCLASS()
 class SOH_API ASOHAIMonster : public ACharacter
@@ -28,6 +29,10 @@ public:
 	void PlayLookAroundMontage();
 
 	//Patrol
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Patrol", meta = (ExposeOnSpawn = "true"))
+	ASOHPatrolRoute* PatrolRouteActor;
+
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "AI|Patrol")
 	TArray<ATargetPoint*> PatrolTargets;
 
@@ -85,5 +90,8 @@ public:
 	//Open Door
 
 	bool HasLineOfSightToTarget(AActor* Target);
+
+	UFUNCTION()
+	void CheckDoorAhead();
 
 };
