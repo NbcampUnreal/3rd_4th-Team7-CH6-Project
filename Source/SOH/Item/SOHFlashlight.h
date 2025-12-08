@@ -67,13 +67,13 @@ private:
     float InitialBattery = 50.f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight|Battery")
-    float DrainRate = 0.5f;
+    float DrainRate = 1.0f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight|Battery")
     float DrainInterval = 1.0f;
 
     UPROPERTY(VisibleInstanceOnly, Category = "Flashlight|Battery")
-    float CurrentBattery = 0.f;
+    float CurrentBattery = 3.0f;
 
     bool IsBatteryEmpty() const { return CurrentBattery <= 0.f; }
 
