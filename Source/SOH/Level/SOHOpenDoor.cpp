@@ -17,6 +17,15 @@ ASOHOpenDoor::ASOHOpenDoor()
 	DoorFrame = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorFrame"));
 	DoorFrame->SetupAttachment(Root);
 
+	if (InteractionRange)
+		InteractionRange->SetupAttachment(Root);
+
+	if (UIAnchor)
+	{
+		UIAnchor->SetupAttachment(DoorFrame);
+		UIAnchor->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
+	}
+
 	if (DoorFrame)
 	{
 		DoorFrame->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
