@@ -24,13 +24,20 @@ void ASOHCabinet::Interact_Implementation(AActor* Caller)
 
 	if (bIsHidden)
 	{
-		ExitCabinet(Player);
+		if (!bIsOpen)
+		{
+			bPendingExit = true;
+			Super::Interact_Implementation(Caller);
+		}
+		else
+		{
+			ExitCabinet(Player);
+		}
 		return;
 	}
 
 	if (!bIsOpen)
 	{
-
 		Super::Interact_Implementation(Caller);
 
 		if (bUseCabinetJumpScare && !bJumpScareTriggered && CabinetJumpScare)
@@ -45,26 +52,41 @@ void ASOHCabinet::Interact_Implementation(AActor* Caller)
 	}
 
 	bPendingEnter = true;
-	Super::Interact_Implementation(Caller);
 }
 
 void ASOHCabinet::NotifyDoorMoveFinished(bool bNowOpen)
 {
 	Super::NotifyDoorMoveFinished(bNowOpen);
 
-	if (bIsMoving) return;
+	bIsOpen = bNowOpen;
+	bIsMoving = false;
 
-	if (bNowOpen && bPendingEnter)
+	if (!bNowOpen)
+	{
+		bPendingEnter = false;
+		bPendingExit = false;
+		return;
+	}
+
+	if (bPendingExit)
+	{
+		bPendingExit = false;
+
+		ASOHPlayerCharacter* Player =
+			Cast<ASOHPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+
+		if (Player) ExitCabinet(Player);
+		return;
+	}
+
+	if (bPendingEnter)
 	{
 		bPendingEnter = false;
 
 		ASOHPlayerCharacter* Player =
 			Cast<ASOHPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 
-		if (Player)
-		{
-			EnterCabinet(Player);
-		}
+		if (Player) EnterCabinet(Player);
 	}
 }
 
@@ -101,4 +123,5 @@ void ASOHCabinet::ExitCabinet(ASOHPlayerCharacter* Player)
 	}
 
 	bIsHidden = false;
+	bIsOpen = false;
 }

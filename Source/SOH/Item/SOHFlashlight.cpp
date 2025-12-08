@@ -7,6 +7,7 @@
 #include "Character/SOHPlayerCharacter.h"
 #include "UI/SOHMessageManager.h"
 #include "Level/SOHJumpScareBase.h"
+#include "Item/SOHItemManager.h"
 
 ASOHFlashlight::ASOHFlashlight()
 {
@@ -211,6 +212,28 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
 
     if (!bAdded)
         return;
+
+    UGameInstance* GI = GetGameInstance();
+    USOHItemManager* ItemMgr = GI ? GI->GetSubsystem<USOHItemManager>() : nullptr;
+
+    FText ItemName = FText::FromName(itemID);
+
+    if (ItemMgr)
+    {
+        if (FSOHItemTableRow* ItemData = ItemMgr->GetItemDataByID(itemID))
+        {
+            ItemName = ItemData->itemName;
+        }
+    }
+
+    if (USOHMessageManager* MsgMgr = Caller->FindComponentByClass<USOHMessageManager>())
+    {
+        FText Msg = FText::Format(
+            FText::FromString(TEXT("{0}을(를) 획득했다.")),
+            ItemName
+        );
+        MsgMgr->ShowMessageText(Msg, 1.5f);
+    }
 
     if (ACharacter* Char = Cast<ACharacter>(Caller))
     {

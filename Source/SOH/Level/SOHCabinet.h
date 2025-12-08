@@ -29,8 +29,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cabinet|State")
 	bool bIsHidden = false;
 
-	bool bPendingEnter = false;
-
 	FVector CachedPlayerLocation;
 	FRotator CachedPlayerRotation;
 
@@ -47,6 +45,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cabinet|JumpScare")
 	bool bJumpScareTriggered = false;
+
+	bool bPendingEnter = false;
+	bool bPendingExit = false;
 
 	virtual void Interact_Implementation(AActor* Caller) override;
 	virtual void NotifyDoorMoveFinished(bool bNowOpen) override;

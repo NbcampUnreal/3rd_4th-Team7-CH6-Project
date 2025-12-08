@@ -2,6 +2,7 @@
 #include "SOHItemManager.h"
 #include "SOHInventoryComponent.h" // 인벤토리 컴포넌트
 #include "Components/StaticMeshComponent.h"
+#include "UI/SOHMessageManager.h"
 
 ASOHBaseItem::ASOHBaseItem()
 {
@@ -110,8 +111,30 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
         if (bSuccess)
         {
             UE_LOG(LogTemp, Log, TEXT("BaseItem: Picked up by %s -> ItemID: %s"), *Caller->GetName(), *itemID.ToString());
-            
-            // 3. 월드에서 삭제
+
+            UGameInstance* gameInst = GetGameInstance();
+            USOHItemManager* itemManager = gameInst ? gameInst->GetSubsystem<USOHItemManager>() : nullptr;
+
+            FText ItemName = FText::FromName(itemID);
+            if (itemManager)
+            {
+                FSOHItemTableRow* itemData = itemManager->GetItemDataByID(itemID);
+                if (itemData)
+                {
+                    ItemName = itemData->itemName;
+                }
+            }
+
+            USOHMessageManager* MessageMgr = Caller->FindComponentByClass<USOHMessageManager>();
+            if (MessageMgr)
+            {
+                FText Msg = FText::Format(
+                    FText::FromString(TEXT("{0}을(를) 획득했다.")),
+                    ItemName
+                );
+                MessageMgr->ShowMessageText(Msg, 1.5f);
+            }
+
             Destroy();
         }
         else
