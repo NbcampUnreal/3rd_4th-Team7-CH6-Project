@@ -143,6 +143,17 @@ void ASOHFlashlight::DrainOnce()
         SetOn(false);
         StopBatteryDrain();
 
+        if (OwnerChar)
+        {
+            if (USOHMessageManager* MsgMgr = OwnerChar->FindComponentByClass<USOHMessageManager>())
+            {
+                MsgMgr->ShowMessageText(
+                    FText::FromString(TEXT("비상 배터리 방전 비상")),
+                    1.5f
+                );
+            }
+        }
+
         return;
     }
     UpdateLightFromBattery();

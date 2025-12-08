@@ -87,6 +87,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayDetectPlayerSound();
 
+	// 도착 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Movement")
+	USoundBase* ArriveAtTargetSound;
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayArriveAtTargetSound();
+
+	// 소리 들었을 때 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Perception")
+	USoundBase* HearNoiseSound;
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayHearNoiseSound();
+
 	//Open Door
 
 	bool HasLineOfSightToTarget(AActor* Target);

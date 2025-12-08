@@ -217,3 +217,31 @@ void ASOHAIMonster::PlayDetectPlayerSound()
         );
     }
 }
+
+void ASOHAIMonster::PlayArriveAtTargetSound()
+{
+    if (!ArriveAtTargetSound) return;
+
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    UGameplayStatics::PlaySoundAtLocation(
+        World,
+        ArriveAtTargetSound,
+        GetActorLocation()
+    );
+}
+
+void ASOHAIMonster::PlayHearNoiseSound()
+{
+    if (!HearNoiseSound) return;
+
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    UGameplayStatics::PlaySoundAtLocation(
+        World,
+        HearNoiseSound,
+        GetActorLocation()
+    );
+}
