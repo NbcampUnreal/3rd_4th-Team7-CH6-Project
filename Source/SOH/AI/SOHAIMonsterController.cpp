@@ -107,6 +107,21 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 
 	ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn());
 
+	static const FAISenseID HearingSenseID = UAISense::GetSenseID(UAISense_Hearing::StaticClass());
+	if (Stimulus.Type == HearingSenseID)
+	{
+		if (bSensed && Monster)
+		{
+			Monster->PlayHearNoiseSound();
+
+			// 나중에 소리들은 곳으로 이동하고 싶을때 BT 저장용
+			/*BlackboardComp->SetValueAsVector(Key_LastKnownLocation, Stimulus.StimulusLocation);
+			BlackboardComp->SetValueAsBool(Key_IsSearching, true);*/
+		}
+
+		return;
+	}
+
 	if (bSensed)
 	{
 		if (!bPrevSensedPlayer && Monster)
@@ -169,6 +184,8 @@ void ASOHAIMonsterController::OnMoveCompleted(FAIRequestID RequestID, const FPat
 		{
 			if (ASOHAIMonster* Monster = Cast<ASOHAIMonster>(GetPawn()))
 			{
+				Monster->PlayArriveAtTargetSound();
+
 				Monster->PlayLookAroundMontage();
 			}
 		}
