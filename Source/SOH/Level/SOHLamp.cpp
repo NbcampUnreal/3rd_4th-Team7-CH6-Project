@@ -41,6 +41,11 @@ void ASOHLamp::TurnOn()
 {
     bIsOn = true;
 
+    if (LampMaterialInstance)
+    {
+        LampMaterialInstance->SetScalarParameterValue(TEXT("Emissive_Control"), 0.09f);
+    }
+
     if (RectLight)
     {
         RectLight->SetVisibility(true);
@@ -50,6 +55,11 @@ void ASOHLamp::TurnOn()
 void ASOHLamp::TurnOff()
 {
     bIsOn = false;
+
+    if (LampMaterialInstance)
+    {
+        LampMaterialInstance->SetScalarParameterValue(TEXT("Emissive_Control"), 0.0f);
+    }
 
     if (RectLight)
     {
