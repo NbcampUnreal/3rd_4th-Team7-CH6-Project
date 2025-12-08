@@ -1,53 +1,127 @@
 #include "SOHCabinet.h"
 #include "SOH/Character/SOHPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
+#include "SOHJumpScareBase.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/Character.h"
 
 ASOHCabinet::ASOHCabinet()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	HidePoint = CreateDefaultSubobject<USceneComponent>(TEXT("HidePoint"));
+	HidePoint->SetupAttachment(RootComponent);
+
+	HideCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("HideCamera"));
+	HideCamera->SetupAttachment(HidePoint);
 }
 
 void ASOHCabinet::Interact_Implementation(AActor* Caller)
 {
-	if (bIsMoving) return;
-
 	ASOHPlayerCharacter* Player = Cast<ASOHPlayerCharacter>(Caller);
-	if (!Player)
-	{
-		Super::Interact_Implementation(Caller);
-		return;
-	}
+	if (!Player || bIsMoving) return;
 
 	if (bIsHidden)
 	{
 		if (!bIsOpen)
 		{
-			bIsMoving = true;
-
-			if (OpenSound)
-				UGameplayStatics::PlaySoundAtLocation(this, OpenSound, GetActorLocation());
-
-			BP_OpenDoor(Caller);
+			bPendingExit = true;
+			Super::Interact_Implementation(Caller);
 		}
-
-		if (HideExitMontage)
+		else
 		{
-			Player->PlayUpperBodyMontage(HideExitMontage);
+			ExitCabinet(Player);
 		}
-
-		bIsHidden = false;
 		return;
 	}
 
-	const bool bWasOpen = bIsOpen;
-
-	Super::Interact_Implementation(Caller);
-
-	if (!bWasOpen)
+	if (!bIsOpen)
 	{
-		if (HideEnterMontage)
-			Player->PlayUpperBodyMontage(HideEnterMontage);
+		Super::Interact_Implementation(Caller);
 
-		bIsHidden = true;
+		if (bUseCabinetJumpScare && !bJumpScareTriggered && CabinetJumpScare)
+		{
+			CabinetJumpScare->StartJumpScare(Player);
+			bJumpScareTriggered = true;
+			return;
+		}
+
+		bPendingEnter = true;
+		return;
 	}
+
+	bPendingEnter = true;
+}
+
+void ASOHCabinet::NotifyDoorMoveFinished(bool bNowOpen)
+{
+	Super::NotifyDoorMoveFinished(bNowOpen);
+
+	bIsOpen = bNowOpen;
+	bIsMoving = false;
+
+	if (!bNowOpen)
+	{
+		bPendingEnter = false;
+		bPendingExit = false;
+		return;
+	}
+
+	if (bPendingExit)
+	{
+		bPendingExit = false;
+
+		ASOHPlayerCharacter* Player =
+			Cast<ASOHPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+
+		if (Player) ExitCabinet(Player);
+		return;
+	}
+
+	if (bPendingEnter)
+	{
+		bPendingEnter = false;
+
+		ASOHPlayerCharacter* Player =
+			Cast<ASOHPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+
+		if (Player) EnterCabinet(Player);
+	}
+}
+
+void ASOHCabinet::EnterCabinet(ASOHPlayerCharacter* Player)
+{
+	if (!Player || !HidePoint) return;
+
+	CachedPlayerLocation = Player->GetActorLocation();
+	CachedPlayerRotation = Player->GetActorRotation();
+
+	Player->SetActorLocation(HidePoint->GetComponentLocation());
+	Player->SetActorRotation(HidePoint->GetComponentRotation());
+
+	if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
+	{
+		FViewTargetTransitionParams Params;
+		Params.BlendTime = 0.3f;
+		PC->SetViewTarget(this, Params);
+	}
+
+	bIsHidden = true;
+}
+
+void ASOHCabinet::ExitCabinet(ASOHPlayerCharacter* Player)
+{
+	Player->SetActorLocation(CachedPlayerLocation);
+	Player->SetActorRotation(CachedPlayerRotation);
+
+	if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
+	{
+		FViewTargetTransitionParams Params;
+		Params.BlendTime = 0.3f;
+		PC->SetViewTarget(Player, Params);
+	}
+
+	bIsHidden = false;
+	bIsOpen = false;
 }

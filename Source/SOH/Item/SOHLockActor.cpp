@@ -2,6 +2,7 @@
 #include "SOHInventoryComponent.h" // 인벤토리 확인
 #include "Level/SOHSlidingDoor.h"
 #include "Level/SOHOpenDoor.h"
+#include "UI/SOHMessageManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
 
@@ -97,6 +98,13 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[Lock] 실패! 열쇠(%s)가 없습니다."), *RequiredKeyID.ToString());
+			if (USOHMessageManager* MsgMgr = Caller->FindComponentByClass<USOHMessageManager>())
+			{
+				MsgMgr->ShowMessageText(
+					FText::FromString(TEXT("열쇠가 필요하다.")),
+					1.5f
+				);
+			}
 		}
 	}
 	else

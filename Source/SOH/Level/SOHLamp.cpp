@@ -12,47 +12,57 @@ ASOHLamp::ASOHLamp()
     RectLight = CreateDefaultSubobject<URectLightComponent>(TEXT("RectLight"));
     RectLight->SetupAttachment(RootComponent);
 
-    bIsOn = true;
+    bIsOn = false;
 }
 
 void ASOHLamp::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (RectLight)
-    {
-        bIsOn = RectLight->IsVisible();
-    }
+    bIsOn = bStartOn;    
+    UpdateLightState();
 }
 
 void ASOHLamp::ToggleLight()
 {
-    if (bIsOn)
-    {
-        TurnOff();
-    }
-    else
-    {
-        TurnOn();
-    }
+    bIsOn = !bIsOn;
+    UpdateLightState();
 }
 
 void ASOHLamp::TurnOn()
 {
     bIsOn = true;
-
-    if (RectLight)
-    {
-        RectLight->SetVisibility(true);
-    }
+    UpdateLightState();
 }
 
 void ASOHLamp::TurnOff()
 {
     bIsOn = false;
 
+    UpdateLightState();
+}
+
+void ASOHLamp::UpdateLightState()
+{
+    // Emissive 제어
+    if (LampMaterialInstance)
+    {
+        const float EmissiveValue = bIsOn ? EmissiveOn : EmissiveOff;
+        LampMaterialInstance->SetScalarParameterValue(TEXT("Emissive_Control"), EmissiveValue);
+    }
+
+    // RectLight 제어
     if (RectLight)
     {
-        RectLight->SetVisibility(false);
+        if (bIsOn)
+        {
+            RectLight->SetVisibility(true);
+            RectLight->SetIntensity(LightIntensity);
+        }
+        else
+        {
+            RectLight->SetVisibility(false);
+            RectLight->SetIntensity(0.0f);
+        }
     }
 }

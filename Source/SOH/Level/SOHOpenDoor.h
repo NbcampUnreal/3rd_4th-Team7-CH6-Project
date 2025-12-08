@@ -57,7 +57,7 @@ public:
 	void NotifyDoorMoveStarted();
 
 	UFUNCTION(BlueprintCallable, Category = "Door")
-	void NotifyDoorMoveFinished(bool bNowOpen);
+	virtual void NotifyDoorMoveFinished(bool bNowOpen);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door|Lock")
 	ASOHLockActor* LinkedLockActor;

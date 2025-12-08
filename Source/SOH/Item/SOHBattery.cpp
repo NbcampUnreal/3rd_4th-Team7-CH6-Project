@@ -2,6 +2,8 @@
 #include "SOHFlashlight.h"
 #include "Character/SOHPlayerCharacter.h"
 #include "SOHInventoryComponent.h"
+#include "Item/SOHItemManager.h"
+#include "UI/SOHMessageManager.h"
 
 ASOHBattery::ASOHBattery()
 {
@@ -16,6 +18,28 @@ void ASOHBattery::Interact_Implementation(AActor* Caller)
     const bool bAdded = InventoryComp ? InventoryComp->AddToInventory(itemID, 1) : false;
 
     if (!bAdded) return;
+
+    UGameInstance* GI = GetGameInstance();
+    USOHItemManager* ItemMgr = GI ? GI->GetSubsystem<USOHItemManager>() : nullptr;
+
+    FText ItemName = FText::FromName(itemID);
+
+    if (ItemMgr)
+    {
+        if (FSOHItemTableRow* ItemData = ItemMgr->GetItemDataByID(itemID))
+        {
+            ItemName = ItemData->itemName;
+        }
+    }
+
+    if (USOHMessageManager* MsgMgr = Caller->FindComponentByClass<USOHMessageManager>())
+    {
+        FText Msg = FText::Format(
+            FText::FromString(TEXT("{0}을(를) 획득했다.")),
+            ItemName
+        );
+        MsgMgr->ShowMessageText(Msg, 1.5f);
+    }
 
     Destroy();
 }

@@ -6,6 +6,7 @@
 
 class UStaticMeshComponent;
 class URectLightComponent;
+class UMaterialInstanceDynamic;
 
 UCLASS()
 class SOH_API ASOHLamp : public AActor
@@ -35,6 +36,23 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     URectLightComponent* RectLight;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lamp")
+    UMaterialInstanceDynamic* LampMaterialInstance;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lamp")
     bool bIsOn;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Light")
+    bool bStartOn = false;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Light")
+    float EmissiveOn = 0.09f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Light")
+    float EmissiveOff = 0.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Light")
+    float LightIntensity = 5000.0f;
+    
+    void UpdateLightState();
 };

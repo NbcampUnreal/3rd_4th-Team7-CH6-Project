@@ -4,6 +4,12 @@
 #include "Level/SOHOpenDoor.h"
 #include "SOHCabinet.generated.h"
 
+class ASOHJumpScareBase;
+class UCameraComponent;
+class USceneComponent;
+class ASOHPlayerCharacter;
+
+
 UCLASS()
 class SOH_API ASOHCabinet : public ASOHOpenDoor
 {
@@ -14,15 +20,37 @@ public:
 	ASOHCabinet();
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cabinet")
+	USceneComponent* HidePoint;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cabinet|Animation")
-	UAnimMontage* HideEnterMontage = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cabinet|Animation")
-	UAnimMontage* HideExitMontage = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cabinet")
+	UCameraComponent* HideCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cabinet|State")
 	bool bIsHidden = false;
 
+	FVector CachedPlayerLocation;
+	FRotator CachedPlayerRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cabinet|JumpScare")
+	bool bUseCabinetJumpScare = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cabinet|JumpScare",
+		meta = (EditCondition = "bUseCabinetJumpScare"))
+	ASOHJumpScareBase* CabinetJumpScare = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cabinet|JumpScare",
+		meta = (EditCondition = "bUseCabinetJumpScare"))
+	bool bJumpScareOnlyOnce = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cabinet|JumpScare")
+	bool bJumpScareTriggered = false;
+
+	bool bPendingEnter = false;
+	bool bPendingExit = false;
+
 	virtual void Interact_Implementation(AActor* Caller) override;
+	virtual void NotifyDoorMoveFinished(bool bNowOpen) override;
+	void EnterCabinet(ASOHPlayerCharacter* Player);
+	void ExitCabinet(ASOHPlayerCharacter* Player);
 };
