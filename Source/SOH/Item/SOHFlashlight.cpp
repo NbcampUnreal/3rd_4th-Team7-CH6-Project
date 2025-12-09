@@ -88,6 +88,7 @@ void ASOHFlashlight::SetEquipped(ACharacter* NewOwner)
         itemMesh->SetSimulatePhysics(false);
         itemMesh->SetEnableGravity(false);
         itemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        itemMesh->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
     }
 
     AttachToComponent(
