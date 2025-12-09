@@ -17,6 +17,12 @@ class SOH_API ASOHSlidingDoor : public ASOHInteractableActor
 public:
 	ASOHSlidingDoor();
 
+	UFUNCTION(BlueprintCallable, Category = "Door|Lock")
+	void LockAndCloseDoor(AActor* Caller);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsArtroomPlay = false;
+
 protected:
 	virtual void BeginPlay() override;
 

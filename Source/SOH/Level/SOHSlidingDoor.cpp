@@ -128,3 +128,25 @@ void ASOHSlidingDoor::UnlockSlidingDoor(AActor* Caller)
 
 	bLocked = false;
 }
+
+void ASOHSlidingDoor::LockAndCloseDoor(AActor* Caller)
+{
+	if (bLocked) return;
+
+	bLocked = true;
+
+	if (!bIsOpen || bIsMoving)
+	{
+		BP_OnLocked(Caller);
+		return;
+	}
+
+	bIsMoving = true;
+
+	//if (CloseSound)
+	//{
+	//	UGameplayStatics::PlaySoundAtLocation(this, CloseSound, GetActorLocation());
+	//}
+
+	BP_CloseDoor(Caller);
+}
