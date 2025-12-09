@@ -580,3 +580,68 @@ void ASOHPlayerCharacter::CallGameModeOnPlayerDied()
 		}
 	}
 }
+
+void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
+{
+	if (bIsUIOpen && CurrentOpenUI && CurrentUIType != UIType)
+	{
+		// 기존 UI 닫기
+		CloseUI();
+	}
+
+	if (NewUI)
+	{
+		CurrentOpenUI = NewUI;
+		CurrentUIType = UIType;
+		CurrentOpenUI->AddToViewport();
+		bIsUIOpen = true;
+
+
+		if (UIType == FName("Pause") || UIType == FName("Inventory") || UIType == FName("Map"))
+		{
+			UGameplayStatics::SetGlobalTimeDilation(this, 0.0f);
+		}
+
+		// 입력 모드 변경
+		if (APlayerController* PC = GetController<APlayerController>())
+		{
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(CurrentOpenUI->TakeWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+	}
+}
+
+void ASOHPlayerCharacter::CloseUI()
+{
+	if (CurrentOpenUI)
+	{
+		CurrentOpenUI->RemoveFromParent();
+		CurrentOpenUI = nullptr;
+	}
+
+	// 시간 재개
+	UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
+
+	CurrentUIType = NAME_None;
+	bIsUIOpen = false;
+
+	// 입력 모드 복구
+	if (APlayerController* PC = GetController<APlayerController>())
+	{
+		PC->SetInputMode(FInputModeGameOnly());
+		PC->bShowMouseCursor = false;
+	}
+}
+
+// 특정 UI만 닫기
+bool ASOHPlayerCharacter::CloseSpecificUI(FName UIType)
+{
+	if (CurrentUIType == UIType)
+	{
+		CloseUI();
+		return true;
+	}
+	return false;
+}

@@ -152,6 +152,29 @@ protected:
 
 	void TraceForInteractable();
 	
+	// UI 상태 관리
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	bool bIsUIOpen = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	UUserWidget* CurrentOpenUI = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	FName CurrentUIType = NAME_None;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void OpenUI(UUserWidget* NewUI, FName UIType);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool CloseSpecificUI(FName UIType);
+
+	// UI 열기/닫기 함수
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool CanOpenUI() const { return !bIsUIOpen; }
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void CloseUI();
+
 	// 상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
 	float TraceDistance = 150.f;
