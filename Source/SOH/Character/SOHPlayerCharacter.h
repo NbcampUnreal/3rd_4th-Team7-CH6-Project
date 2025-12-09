@@ -154,8 +154,11 @@ protected:
 	
 	// 상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
-	float TraceDistance = 300.f;
+	float TraceDistance = 150.f;
 	
+	UPROPERTY(EditAnywhere, Category = "Interaction")
+	float SphereTraceRadius = 15.f; // 에디터에서 조절 가능
+
 public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

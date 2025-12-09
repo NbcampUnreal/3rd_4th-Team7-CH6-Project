@@ -99,26 +99,59 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 	FVector Start = Camera->GetComponentLocation();
 	FVector End = Start + (Camera->GetForwardVector() * TraceDistance);
+	FVector CameraForward = Camera->GetForwardVector();
 
-	FHitResult HitResult;
+	TArray<FHitResult> HitResults;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	AActor* HitActor = nullptr;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_GameTraceChannel3, Params);
+	// Sphere Trace Multi로 변경 (여러 액터 감지)
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		HitResults,
+		Start,
+		End,
+		FQuat::Identity,
+		ECC_GameTraceChannel3,
+		FCollisionShape::MakeSphere(50.f), // 반지름 조절 가능
+		Params
+	);
+
+	AActor* BestActor = nullptr;
+	float BestDotProduct = -1.f; // 가장 화면 중앙에 가까운 것
+
 	if (bHit)
 	{
-		HitActor = HitResult.GetActor();
+		// 여러 액터 중 화면 중앙에 가장 가까운 것 선택
+		for (const FHitResult& Hit : HitResults)
+		{
+			AActor* HitActor = Hit.GetActor();
+			if (!HitActor || !HitActor->Implements<USOHInteractInterface>())
+				continue;
 
-		bUIHit = bHit;
-	}
-	else
-	{
-		bUIHit = false;
+			// 카메라에서 액터로의 방향 벡터
+			FVector ToActor = (HitActor->GetActorLocation() - Start).GetSafeNormal();
+
+			// Dot Product로 화면 중앙 근접도 계산 (1에 가까울수록 정중앙)
+			float DotProduct = FVector::DotProduct(CameraForward, ToActor);
+
+			float Distance = FVector::Dist(Start, HitActor->GetActorLocation());
+			float Score = DotProduct / (Distance * 0.001f); // 거리 패널티
+
+			// 가장 중앙에 가까운 액터 선택
+			if (DotProduct > BestDotProduct)
+			{
+				BestDotProduct = DotProduct;
+				BestActor = HitActor;
+			}
+		}
 	}
 
-	if (LastHighlightedItem != HitActor)
+	bUIHit = (BestActor != nullptr);
+
+	// 이전에 하이라이트된 액터와 다르면 업데이트
+	if (LastHighlightedItem != BestActor)
 	{
+		// 이전 액터 하이라이트 제거
 		if (LastHighlightedItem)
 		{
 			if (LastHighlightedItem->Implements<USOHInteractInterface>())
@@ -126,13 +159,16 @@ void ASOHPlayerCharacter::TraceForInteractable()
 				ISOHInteractInterface::Execute_CanReceiveTrace(LastHighlightedItem, this, false);
 			}
 		}
-		LastHighlightedItem = nullptr; 
-		if (HitActor && HitActor->Implements<USOHInteractInterface>())
+
+		LastHighlightedItem = nullptr;
+
+		// 새 액터 하이라이트
+		if (BestActor)
 		{
-			ISOHInteractInterface::Execute_CanReceiveTrace(HitActor, this, true);
-			LastHighlightedItem = HitActor;
+			ISOHInteractInterface::Execute_CanReceiveTrace(BestActor, this, true);
+			LastHighlightedItem = BestActor;
 		}
-	} 
+	}
 }
 
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
