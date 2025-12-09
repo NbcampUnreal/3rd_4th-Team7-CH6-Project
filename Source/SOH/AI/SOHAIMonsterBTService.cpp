@@ -117,7 +117,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         if (!(bHasLK && bTimerActive))
         {
             BB->SetValueAsVector(TEXT("LastKnownLocation"), PlayerActor->GetActorLocation());
-            BB->SetValueAsFloat(TEXT("SearchUntilTime"), Now + 30.f);
+            BB->SetValueAsFloat(TEXT("SearchUntilTime"), Now + 15.f);
             BB->SetValueAsBool(TEXT("IsSearching"), true);
             MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
         }
