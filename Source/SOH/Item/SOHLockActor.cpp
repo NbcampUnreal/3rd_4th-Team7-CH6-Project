@@ -11,6 +11,15 @@ ASOHLockActor::ASOHLockActor()
 	// 메쉬 생성
 	LockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LockMesh"));
 	RootComponent = LockMesh;
+
+	if (InteractionRange)
+		InteractionRange->SetupAttachment(LockMesh);
+
+	if (UIAnchor)
+	{
+		UIAnchor->SetupAttachment(LockMesh);
+		UIAnchor->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
+	}
     
 	// 자물쇠는 물리 적용 X (고정된 물체)
 	LockMesh->SetSimulatePhysics(false);

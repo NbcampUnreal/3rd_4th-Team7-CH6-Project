@@ -17,6 +17,15 @@ ASOHSlidingDoor::ASOHSlidingDoor()
 	DoorFrame = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorFrame"));
 	DoorFrame->SetupAttachment(Root);
 
+	if (InteractionRange)
+		InteractionRange->SetupAttachment(Root);
+
+	if (UIAnchor)
+	{
+		UIAnchor->SetupAttachment(DoorFrame);
+		UIAnchor->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
+	}
+
 	if (DoorFrame)
 	{
 		DoorFrame->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
@@ -118,4 +127,26 @@ void ASOHSlidingDoor::UnlockSlidingDoor(AActor* Caller)
 	}
 
 	bLocked = false;
+}
+
+void ASOHSlidingDoor::LockAndCloseDoor(AActor* Caller)
+{
+	if (bLocked) return;
+
+	bLocked = true;
+
+	if (!bIsOpen || bIsMoving)
+	{
+		BP_OnLocked(Caller);
+		return;
+	}
+
+	bIsMoving = true;
+
+	//if (CloseSound)
+	//{
+	//	UGameplayStatics::PlaySoundAtLocation(this, CloseSound, GetActorLocation());
+	//}
+
+	BP_CloseDoor(Caller);
 }

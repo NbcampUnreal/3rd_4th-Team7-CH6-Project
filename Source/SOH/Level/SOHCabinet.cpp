@@ -13,6 +13,15 @@ ASOHCabinet::ASOHCabinet()
 	HidePoint = CreateDefaultSubobject<USceneComponent>(TEXT("HidePoint"));
 	HidePoint->SetupAttachment(RootComponent);
 
+	if (InteractionRange)
+		InteractionRange->SetupAttachment(HidePoint);
+
+	if (UIAnchor)
+	{
+		UIAnchor->SetupAttachment(DoorFrame);
+		UIAnchor->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
+	}
+
 	HideCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("HideCamera"));
 	HideCamera->SetupAttachment(HidePoint);
 }

@@ -18,8 +18,8 @@ protected:
 
 	virtual void Interact_Implementation(AActor* Caller) override;
 
-	// 다른 액터가 이 아이템과 겹치기 시작할 때 호출됨 (테스트 용으로 겹쳐지면 아이템 삭제 필요없을 때 주석 또는 삭제)
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	//// 다른 액터가 이 아이템과 겹치기 시작할 때 호출됨 (테스트 용으로 겹쳐지면 아이템 삭제 필요없을 때 주석 또는 삭제)
+	//virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	
 public:
 	// 아이템 초기화 함수

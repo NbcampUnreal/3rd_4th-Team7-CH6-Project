@@ -152,10 +152,36 @@ protected:
 
 	void TraceForInteractable();
 	
+	// UI 상태 관리
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	bool bIsUIOpen = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	UUserWidget* CurrentOpenUI = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	FName CurrentUIType = NAME_None;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void OpenUI(UUserWidget* NewUI, FName UIType);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool CloseSpecificUI(FName UIType);
+
+	// UI 열기/닫기 함수
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	bool CanOpenUI() const { return !bIsUIOpen; }
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void CloseUI();
+
 	// 상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
-	float TraceDistance = 300.f;
+	float TraceDistance = 150.f;
 	
+	UPROPERTY(EditAnywhere, Category = "Interaction")
+	float SphereTraceRadius = 15.f; // 에디터에서 조절 가능
+
 public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

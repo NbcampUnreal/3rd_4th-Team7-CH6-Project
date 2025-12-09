@@ -2,54 +2,60 @@
 
 #include "CoreMinimal.h"
 #include "Interaction/SOHInteractableActor.h"
-#include "Components/TimelineComponent.h"
 #include "SOHBust.generated.h"
+
+// 회전 이벤트 델리게이트
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBustRotated);
+
+class UTimelineComponent;
+class UCurveFloat;
 
 UCLASS()
 class SOH_API ASOHBust : public ASOHInteractableActor
 {
 	GENERATED_BODY()
 
-public:    
+public:
 	ASOHBust();
 
-	// 인터랙트 오버라이드
 	virtual void Interact_Implementation(AActor* Caller) override;
 
-	// 현재 Position (누적 회전)
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Bust")
+	// 퍼즐 매니저가 읽을 수 있어야 하므로 public
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Position = 0;
+
+	// 퍼즐 매니저에서 바인딩함
+	UPROPERTY(BlueprintAssignable)
+	FBustRotated OnBustRotated;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Puzzle")
+	bool bIsLocked = false;
+
 protected:
-	// BeginPlay 오버라이드
 	virtual void BeginPlay() override;
 
-	// 회전할 메쉬
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* StaticMesh;
 
-
-	// 한 번 Position당 회전할 각도
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Bust")
-	float YawPerPosition = 90.f;
-
-private:
-	// 시작 회전값 (타임라인 기준)
-	UPROPERTY()
-	FRotator StartRotation;
-
-	// 타임라인 컴포넌트
 	UPROPERTY()
 	UTimelineComponent* RotationTimeline;
 
-	// 타임라인에 사용할 플로트 커브
-	UPROPERTY(EditAnywhere, Category = "Rotation")
+	UPROPERTY(EditAnywhere)
 	UCurveFloat* RotationCurve;
 
-	// 타임라인 업데이트 델리게이트
 	UFUNCTION()
-	void HandleTimelineUpdate(float Alpha);
+	void HandleTimelineUpdate(float Value);
 
-	// 타임라인 종료 후 호출
 	UFUNCTION()
 	void HandleTimelineFinished();
+
+	float YawPerPosition = 90.f;
+
+	UPROPERTY(EditAnywhere, Category="Sound")
+	USoundBase* RotateSound;
+
+private:
+	// 보간용 시작/목표 회전 값
+	FRotator StartRotation;
+	FRotator TargetRotation;
 };
