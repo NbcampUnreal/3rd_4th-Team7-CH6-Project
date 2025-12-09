@@ -180,17 +180,18 @@ bool ASOHFlashlight::UseBatteryItem(float ChargeAmount)
 
     UpdateLightFromBattery();
 
-    if (CurrentBattery > Before)
-    {
-        if (bEquipped && !bOn && CurrentBattery > 0.f)
-        {
-            SetOn(true);
-        }
-        else if (bOn && bWasEmpty && CurrentBattery > 0.f)
-        {
-            StartBatteryDrain();
-        }
-    }
+    //if (CurrentBattery > Before)
+    //{
+    //    if (bEquipped && !bOn && CurrentBattery > 0.f)
+    //    {
+    //        SetOn(true);
+    //    }
+    //    else if (bOn && bWasEmpty && CurrentBattery > 0.f)
+    //    {
+    //        StartBatteryDrain();
+    //    }
+    //}
+    StartBatteryDrain();
 
     return CurrentBattery > Before;
 }
