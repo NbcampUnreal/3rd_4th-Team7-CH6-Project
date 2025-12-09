@@ -97,50 +97,49 @@ void ASOHPlayerCharacter::TraceForInteractable()
 	UCameraComponent* Camera = FindComponentByClass<UCameraComponent>();
 	if (!Camera) return;
 
-	FVector Start = Camera->GetComponentLocation();
-	FVector End = Start + (Camera->GetForwardVector() * TraceDistance);
+	// ========== 하이브리드: 캐릭터 앞에서 시작, 카메라 방향 사용 ==========
 	FVector CameraForward = Camera->GetForwardVector();
+	FVector Start = GetActorLocation() + (CameraForward * 100.f) + FVector(0, 0, 90.f);
+	FVector End = Start + (CameraForward * TraceDistance);
+	// ====================================================================
 
 	TArray<FHitResult> HitResults;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	// Sphere Trace Multi로 변경 (여러 액터 감지)
 	bool bHit = GetWorld()->SweepMultiByChannel(
 		HitResults,
 		Start,
 		End,
 		FQuat::Identity,
 		ECC_GameTraceChannel3,
-		FCollisionShape::MakeSphere(50.f), // 반지름 조절 가능
+		FCollisionShape::MakeSphere(50.f),
 		Params
 	);
+	
+	//디버그
+	//DrawDebugSphere(GetWorld(), Start, 50.f, 12, FColor::Green, false, 0.1f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0.1f);
 
 	AActor* BestActor = nullptr;
-	float BestDotProduct = -1.f; // 가장 화면 중앙에 가까운 것
+	float BestScore = -999999.f;
 
 	if (bHit)
 	{
-		// 여러 액터 중 화면 중앙에 가장 가까운 것 선택
 		for (const FHitResult& Hit : HitResults)
 		{
 			AActor* HitActor = Hit.GetActor();
 			if (!HitActor || !HitActor->Implements<USOHInteractInterface>())
 				continue;
 
-			// 카메라에서 액터로의 방향 벡터
 			FVector ToActor = (HitActor->GetActorLocation() - Start).GetSafeNormal();
-
-			// Dot Product로 화면 중앙 근접도 계산 (1에 가까울수록 정중앙)
 			float DotProduct = FVector::DotProduct(CameraForward, ToActor);
-
 			float Distance = FVector::Dist(Start, HitActor->GetActorLocation());
-			float Score = DotProduct / (Distance * 0.001f); // 거리 패널티
+			float Score = DotProduct / (Distance * 0.001f);
 
-			// 가장 중앙에 가까운 액터 선택
-			if (DotProduct > BestDotProduct)
+			if (Score > BestScore)
 			{
-				BestDotProduct = DotProduct;
+				BestScore = Score;
 				BestActor = HitActor;
 			}
 		}
@@ -148,10 +147,8 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 	bUIHit = (BestActor != nullptr);
 
-	// 이전에 하이라이트된 액터와 다르면 업데이트
 	if (LastHighlightedItem != BestActor)
 	{
-		// 이전 액터 하이라이트 제거
 		if (LastHighlightedItem)
 		{
 			if (LastHighlightedItem->Implements<USOHInteractInterface>())
@@ -162,7 +159,6 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 		LastHighlightedItem = nullptr;
 
-		// 새 액터 하이라이트
 		if (BestActor)
 		{
 			ISOHInteractInterface::Execute_CanReceiveTrace(BestActor, this, true);
@@ -596,7 +592,7 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 		CurrentOpenUI->AddToViewport();
 		bIsUIOpen = true;
 
-
+		// Pause UI일 때만 시간 정지
 		if (UIType == FName("Pause") || UIType == FName("Inventory") || UIType == FName("Map"))
 		{
 			UGameplayStatics::SetGlobalTimeDilation(this, 0.0f);
