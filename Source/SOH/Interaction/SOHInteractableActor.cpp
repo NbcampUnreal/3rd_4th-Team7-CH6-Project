@@ -35,24 +35,23 @@ void ASOHInteractableActor::BeginPlay()
 
 	if (InteractionWidget)
 	{
-		if (bEnableProximityText && InteractionWidgetClass)
+		// Widget은 항상 꺼진 상태로 시작 (Trace에서만 제어)
+		InteractionWidget->SetVisibility(false);
+
+		if (InteractionWidgetClass)
 		{
 			InteractionWidget->SetWidgetClass(InteractionWidgetClass);
 			InteractionWidget->SetDrawAtDesiredSize(true);
 			InteractionWidget->SetDrawSize(WidgetSize);
-			InteractionWidget->SetVisibility(false);
-		}
-		else
-		{
-			InteractionWidget->SetVisibility(false);
 		}
 	}
 
-	if (InteractionRange)
-	{
-		InteractionRange->OnComponentBeginOverlap.AddDynamic(this, &ASOHInteractableActor::OnPlayerEnter);
-		InteractionRange->OnComponentEndOverlap.AddDynamic(this, &ASOHInteractableActor::OnPlayerExit);
-	}
+	// Overlap 이벤트 바인딩 주석 처리 (더 이상 사용 안 함)
+	// if (InteractionRange)
+	// {
+	// 	InteractionRange->OnComponentBeginOverlap.AddDynamic(this, &ASOHInteractableActor::OnPlayerEnter);
+	// 	InteractionRange->OnComponentEndOverlap.AddDynamic(this, &ASOHInteractableActor::OnPlayerExit);
+	// }
 }
 
 void ASOHInteractableActor::OnPlayerEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -88,14 +87,17 @@ bool ASOHInteractableActor::CanReceiveTrace_Implementation(AActor* Caller, bool 
 	if (bCanInteract)
 	{
 		ApplyOverlayMaterial(OutlineMaterial);
+		ShowInteractWidget(); // UI도 여기서 표시
 		return true;
 	}
 	else
 	{
 		ApplyOverlayMaterial(nullptr);
+		HideInteractWidget(); // UI도 여기서 숨김
 		return false;
 	}
 }
+
 void ASOHInteractableActor::ShowInteractWidget()
 {
 	 if (InteractionWidget)
