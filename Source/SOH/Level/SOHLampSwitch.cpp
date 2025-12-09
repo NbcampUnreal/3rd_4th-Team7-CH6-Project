@@ -8,6 +8,15 @@ ASOHLampSwitch::ASOHLampSwitch()
 
     SwitchMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwitchMesh"));
     SwitchMesh->SetupAttachment(RootComponent);
+
+    if (InteractionRange)
+        InteractionRange->SetupAttachment(SwitchMesh);
+
+    if (UIAnchor)
+    {
+        UIAnchor->SetupAttachment(SwitchMesh);
+        UIAnchor->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
+    }
 }
 
 void ASOHLampSwitch::BeginPlay()

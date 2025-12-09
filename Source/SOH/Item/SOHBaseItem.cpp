@@ -10,6 +10,12 @@ ASOHBaseItem::ASOHBaseItem()
     itemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
     RootComponent = itemMesh;
 
+    if (InteractionRange)
+        InteractionRange->SetupAttachment(itemMesh);
+
+    if (InteractionWidget)
+        InteractionWidget->SetupAttachment(itemMesh);
+
     // 2. 물리 및 충돌 설정
     itemMesh->SetSimulatePhysics(true);
     itemMesh->SetCollisionProfileName(TEXT("PhysicsActor"));
@@ -149,31 +155,31 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
 }
 
 // 테스트 코드
-void ASOHBaseItem::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-    Super::NotifyActorBeginOverlap(OtherActor);
-
-    // 1. 부딪힌 대상(OtherActor)이 유효한지, 그리고 나 자신(this)이 아닌지 확인
-    if (OtherActor && OtherActor != this)
-    {
-        // 2. 부딪힌 대상에게 '인벤토리 컴포넌트'가 있는지 찾아본다.
-        // (FindComponentByClass는 액터에 붙은 컴포넌트를 검색해 줍니다)
-        USOHInventoryComponent* InventoryComp = OtherActor->FindComponentByClass<USOHInventoryComponent>();
-
-        if (InventoryComp)
-        {
-            // 3. 인벤토리가 있다면, 아이템 추가 시도!
-            // (지금은 테스트니까 1개씩 추가한다고 가정)
-            bool bSuccess = InventoryComp->AddToInventory(itemID, 1);
-
-            if (bSuccess)
-            {
-                // 4. 추가에 성공했으면 로그를 남기고
-                UE_LOG(LogTemp, Log, TEXT("Item Picked Up: %s"), *itemID.ToString());
-
-                // 5. 이 아이템 액터는 세상에서 사라진다. (Destroy)
-                Destroy();
-            }
-        }
-    }
-}
+//void ASOHBaseItem::NotifyActorBeginOverlap(AActor* OtherActor)
+//{
+//    Super::NotifyActorBeginOverlap(OtherActor);
+//
+//    // 1. 부딪힌 대상(OtherActor)이 유효한지, 그리고 나 자신(this)이 아닌지 확인
+//    if (OtherActor && OtherActor != this)
+//    {
+//        // 2. 부딪힌 대상에게 '인벤토리 컴포넌트'가 있는지 찾아본다.
+//        // (FindComponentByClass는 액터에 붙은 컴포넌트를 검색해 줍니다)
+//        USOHInventoryComponent* InventoryComp = OtherActor->FindComponentByClass<USOHInventoryComponent>();
+//
+//        if (InventoryComp)
+//        {
+//            // 3. 인벤토리가 있다면, 아이템 추가 시도!
+//            // (지금은 테스트니까 1개씩 추가한다고 가정)
+//            bool bSuccess = InventoryComp->AddToInventory(itemID, 1);
+//
+//            if (bSuccess)
+//            {
+//                // 4. 추가에 성공했으면 로그를 남기고
+//                UE_LOG(LogTemp, Log, TEXT("Item Picked Up: %s"), *itemID.ToString());
+//
+//                // 5. 이 아이템 액터는 세상에서 사라진다. (Destroy)
+//                Destroy();
+//            }
+//        }
+//    }
+//}
