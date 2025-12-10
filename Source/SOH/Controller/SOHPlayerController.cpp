@@ -55,6 +55,21 @@ void ASOHPlayerController::SetupInputComponent()
 		{
 			EnhancedInput->BindAction(IA_UseBattery, ETriggerEvent::Triggered, this, &ASOHPlayerController::UseBattery);
 		}
+
+		if (IA_TogglePause)
+		{
+			EnhancedInput->BindAction(IA_TogglePause, ETriggerEvent::Started, this, &ASOHPlayerController::OnTogglePause);
+		}
+
+		if (IA_ToggleMap)
+		{
+			EnhancedInput->BindAction(IA_ToggleMap, ETriggerEvent::Started, this, &ASOHPlayerController::OnToggleMap);
+		}
+
+		if (IA_ToggleInventory)
+		{
+			EnhancedInput->BindAction(IA_ToggleInventory, ETriggerEvent::Started, this, &ASOHPlayerController::OnToggleInventory);
+		}
 	}
 }
 
@@ -121,5 +136,29 @@ void ASOHPlayerController::UseBattery(const FInputActionValue& Value)
 	if (PC)
 	{
 		PC->UseBattery();
+	}
+}
+
+void ASOHPlayerController::OnTogglePause(const FInputActionValue& Value)
+{
+	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
+	{
+		MyChar->OnTogglePause(Value);
+	}
+}
+
+void ASOHPlayerController::OnToggleMap(const FInputActionValue& Value)
+{
+	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
+	{
+		MyChar->OnToggleMap(Value);
+	}
+}
+
+void ASOHPlayerController::OnToggleInventory(const FInputActionValue& Value)
+{
+	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
+	{
+		MyChar->OnToggleInventory(Value);
 	}
 }

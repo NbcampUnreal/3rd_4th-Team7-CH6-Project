@@ -116,7 +116,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 		FCollisionShape::MakeSphere(50.f),
 		Params
 	);
-	
+
 	//디버그
 	//DrawDebugSphere(GetWorld(), Start, 50.f, 12, FColor::Green, false, 0.1f);
 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0.1f);
@@ -577,11 +577,37 @@ void ASOHPlayerCharacter::CallGameModeOnPlayerDied()
 	}
 }
 
+void ASOHPlayerCharacter::ToggleUI(FName UIType, TSubclassOf<UUserWidget> WidgetClass)
+{
+	// 같은 UI가 열려있으면 닫기
+	if (bIsUIOpen && CurrentUIType == UIType)
+	{
+		CloseUI();
+		return;
+	}
+
+	// 다른 UI가 열려있으면 닫기
+	if (bIsUIOpen)
+	{
+		CloseUI();
+	}
+
+	// 새 UI 열기
+	if (WidgetClass)
+	{
+		UUserWidget* NewWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetClass);
+		if (NewWidget)
+		{
+			OpenUI(NewWidget, UIType);
+		}
+	}
+}
+
+// OpenUI 
 void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 {
 	if (bIsUIOpen && CurrentOpenUI && CurrentUIType != UIType)
 	{
-		// 기존 UI 닫기
 		CloseUI();
 	}
 
@@ -595,20 +621,21 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 		// Pause UI일 때만 시간 정지
 		if (UIType == FName("Pause") || UIType == FName("Inventory") || UIType == FName("Map"))
 		{
-			UGameplayStatics::SetGlobalTimeDilation(this, 0.0f);
+			UGameplayStatics::SetGlobalTimeDilation(this, 0.0001f);  // ⭐ 0.0 → 0.0001
 		}
 
 		// 입력 모드 변경
 		if (APlayerController* PC = GetController<APlayerController>())
 		{
-			FInputModeUIOnly InputMode;
-			InputMode.SetWidgetToFocus(CurrentOpenUI->TakeWidget());
+			FInputModeGameAndUI InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			PC->SetInputMode(InputMode);
 			PC->bShowMouseCursor = true;
 		}
 	}
 }
 
+// CloseUI 
 void ASOHPlayerCharacter::CloseUI()
 {
 	if (CurrentOpenUI)
@@ -617,33 +644,33 @@ void ASOHPlayerCharacter::CloseUI()
 		CurrentOpenUI = nullptr;
 	}
 
-	// 시간 재개
 	UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
-
 	CurrentUIType = NAME_None;
 	bIsUIOpen = false;
 
-	// 입력 모드 복구
 	if (APlayerController* PC = GetController<APlayerController>())
 	{
 		FInputModeGameOnly GameInputMode;
 		PC->SetInputMode(GameInputMode);
 		PC->bShowMouseCursor = false;
 
-		// ⭐ 혹시 모를 입력 차단 해제
 		PC->SetIgnoreLookInput(false);
 		PC->SetIgnoreMoveInput(false);
 		PC->ResetIgnoreInputFlags();
 	}
 }
 
-// 특정 UI만 닫기
-bool ASOHPlayerCharacter::CloseSpecificUI(FName UIType)
+void ASOHPlayerCharacter::OnTogglePause(const FInputActionValue& Value)
 {
-	if (CurrentUIType == UIType)
-	{
-		CloseUI();
-		return true;
-	}
-	return false;
+	ToggleUI(FName("Pause"), PauseMenuClass);
+}
+
+void ASOHPlayerCharacter::OnToggleMap(const FInputActionValue& Value)
+{
+	ToggleUI(FName("Map"), MapMenuClass);
+}
+
+void ASOHPlayerCharacter::OnToggleInventory(const FInputActionValue& Value)
+{
+	ToggleUI(FName("Inventory"), InventoryMenuClass);
 }
