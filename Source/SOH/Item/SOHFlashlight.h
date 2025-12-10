@@ -19,6 +19,12 @@ class SOH_API ASOHFlashlight : public ASOHBaseItem
 public:
     ASOHFlashlight();
 
+    UFUNCTION(BlueprintCallable, Category = "Puzzle")
+    void SetFlashlightCutScene();
+
+    UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Flashlight")
+    void PlayFlashlightCutScene();
+
     UFUNCTION(BlueprintCallable, Category = "Flashlight")
     void Toggle();
 

@@ -104,6 +104,7 @@ void ASOHFlashlight::SetEquipped(ACharacter* NewOwner)
     SetActorEnableCollision(false);
     HideInteractWidget();
     ApplyOverlayMaterial(nullptr);
+    SetFlashlightCutScene();
 }
 
 void ASOHFlashlight::StartBatteryDrain()
@@ -246,4 +247,9 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
             PC->SetFlashlight(this);
         }
     }
+}
+
+void ASOHFlashlight::SetFlashlightCutScene()
+{
+    PlayFlashlightCutScene();
 }
