@@ -22,12 +22,15 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	//두리번 몽타주
+	// 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* LookAroundMontage;
 
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	void PlayLookAroundMontage();
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void StopAllMontagesInstant();
 
 	//Patrol
 

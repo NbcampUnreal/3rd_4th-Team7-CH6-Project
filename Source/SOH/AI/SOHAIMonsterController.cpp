@@ -143,6 +143,8 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 	{
 		if (!bPrevSensedPlayer && Monster)
 		{
+			Monster->StopAllMontagesInstant();
+
 			Monster->PlayDetectPlayerSound();
 		}
 

@@ -322,3 +322,14 @@ bool ASOHAIMonster::SeePlayerDuringInvestigate()
 
     return HasLineOfSightToTarget(Player);
 }
+
+void ASOHAIMonster::StopAllMontagesInstant()
+{
+    if (USkeletalMeshComponent* MontageMesh = GetMesh())
+    {
+        if (UAnimInstance* Anim = MontageMesh->GetAnimInstance())
+        {
+            Anim->StopAllMontages(0.0f);
+        }
+    }
+}
