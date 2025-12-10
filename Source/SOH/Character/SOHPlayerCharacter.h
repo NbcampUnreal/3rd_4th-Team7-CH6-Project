@@ -152,7 +152,6 @@ protected:
 
 	void TraceForInteractable();
 	
-	// UI 상태 관리
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	bool bIsUIOpen = false;
 
@@ -166,14 +165,19 @@ protected:
 	void OpenUI(UUserWidget* NewUI, FName UIType);
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	bool CloseSpecificUI(FName UIType);
-
-	// UI 열기/닫기 함수
-	UFUNCTION(BlueprintCallable, Category = "UI")
-	bool CanOpenUI() const { return !bIsUIOpen; }
-
-	UFUNCTION(BlueprintCallable, Category = "UI")
 	void CloseUI();
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleUI(FName UIType, TSubclassOf<UUserWidget> WidgetClass);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> MapMenuClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> InventoryMenuClass;
 
 	// 상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
@@ -196,6 +200,9 @@ public:
 	void ToggleFlashlight();
 	void PlayUpperBodyMontage(UAnimMontage* Montage);
 	void UseBattery();
+	void OnTogglePause(const FInputActionValue& Value);
+	void OnToggleMap(const FInputActionValue& Value);
+	void OnToggleInventory(const FInputActionValue& Value);
 
 	// 체력 관련 UI
 
@@ -228,6 +235,7 @@ private:
 	FTimerHandle StaminaUpdateTimer;
 
 	void CheckCrouchMovement();
+
 
 
 };
