@@ -18,6 +18,8 @@ ASOHLampSwitch::ASOHLampSwitch()
         UIAnchor->SetupAttachment(SwitchMesh);
         UIAnchor->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
     }
+
+    bIsLocked = false;
 }
 
 void ASOHLampSwitch::BeginPlay()
@@ -48,11 +50,19 @@ bool ASOHLampSwitch::CanReceiveTrace_Implementation(AActor* Caller, bool bCanInt
 
 void ASOHLampSwitch::ToggleAllLamps()
 {
-    for (ASOHLamp* Lamp : ControlledLamps)
+    if (!bIsLocked)
     {
-        if (IsValid(Lamp))
+        for (ASOHLamp* Lamp : ControlledLamps)
         {
-            Lamp->ToggleLight();
+            if (IsValid(Lamp))
+            {
+                Lamp->ToggleLight();
+            }
         }
     }
+}
+
+void ASOHLampSwitch::SetLocked(bool bNewLocked)
+{
+    bIsLocked = bNewLocked;
 }

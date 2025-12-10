@@ -38,4 +38,11 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Lamp|Sound")
     USoundBase* ToggleSound;
+
+    // 배전 연결을 위한 함수와 변수
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lamp|Lock")
+    bool bIsLocked = false;
+
+    UFUNCTION(BlueprintCallable, Category = "Lamp|Lock")
+    void SetLocked(bool bNewLocked);
 };
