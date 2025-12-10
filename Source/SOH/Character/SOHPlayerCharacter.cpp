@@ -601,7 +601,7 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 		// 입력 모드 변경
 		if (APlayerController* PC = GetController<APlayerController>())
 		{
-			FInputModeGameAndUI InputMode;
+			FInputModeUIOnly InputMode;
 			InputMode.SetWidgetToFocus(CurrentOpenUI->TakeWidget());
 			PC->SetInputMode(InputMode);
 			PC->bShowMouseCursor = true;
@@ -626,8 +626,14 @@ void ASOHPlayerCharacter::CloseUI()
 	// 입력 모드 복구
 	if (APlayerController* PC = GetController<APlayerController>())
 	{
-		PC->SetInputMode(FInputModeGameOnly());
+		FInputModeGameOnly GameInputMode;
+		PC->SetInputMode(GameInputMode);
 		PC->bShowMouseCursor = false;
+
+		// ⭐ 혹시 모를 입력 차단 해제
+		PC->SetIgnoreLookInput(false);
+		PC->SetIgnoreMoveInput(false);
+		PC->ResetIgnoreInputFlags();
 	}
 }
 
