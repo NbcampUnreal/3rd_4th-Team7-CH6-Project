@@ -110,14 +110,31 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 	static const FAISenseID HearingSenseID = UAISense::GetSenseID(UAISense_Hearing::StaticClass());
 	if (Stimulus.Type == HearingSenseID)
 	{
-		if (bSensed && Monster)
-		{
-			Monster->PlayHearNoiseSound();
+		if (!bSensed || !Monster) return;
 
-			// 나중에 소리들은 곳으로 이동하고 싶을때 BT 저장용
-			/*BlackboardComp->SetValueAsVector(Key_LastKnownLocation, Stimulus.StimulusLocation);
-			BlackboardComp->SetValueAsBool(Key_IsSearching, true);*/
+		FVector MyLoc = Monster->GetActorLocation();
+		FVector NoiseLoc = Stimulus.StimulusLocation;
+
+		float DeltaZ = FMath::Abs(NoiseLoc.Z - MyLoc.Z);
+		const float MaxHeightDiff = 200.f;
+
+		if (DeltaZ > MaxHeightDiff)
+		{
+			return;
 		}
+
+		auto* BB = BlackboardComp;
+		const bool bPlayerInRange = BB->GetValueAsBool(Key_PlayerInRange);
+		const bool bPathFail = BB->GetValueAsBool(Key_PathFailing);
+		const bool bIsSearching = BB->GetValueAsBool(Key_IsSearching);
+
+		bool bIsChasing = (bPlayerInRange && !bPathFail && !bIsSearching);
+
+		if (bIsChasing) return;
+
+		if (Monster->IsInvestigatingNoise()) return;
+
+		Monster->StartInvestigateNoise(Stimulus.StimulusLocation, this);
 
 		return;
 	}

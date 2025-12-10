@@ -8,6 +8,7 @@ class ATargetPoint;
 class UAudioComponent;
 class USoundBase;
 class ASOHPatrolRoute;
+class AAIController;
 
 UCLASS()
 class SOH_API ASOHAIMonster : public ACharacter
@@ -107,5 +108,29 @@ public:
 
 	UFUNCTION()
 	void CheckDoorAhead();
+
+	// AISense_Hearing
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	bool bSoundEnabled = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI|Perception|Hearing")
+	bool bInvestigatingNoise = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Perception|Hearing")
+	float NoiseInvestigateDuration = 3.0f;
+
+	FTimerHandle NoiseInvestigateTimerHandle;
+
+	UPROPERTY()
+	AAIController* CachedAIController = nullptr;
+
+	void StartInvestigateNoise(const FVector& NoiseLocation, AAIController* InController);
+
+	UFUNCTION()
+	void EndInvestigateNoise();
+
+	bool IsInvestigatingNoise() const { return bInvestigatingNoise; }
+
+	bool SeePlayerDuringInvestigate();
 
 };

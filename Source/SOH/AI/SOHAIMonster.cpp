@@ -195,6 +195,8 @@ void ASOHAIMonster::CheckDoorAhead()
 
 void ASOHAIMonster::PlayDetectPlayerSound()
 {
+    if (!bSoundEnabled) return;
+
     if (!DetectPlayerSound)
         return;
 
@@ -220,6 +222,8 @@ void ASOHAIMonster::PlayDetectPlayerSound()
 
 void ASOHAIMonster::PlayArriveAtTargetSound()
 {
+    if (!bSoundEnabled) return;
+
     if (!ArriveAtTargetSound) return;
 
     UWorld* World = GetWorld();
@@ -234,6 +238,8 @@ void ASOHAIMonster::PlayArriveAtTargetSound()
 
 void ASOHAIMonster::PlayHearNoiseSound()
 {
+    if (!bSoundEnabled) return;
+
     if (!HearNoiseSound) return;
 
     UWorld* World = GetWorld();
@@ -244,4 +250,75 @@ void ASOHAIMonster::PlayHearNoiseSound()
         HearNoiseSound,
         GetActorLocation()
     );
+}
+
+void ASOHAIMonster::StartInvestigateNoise(const FVector& NoiseLocation, AAIController* InController)
+{
+    if (bInvestigatingNoise || !Controller)
+        return;
+
+    bInvestigatingNoise = true;
+    CachedAIController = Cast<AAIController>(InController);
+
+    UCharacterMovementComponent* Move = GetCharacterMovement();
+    if (Move)
+    {
+        Move->StopMovementImmediately();
+        Move->DisableMovement();
+    }
+
+    FVector Dir = NoiseLocation - GetActorLocation();
+    Dir.Z = 0;
+    if (!Dir.IsNearlyZero())
+    {
+        FRotator NewRot = Dir.Rotation();
+        SetActorRotation(NewRot);
+    }
+
+    PlayHearNoiseSound();
+
+    if (SeePlayerDuringInvestigate())
+    {
+        if (CachedAIController)
+        {
+            CachedAIController->GetBlackboardComponent()->SetValueAsBool(
+                TEXT("PlayerInRange"), true
+            );
+        }
+
+        EndInvestigateNoise();
+        return;
+    }
+
+    GetWorld()->GetTimerManager().SetTimer(
+        NoiseInvestigateTimerHandle,
+        this,
+        &ASOHAIMonster::EndInvestigateNoise,
+        NoiseInvestigateDuration,
+        false
+    );
+}
+
+void ASOHAIMonster::EndInvestigateNoise()
+{
+    bInvestigatingNoise = false;
+
+    if (UCharacterMovementComponent* Move = GetCharacterMovement())
+    {
+        Move->SetMovementMode(MOVE_Walking);
+    }
+
+    if (CachedAIController)
+    {
+        CachedAIController->ClearFocus(EAIFocusPriority::Gameplay);
+        CachedAIController = nullptr;
+    }
+}
+
+bool ASOHAIMonster::SeePlayerDuringInvestigate()
+{
+    ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+    if (!Player) return false;
+
+    return HasLineOfSightToTarget(Player);
 }
