@@ -5,6 +5,7 @@
 #include "SOHJumpScareBase.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ASOHCabinet::ASOHCabinet()
 {
@@ -109,6 +110,11 @@ void ASOHCabinet::EnterCabinet(ASOHPlayerCharacter* Player)
 	Player->SetActorLocation(HidePoint->GetComponentLocation());
 	Player->SetActorRotation(HidePoint->GetComponentRotation());
 
+	if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
+	{
+		MoveComp->DisableMovement();
+	}
+
 	if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
 	{
 		FViewTargetTransitionParams Params;
@@ -123,6 +129,11 @@ void ASOHCabinet::ExitCabinet(ASOHPlayerCharacter* Player)
 {
 	Player->SetActorLocation(CachedPlayerLocation);
 	Player->SetActorRotation(CachedPlayerRotation);
+
+	if (UCharacterMovementComponent* MoveComp = Player->GetCharacterMovement())
+	{
+		MoveComp->SetMovementMode(MOVE_Walking);
+	}
 
 	if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
 	{
