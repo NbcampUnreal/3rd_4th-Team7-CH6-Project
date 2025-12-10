@@ -6,6 +6,7 @@
 
 class UStaticMeshComponent;
 class ASOHLamp;
+class USoundBase;
 
 UCLASS()
 class SOH_API ASOHLampSwitch : public ASOHInteractableActor
@@ -34,4 +35,7 @@ protected:
 public:
     UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Lamp")
     TArray<ASOHLamp*> ControlledLamps;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Lamp|Sound")
+    USoundBase* ToggleSound;
 };

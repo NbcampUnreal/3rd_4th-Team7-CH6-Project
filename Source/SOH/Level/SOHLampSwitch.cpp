@@ -1,6 +1,7 @@
 #include "SOHLampSwitch.h"
 #include "SOHLamp.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ASOHLampSwitch::ASOHLampSwitch()
 {
@@ -29,6 +30,12 @@ void ASOHLampSwitch::Interact_Implementation(AActor* Caller)
     Super::Interact_Implementation(Caller);
 
     ToggleAllLamps();
+
+    if (ToggleSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, ToggleSound, GetActorLocation());
+    }
+
     PlaySwitchAnimation();
 }
 
