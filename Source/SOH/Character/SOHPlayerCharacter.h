@@ -59,7 +59,7 @@ protected:
 	// 체력
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat|Health")
-	float MaxHealth = 100.f;
+	float MaxHealth = 200.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat|Health")
 	float Health;
@@ -181,7 +181,7 @@ protected:
 
 	// 상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
-	float TraceDistance = 150.f;
+	float TraceDistance = 300.f;
 	
 	UPROPERTY(EditAnywhere, Category = "Interaction")
 	float SphereTraceRadius = 15.f; // 에디터에서 조절 가능

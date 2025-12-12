@@ -95,62 +95,69 @@ void ASOHPlayerCharacter::BeginPlay()
 void ASOHPlayerCharacter::TraceForInteractable()
 {
 	UCameraComponent* Camera = FindComponentByClass<UCameraComponent>();
-	if (!Camera) return;
+	if (!Camera)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Camera Component NOT FOUND!"));
+		return;
+	}
 
-	// ========== 하이브리드: 캐릭터 앞에서 시작, 카메라 방향 사용 ==========
-	FVector CameraForward = Camera->GetForwardVector();
-	FVector Start = GetActorLocation() + (CameraForward * 60.f) + FVector(0, 0, 90.f);
-	FVector End = Start + (CameraForward * TraceDistance);
-	// ====================================================================
+	FVector Start = Camera->GetComponentLocation();
+	FVector End = Start + (Camera->GetForwardVector() * TraceDistance);
 
-	TArray<FHitResult> HitResults;
+	FHitResult HitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	bool bHit = GetWorld()->SweepMultiByChannel(
-		HitResults,
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
 		Start,
 		End,
-		FQuat::Identity,
 		ECC_GameTraceChannel3,
-		FCollisionShape::MakeSphere(50.f),
 		Params
 	);
 
-	//디버그
-	//DrawDebugSphere(GetWorld(), Start, 50.f, 12, FColor::Green, false, 0.1f);
-	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0.1f);
-
-	AActor* BestActor = nullptr;
-	float BestScore = -999999.f;
+	// 강화된 디버그
+	//DrawDebugLine(GetWorld(), Start, End, bHit ? FColor::Green : FColor::Red, false, 0.1f, 0, 2.0f);
 
 	if (bHit)
 	{
-		for (const FHitResult& Hit : HitResults)
+		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.f, 12, FColor::Yellow, false, 0.1f);
+		//UE_LOG(LogTemp, Warning, TEXT("=== HIT DETECTED ==="));
+		//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *HitResult.GetComponent()->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), HitResult.Distance);
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("No hit"));
+	}
+
+	AActor* HitActor = nullptr;
+
+	if (bHit)
+	{
+		HitActor = HitResult.GetActor();
+		//UE_LOG(LogTemp, Warning, TEXT("Checking interface for: %s"), *HitActor->GetName());
+
+		if (HitActor && HitActor->Implements<USOHInteractInterface>())
 		{
-			AActor* HitActor = Hit.GetActor();
-			if (!HitActor || !HitActor->Implements<USOHInteractInterface>())
-				continue;
-
-			FVector ToActor = (HitActor->GetActorLocation() - Start).GetSafeNormal();
-			float DotProduct = FVector::DotProduct(CameraForward, ToActor);
-			float Distance = FVector::Dist(Start, HitActor->GetActorLocation());
-			float Score = DotProduct / (Distance * 0.001f);
-
-			if (Score > BestScore)
-			{
-				BestScore = Score;
-				BestActor = HitActor;
-			}
+			//UE_LOG(LogTemp, Warning, TEXT("✅ INTERFACE OK!"));
+		}
+		else
+		{
+			//UE_LOG(LogTemp, Error, TEXT("❌ NO INTERFACE!"));
+			HitActor = nullptr;
 		}
 	}
 
-	bUIHit = (BestActor != nullptr);
+	bUIHit = (HitActor != nullptr);
+	UE_LOG(LogTemp, Warning, TEXT("bUIHit: %s"), bUIHit ? TEXT("TRUE") : TEXT("FALSE"));
 
-	if (LastHighlightedItem != BestActor)
+	if (LastHighlightedItem != HitActor)
 	{
 		if (LastHighlightedItem)
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("Removing highlight from: %s"), *LastHighlightedItem->GetName());
 			if (LastHighlightedItem->Implements<USOHInteractInterface>())
 			{
 				ISOHInteractInterface::Execute_CanReceiveTrace(LastHighlightedItem, this, false);
@@ -159,10 +166,11 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 		LastHighlightedItem = nullptr;
 
-		if (BestActor)
+		if (HitActor)
 		{
-			ISOHInteractInterface::Execute_CanReceiveTrace(BestActor, this, true);
-			LastHighlightedItem = BestActor;
+			//UE_LOG(LogTemp, Warning, TEXT("Adding highlight to: %s"), *HitActor->GetName());
+			ISOHInteractInterface::Execute_CanReceiveTrace(HitActor, this, true);
+			LastHighlightedItem = HitActor;
 		}
 	}
 }
