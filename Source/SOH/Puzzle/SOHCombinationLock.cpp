@@ -25,6 +25,15 @@ ASOHCombinationLock::ASOHCombinationLock()
     Gear3->SetupAttachment(RootComponent);
     CameraComponent->SetupAttachment(RootComponent);
 
+    if (InteractionRange)
+        InteractionRange->SetupAttachment(Body);
+
+    if (UIAnchor)
+    {
+        UIAnchor->SetupAttachment(Body);
+        UIAnchor->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
+    }
+
     Gears = { Gear1, Gear2, Gear3 };
 
     // Initialize arrays
