@@ -2,6 +2,7 @@
 #include "SOHItemManager.h"
 #include "SOHInventoryComponent.h" // 인벤토리 컴포넌트
 #include "Components/StaticMeshComponent.h"
+#include "GameMode/SOHGameInstance.h"
 #include "UI/SOHMessageManager.h"
 
 ASOHBaseItem::ASOHBaseItem()
@@ -118,6 +119,23 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
         {
             UE_LOG(LogTemp, Log, TEXT("BaseItem: Picked up by %s -> ItemID: %s"), *Caller->GetName(), *itemID.ToString());
 
+            if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+            {
+                if (ItemConditionTag.IsValid())
+                {
+                    GI->CompleteCondition(ItemConditionTag);
+                    UE_LOG(LogTemp, Warning,
+                        TEXT("[TAG] Condition Sent From Item: %s"),
+                        *ItemConditionTag.ToString());
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Warning,
+                        TEXT("[TAG] Item has NO GameplayTag set: %s"),
+                        *itemID.ToString());
+                }
+            }
+            
             UGameInstance* gameInst = GetGameInstance();
             USOHItemManager* itemManager = gameInst ? gameInst->GetSubsystem<USOHItemManager>() : nullptr;
 

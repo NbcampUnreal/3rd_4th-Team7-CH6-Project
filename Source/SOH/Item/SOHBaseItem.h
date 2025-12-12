@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Interaction/SOHInteractableActor.h"
 #include "SOHItemDataStructs.h" // 데이터 구조체
+#include "GameplayTagContainer.h"
 #include "SOHBaseItem.generated.h"
 
 UCLASS()
@@ -30,6 +31,10 @@ public:
 	// 아이템 ID (데이터 테이블의 Row Name)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FName itemID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="GameplayTag")
+	FGameplayTag ItemConditionTag;
+
 
 protected:
 	// 아이템의 3D 외형을 담당하는 컴포넌트 (Mesh) 
