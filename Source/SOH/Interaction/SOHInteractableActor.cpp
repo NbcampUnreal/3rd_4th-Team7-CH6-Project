@@ -35,7 +35,7 @@ void ASOHInteractableActor::BeginPlay()
 
 	if (InteractionWidget)
 	{
-		// WidgetÀº Ç×»ó ²¨Áø »óÅÂ·Î ½ÃÀÛ (Trace¿¡¼­¸¸ Á¦¾î)
+		// Widgetï¿½ï¿½ ï¿½×»ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½ (Traceï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 		InteractionWidget->SetVisibility(false);
 
 		if (InteractionWidgetClass)
@@ -46,12 +46,12 @@ void ASOHInteractableActor::BeginPlay()
 		}
 	}
 
-	// Overlap ÀÌº¥Æ® ¹ÙÀÎµù ÁÖ¼® Ã³¸® (´õ ÀÌ»ó »ç¿ë ¾È ÇÔ)
-	// if (InteractionRange)
-	// {
-	// 	InteractionRange->OnComponentBeginOverlap.AddDynamic(this, &ASOHInteractableActor::OnPlayerEnter);
-	// 	InteractionRange->OnComponentEndOverlap.AddDynamic(this, &ASOHInteractableActor::OnPlayerExit);
-	// }
+	// Overlap ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½Îµï¿½ ï¿½Ö¼ï¿½ Ã³ï¿½ï¿½ (ï¿½ï¿½ ï¿½Ì»ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½)
+	 if (InteractionRange)
+	 {
+	 	InteractionRange->OnComponentBeginOverlap.AddDynamic(this, &ASOHInteractableActor::OnPlayerEnter);
+	 	InteractionRange->OnComponentEndOverlap.AddDynamic(this, &ASOHInteractableActor::OnPlayerExit);
+	 }
 }
 
 void ASOHInteractableActor::OnPlayerEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -87,13 +87,13 @@ bool ASOHInteractableActor::CanReceiveTrace_Implementation(AActor* Caller, bool 
 	if (bCanInteract)
 	{
 		ApplyOverlayMaterial(OutlineMaterial);
-		ShowInteractWidget(); // UIµµ ¿©±â¼­ Ç¥½Ã
+		//ShowInteractWidget(); // UIï¿½ï¿½ ï¿½ï¿½ï¿½â¼­ Ç¥ï¿½ï¿½
 		return true;
 	}
 	else
 	{
 		ApplyOverlayMaterial(nullptr);
-		HideInteractWidget(); // UIµµ ¿©±â¼­ ¼û±è
+		//HideInteractWidget(); // UIï¿½ï¿½ ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½
 		return false;
 	}
 }
