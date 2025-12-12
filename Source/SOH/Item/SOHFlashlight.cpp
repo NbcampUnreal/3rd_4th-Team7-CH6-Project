@@ -176,24 +176,10 @@ bool ASOHFlashlight::UseBatteryItem(float ChargeAmount)
         return false;
 
     float Before = CurrentBattery;
-    const bool bWasEmpty = (CurrentBattery <= 0.f);
 
     CurrentBattery = FMath::Clamp(CurrentBattery + ChargeAmount, 0.f, MaxBattery);
 
     UpdateLightFromBattery();
-
-    //if (CurrentBattery > Before)
-    //{
-    //    if (bEquipped && !bOn && CurrentBattery > 0.f)
-    //    {
-    //        SetOn(true);
-    //    }
-    //    else if (bOn && bWasEmpty && CurrentBattery > 0.f)
-    //    {
-    //        StartBatteryDrain();
-    //    }
-    //}
-    StartBatteryDrain();
 
     return CurrentBattery > Before;
 }
