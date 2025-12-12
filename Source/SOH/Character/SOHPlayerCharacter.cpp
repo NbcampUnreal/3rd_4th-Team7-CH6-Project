@@ -99,7 +99,7 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 	// ========== 하이브리드: 캐릭터 앞에서 시작, 카메라 방향 사용 ==========
 	FVector CameraForward = Camera->GetForwardVector();
-	FVector Start = GetActorLocation() + (CameraForward * 100.f) + FVector(0, 0, 90.f);
+	FVector Start = GetActorLocation() + (CameraForward * 60.f) + FVector(0, 0, 90.f);
 	FVector End = Start + (CameraForward * TraceDistance);
 	// ====================================================================
 
