@@ -62,7 +62,10 @@ void ASOHInteractableActor::OnPlayerEnter(UPrimitiveComponent* OverlappedComp, A
 
 	if (!bEnableProximityText) return;
 
-	if (!OtherActor || !OtherActor->IsA(ACharacter::StaticClass())) return;
+	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	if (!Character) return;
+
+	if (!Character->IsPlayerControlled()) return;
 
 	ShowInteractWidget();
 }
@@ -70,7 +73,12 @@ void ASOHInteractableActor::OnPlayerEnter(UPrimitiveComponent* OverlappedComp, A
 void ASOHInteractableActor::OnPlayerExit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (!OtherActor->IsA(ACharacter::StaticClass())) return;
+	if (!OtherActor) return;
+
+	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	if (!Character) return;
+
+	if (!Character->IsPlayerControlled()) return;
 
 	HideInteractWidget();
 }
