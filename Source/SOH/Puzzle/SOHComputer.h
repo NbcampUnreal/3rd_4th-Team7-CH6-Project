@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Interaction/SOHInteractableActor.h"
+#include "GameplayTagContainer.h"
 #include "SOHComputer.generated.h"
 
 class UStaticMeshComponent;
@@ -15,6 +16,9 @@ class SOH_API ASOHComputer : public ASOHInteractableActor
 	
 public:
 	ASOHComputer();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle")
+	FGameplayTag PuzzleSolvedTag;
 	
 protected:
 	virtual void Interact_Implementation(AActor* Caller) override;

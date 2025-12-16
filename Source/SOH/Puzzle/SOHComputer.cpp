@@ -1,4 +1,5 @@
 #include "Puzzle/SOHComputer.h"
+#include "GameMode/SOHGameInstance.h"
 #include "Interaction/SOHInteractableActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h" 
@@ -59,4 +60,16 @@ void ASOHComputer::ShowComputerWidget()
 void ASOHComputer::SetPasswordSolved(bool bSolved)
 {
 	bIsPasswordSolved = bSolved;
+	
+	if (bSolved)
+	{
+		if (PuzzleSolvedTag.IsValid())
+		{
+			if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
+			{
+				GI->CompleteCondition(PuzzleSolvedTag);
+				UE_LOG(LogTemp, Warning, TEXT("Computer Puzzle Solved! Tag Sent: %s"), *PuzzleSolvedTag.ToString());
+			}
+		}
+	}
 }

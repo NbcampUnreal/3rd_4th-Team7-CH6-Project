@@ -4,6 +4,7 @@
 #include "Interaction/SOHInteractableActor.h"
 #include "Camera/CameraComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "GameplayTagContainer.h"
 #include "SOHCombinationLock.generated.h"
 
 class UStaticMeshComponent;
@@ -27,6 +28,9 @@ class SOH_API ASOHCombinationLock : public ASOHInteractableActor
 public:
     ASOHCombinationLock();
     virtual void Interact_Implementation(AActor* Caller) override;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle")
+    FGameplayTag PuzzleClearTag;
 
 protected:
     virtual void BeginPlay() override;

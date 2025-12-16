@@ -3,6 +3,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameMode/SOHGameInstance.h"
 #include "Level/SOHOpenDoor.h"
 
 // Constructor
@@ -249,6 +250,15 @@ void ASOHCombinationLock::UnlockComplete()
     if (LinkedDoor)
     {
         LinkedDoor->UnlockOpenDoor(this);
+    }
+    
+    if (PuzzleClearTag.IsValid())
+    {
+        if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
+        {
+            GI->CompleteCondition(PuzzleClearTag);
+            UE_LOG(LogTemp, Warning, TEXT("Combination Puzzle Completed! Tag = %s"), *PuzzleClearTag.ToString());
+        }
     }
 
     FTimerHandle DestroyTimerHandle;
