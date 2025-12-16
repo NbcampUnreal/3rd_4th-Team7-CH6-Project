@@ -524,6 +524,90 @@ float ASOHPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	return ActualDamage;
 }
 
+void ASOHPlayerCharacter::UseHealthItem()
+{
+	if (bIsDead) return;
+
+	// 이미 체력이 가득 찬 경우
+	if (Health >= MaxHealth)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Health is already full!"));
+		return;
+	}
+
+	USOHInventoryComponent* InventoryComp = FindComponentByClass<USOHInventoryComponent>();
+	if (!InventoryComp) return;
+
+	TArray<FSOHInventoryItem> Items;
+	InventoryComp->GetInventoryContents_BP(Items);
+
+	FName HealthItemID = NAME_None;
+
+	USOHItemManager* ItemManager = GetGameInstance()->GetSubsystem<USOHItemManager>();
+	if (!ItemManager) return;
+
+	// 인벤토리에서 회복 아이템 찾기
+	for (const FSOHInventoryItem& Item : Items)
+	{
+		FSOHItemTableRow Row;
+		if (ItemManager->GetItemDataByID_BP(Item.itemID, Row))
+		{
+			// "Health" 또는 "Healing" 태그를 가진 아이템 찾기
+			if (Row.itemTags.Contains("Health"))
+			{
+				HealthItemID = Item.itemID;
+				break;
+			}
+		}
+	}
+
+	if (HealthItemID.IsNone())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No health item in inventory!"));
+		return;
+	}
+
+	// 아이템 데이터 가져오기
+	FSOHItemTableRow HealthData;
+	if (!ItemManager->GetItemDataByID_BP(HealthItemID, HealthData))
+		return;
+
+	// 체력 회복
+	float HealAmount = HealthData.value;
+	float BeforeHealth = Health;
+
+	Heal(HealAmount);
+
+	float AfterHealth = Health;
+
+	// 실제로 회복되었으면 아이템 소모
+	if (AfterHealth > BeforeHealth)
+	{
+		InventoryComp->ConsumeItem(HealthItemID, 1);
+
+		// 회복 사운드 재생 (있다면)
+		if (HealSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, HealSound, GetActorLocation());
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("Healed %.1f HP (%.1f -> %.1f)"),
+			AfterHealth - BeforeHealth, BeforeHealth, AfterHealth);
+	}
+}
+
+void ASOHPlayerCharacter::Heal(float HealAmount)
+{
+	if (bIsDead) return;
+
+	Health = FMath::Clamp(Health + HealAmount, 0.f, MaxHealth);
+
+	// HUD 업데이트 (붉은 테두리 제거)
+	UpdateOverlay(Health, MaxHealth);
+
+	UE_LOG(LogTemp, Log, TEXT("Current Health: %.1f / %.1f"), Health, MaxHealth);
+}
+
 // 죽음 처리
 
 void ASOHPlayerCharacter::Die()

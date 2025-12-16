@@ -100,6 +100,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina|Audio")
 	float LowStaminaThreshold = 30.f;
 
+	// 회복 사운드
+	UPROPERTY(EditAnywhere, Category = "Stat|Health")
+	USoundBase* HealSound;
+
 	// 체력 감소/죽음 처리
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Death")
@@ -205,6 +209,15 @@ public:
 	void OnToggleInventory(const FInputActionValue& Value);
 
 	// 체력 관련 UI
+	
+	// 체력 회복 아이템 사용
+	UFUNCTION(BlueprintCallable)
+	void UseHealthItem();
+
+	// 체력 회복 함수 (직접 호출용)
+	UFUNCTION(BlueprintCallable)
+	void Heal(float HealAmount);
+
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateOverlay(float HealthValue, float MaxHealthValue);
