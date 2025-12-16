@@ -82,6 +82,9 @@ public:
 
 	//Sound
 
+	UPROPERTY(VisibleAnywhere, Category = "Audio")
+	UAudioComponent* ChaseAudioComp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	USoundBase* DetectPlayerSound;
 
@@ -91,12 +94,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayDetectPlayerSound();
 
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlayChaseLoop();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void StopChaseLoop();
+
 	// 도착 사운드
+
+	UPROPERTY(VisibleAnywhere, Category = "Audio")
+	UAudioComponent* ArriveAudioComp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Movement")
 	USoundBase* ArriveAtTargetSound;
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayArriveAtTargetSound();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void StopArriveSound();
 
 	// 소리 들었을 때 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Perception")

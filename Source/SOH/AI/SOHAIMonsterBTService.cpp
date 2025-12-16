@@ -136,6 +136,12 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         const bool bPrevOnNav = BB->GetValueAsBool(TEXT("PlayerOnNav"));
         BB->SetValueAsBool(TEXT("PlayerOnNav"), bOnNav);
 
+        if (bOnNav && !bPrevOnNav && Monster)
+        {
+            Monster->StopAllMontagesInstant();
+            Monster->PlayDetectPlayerSound();
+        }
+
         if (!bOnNav)
         {
             BB->SetValueAsBool(TEXT("PathFailing"), true);

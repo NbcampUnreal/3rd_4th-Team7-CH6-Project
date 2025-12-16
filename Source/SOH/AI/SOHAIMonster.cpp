@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/AudioComponent.h"
 
 ASOHAIMonster::ASOHAIMonster()
 {
@@ -14,6 +15,14 @@ ASOHAIMonster::ASOHAIMonster()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = ASOHAIMonsterController::StaticClass();
+
+    ChaseAudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("ChaseAudioComp"));
+    ChaseAudioComp->SetupAttachment(RootComponent);
+    ChaseAudioComp->bAutoActivate = false;
+
+    ArriveAudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("ArriveAudioComp"));
+    ArriveAudioComp->SetupAttachment(RootComponent);
+    ArriveAudioComp->bAutoActivate = false;
 
 	auto* Move = GetCharacterMovement();
 	if (Move)
@@ -209,31 +218,16 @@ void ASOHAIMonster::PlayDetectPlayerSound()
         DetectPlayerSound,
         GetActorLocation()
     );
-
-    if (ChaseSound)
-    {
-        UGameplayStatics::PlaySoundAtLocation(
-            World,
-            ChaseSound,
-            GetActorLocation()
-        );
-    }
 }
 
 void ASOHAIMonster::PlayArriveAtTargetSound()
 {
     if (!bSoundEnabled) return;
-
     if (!ArriveAtTargetSound) return;
+    if (!ArriveAudioComp) return;
 
-    UWorld* World = GetWorld();
-    if (!World) return;
-
-    UGameplayStatics::PlaySoundAtLocation(
-        World,
-        ArriveAtTargetSound,
-        GetActorLocation()
-    );
+    ArriveAudioComp->SetSound(ArriveAtTargetSound);
+    ArriveAudioComp->Play();
 }
 
 void ASOHAIMonster::PlayHearNoiseSound()
@@ -286,7 +280,12 @@ void ASOHAIMonster::StartInvestigateNoise(const FVector& NoiseLocation, AAIContr
             );
         }
 
-        EndInvestigateNoise();
+        if (UCharacterMovementComponent* MoveMonster = GetCharacterMovement())
+        {
+            MoveMonster->SetMovementMode(MOVE_Walking);
+        }
+
+        //EndInvestigateNoise();
         return;
     }
 
@@ -331,5 +330,38 @@ void ASOHAIMonster::StopAllMontagesInstant()
         {
             Anim->StopAllMontages(0.0f);
         }
+    }
+}
+
+void ASOHAIMonster::PlayChaseLoop()
+{
+    if (!bSoundEnabled) return;
+    if (!ChaseSound) return;
+    if (!ChaseAudioComp) return;
+
+    if (!ChaseAudioComp->IsPlaying())
+    {
+        ChaseAudioComp->SetSound(ChaseSound);
+        ChaseAudioComp->Play();
+    }
+}
+
+void ASOHAIMonster::StopChaseLoop()
+{
+    if (!ChaseAudioComp) return;
+
+    if (ChaseAudioComp->IsPlaying())
+    {
+        ChaseAudioComp->Stop();
+    }
+}
+
+void ASOHAIMonster::StopArriveSound()
+{
+    if (!ArriveAudioComp) return;
+
+    if (ArriveAudioComp->IsPlaying())
+    {
+        ArriveAudioComp->Stop();
     }
 }

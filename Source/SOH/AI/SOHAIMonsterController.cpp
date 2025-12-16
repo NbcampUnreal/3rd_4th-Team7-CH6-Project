@@ -141,13 +141,13 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 
 	if (bSensed)
 	{
-		if (!bPrevSensedPlayer && Monster)
+		if (Monster)
 		{
+			Monster->StopArriveSound();
 			Monster->StopAllMontagesInstant();
-
 			Monster->PlayDetectPlayerSound();
+			Monster->PlayChaseLoop();
 		}
-
 		BlackboardComp->SetValueAsObject(Key_PlayerActor, PlayerPawn);
 		BlackboardComp->SetValueAsBool(Key_PlayerInRange, true);
 		BlackboardComp->ClearValue(Key_LastKnownLocation);
@@ -166,6 +166,11 @@ void ASOHAIMonsterController::HandleTargetPerceptionUpdated(AActor* Actor, FAISt
 	}
 	else
 	{
+		if (Monster)
+		{
+			Monster->StopChaseLoop();
+		}
+
 		BlackboardComp->SetValueAsBool(Key_PlayerInRange, false);
 		BlackboardComp->ClearValue(Key_PlayerActor);
 
