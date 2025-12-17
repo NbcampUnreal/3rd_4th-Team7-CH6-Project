@@ -54,6 +54,7 @@ protected:
 
 	FVector2D CurrentMoveInput;
 
+
 	// 여기서부터
 
 	// 체력
@@ -99,6 +100,14 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina|Audio")
 	float LowStaminaThreshold = 30.f;
+
+	// 발소리
+	UPROPERTY(EditAnywhere, Category = "Audio|Footstep")
+	USoundBase* FootstepSound;
+
+	// 발소리 재생 최소 속도
+	UPROPERTY(EditAnywhere, Category = "Audio|Footstep")
+	float MinFootstepSpeed = 10.0f;
 
 	// 회복 사운드
 	UPROPERTY(EditAnywhere, Category = "Stat|Health")
@@ -218,6 +227,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Heal(float HealAmount);
 
+	// 발소리 재생 (AnimNotify에서 호출)
+	UFUNCTION(BlueprintCallable)
+	void PlayFootstepSound();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateOverlay(float HealthValue, float MaxHealthValue);

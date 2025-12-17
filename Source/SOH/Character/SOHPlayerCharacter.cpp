@@ -414,6 +414,33 @@ void ASOHPlayerCharacter::StopHeavyBreathing()
 	}
 }
 
+void ASOHPlayerCharacter::PlayFootstepSound()
+{
+    // 실제 이동 속도 체크
+    FVector Velocity = GetVelocity();
+    Velocity.Z = 0.f;  // 수직 속도 제외
+    float CurrentSpeed = Velocity.Size();
+    
+    // 실제로 움직이고 있을 때만 사운드 재생
+    if (CurrentSpeed > MinFootstepSpeed)
+    {
+        if (FootstepSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(
+                this, 
+                FootstepSound, 
+                GetActorLocation()
+            );
+            
+            UE_LOG(LogTemp, Log, TEXT("Footstep played (Speed: %.1f)"), CurrentSpeed);
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Footstep blocked (Speed: %.1f < %.1f)"), 
+            CurrentSpeed, MinFootstepSpeed);
+    }
+}
 
 void ASOHPlayerCharacter::Interact()
 {
