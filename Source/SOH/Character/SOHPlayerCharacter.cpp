@@ -210,17 +210,22 @@ void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 
 void ASOHPlayerCharacter::Look(const FInputActionValue& Value)
 {
+	// ⭐ UI 열려있으면 무조건 리턴
+	if (bIsUIOpen)
+	{
+		return;
+	}
+
 	const FVector2D Axis = Value.Get<FVector2D>();
 
 	if (Controller)
 	{
-		// Pitch만 제한
 		FRotator CurrentRotation = Controller->GetControlRotation();
 		float NewPitch = FMath::ClampAngle(CurrentRotation.Pitch - Axis.Y, MinPitchAngle, MaxPitchAngle);
 
 		FRotator NewRotation = CurrentRotation;
 		NewRotation.Pitch = NewPitch;
-		NewRotation.Yaw = CurrentRotation.Yaw + Axis.X;  // Yaw는 제한 없음
+		NewRotation.Yaw = CurrentRotation.Yaw + Axis.X;
 
 		Controller->SetControlRotation(NewRotation);
 	}
@@ -729,7 +734,6 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 	{
 		CloseUI();
 	}
-
 	if (NewUI)
 	{
 		CurrentOpenUI = NewUI;
@@ -740,7 +744,7 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 		// Pause UI일 때만 시간 정지
 		if (UIType == FName("Pause") || UIType == FName("Inventory") || UIType == FName("Map"))
 		{
-			UGameplayStatics::SetGlobalTimeDilation(this, 0.0001f);  // ⭐ 0.0 → 0.0001
+			UGameplayStatics::SetGlobalTimeDilation(this, 0.0001f);
 		}
 
 		// 입력 모드 변경
@@ -750,6 +754,10 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			PC->SetInputMode(InputMode);
 			PC->bShowMouseCursor = true;
+
+			// ⭐ 추가: Look/Move 입력 차단
+			PC->SetIgnoreLookInput(true);
+			PC->SetIgnoreMoveInput(true);
 		}
 	}
 }
