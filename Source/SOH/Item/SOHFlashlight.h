@@ -53,7 +53,7 @@ private:
     USkeletalMeshComponent* OwnerMesh;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight")
-    FName HandSocketName = TEXT("FlashlightSocket");
+    FName HandSocketName = TEXT("Chest_Socket");
 
     UPROPERTY(EditAnywhere, Category = "Flashlight")
     bool bStartOn = false;
