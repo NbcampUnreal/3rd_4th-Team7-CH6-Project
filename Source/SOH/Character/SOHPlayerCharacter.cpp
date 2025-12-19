@@ -20,28 +20,29 @@
 
 ASOHPlayerCharacter::ASOHPlayerCharacter()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = true;
+	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	GetCharacterMovement()->bOrientRotationToMovement = false;
-	GetCharacterMovement()->bUseControllerDesiredRotation = true;  // 추가!
-	GetCharacterMovement()->RotationRate = FRotator(0.f, 270.f, 0.f);  // 속도 조절
+	// 이동 방향으로만 회전
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 270.f, 0.f);
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
+	// 카메라는 자유롭게 회전
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 300.f;
-	SpringArm->bUsePawnControlRotation = true;
+	SpringArm->bUsePawnControlRotation = true;  // ← 마우스 따라감
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	FollowCamera->bUsePawnControlRotation = false; // ← SpringArm만 따라감
 
 	Tags.Add(FName("Player"));
-
 	Health = MaxHealth;
 	Stamina = MaxStamina;
 }
@@ -88,6 +89,41 @@ void ASOHPlayerCharacter::BeginPlay()
 			Health = GI->LoadedHealth;
 			Stamina = GI->LoadedStamina;
 			UpdateOverlay(Health, MaxHealth);
+		}
+	}
+}
+
+void ASOHPlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// ⭐ UI가 열려있으면 회전/이동 무시
+	if (bIsUIOpen)
+	{
+		return; 
+	}
+
+	// 현재 속도 체크
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	float CurrentSpeed = Velocity.Size();
+
+	// 정지 상태일 때만 컨트롤러 회전을 따라감
+	if (CurrentSpeed < 1.0f)
+	{
+		if (AController* MyController = GetController())
+		{
+			FRotator CurrentRotation = GetActorRotation();
+			FRotator TargetRotation = FRotator(0.f, MyController->GetControlRotation().Yaw, 0.f);
+
+			FRotator NewRotation = FMath::RInterpTo(
+				CurrentRotation,
+				TargetRotation,
+				DeltaTime,
+				StandingRotationSpeed
+			);
+
+			SetActorRotation(NewRotation);
 		}
 	}
 }
@@ -177,6 +213,11 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 {
+	if (bIsUIOpen)
+	{
+		return;
+	}
+
 	const FVector2D Axis = Value.Get<FVector2D>();
 
 	// 현재 이동 방향 저장
@@ -741,7 +782,7 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 		CurrentOpenUI->AddToViewport();
 		bIsUIOpen = true;
 
-		// Pause UI일 때만 시간 정지
+		//시간 정지
 		if (UIType == FName("Pause") || UIType == FName("Inventory") || UIType == FName("Map"))
 		{
 			UGameplayStatics::SetGlobalTimeDilation(this, 0.0001f);
@@ -751,13 +792,14 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 		if (APlayerController* PC = GetController<APlayerController>())
 		{
 			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(CurrentOpenUI->TakeWidget());
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			PC->SetInputMode(InputMode);
 			PC->bShowMouseCursor = true;
 
 			// ⭐ 추가: Look/Move 입력 차단
-			PC->SetIgnoreLookInput(true);
-			PC->SetIgnoreMoveInput(true);
+			//PC->SetIgnoreLookInput(true);
+			//PC->SetIgnoreMoveInput(true);
 		}
 	}
 }
@@ -787,17 +829,53 @@ void ASOHPlayerCharacter::CloseUI()
 	}
 }
 
-void ASOHPlayerCharacter::OnTogglePause(const FInputActionValue& Value)
+void ASOHPlayerCharacter::OnToggleInventory(const FInputActionValue& Value)
 {
-	ToggleUI(FName("Pause"), PauseMenuClass);
+	// ⭐ 현재 인벤토리가 열려있는지 체크
+	if (bIsUIOpen)
+	{
+		// 인벤토리가 열려있으면 무조건 닫기
+		if (CurrentUIType == FName("Inventory"))
+		{
+			CloseUI();
+			return;
+		}
+
+		// 다른 UI가 열려있으면 무시 (또는 경고)
+		UE_LOG(LogTemp, Warning, TEXT("Another UI is open!"));
+		return;
+	}
+
+	// UI가 안 열려있으면 인벤토리 열기
+	ToggleUI(FName("Inventory"), InventoryMenuClass);
 }
 
 void ASOHPlayerCharacter::OnToggleMap(const FInputActionValue& Value)
 {
+	if (bIsUIOpen)
+	{
+		if (CurrentUIType == FName("Map"))
+		{
+			CloseUI();
+			return;
+		}
+		return; // 다른 UI 열려있으면 무시
+	}
+
 	ToggleUI(FName("Map"), MapMenuClass);
 }
 
-void ASOHPlayerCharacter::OnToggleInventory(const FInputActionValue& Value)
+void ASOHPlayerCharacter::OnTogglePause(const FInputActionValue& Value)
 {
-	ToggleUI(FName("Inventory"), InventoryMenuClass);
+	if (bIsUIOpen)
+	{
+		if (CurrentUIType == FName("Pause"))
+		{
+			CloseUI();
+			return;
+		}
+		return;
+	}
+
+	ToggleUI(FName("Pause"), PauseMenuClass);
 }

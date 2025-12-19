@@ -52,6 +52,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float RunSpeed = 400.f;
 
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float StandingRotationSpeed = 10.0f;
+
 	FVector2D CurrentMoveInput;
 
 
@@ -216,7 +219,7 @@ public:
 	void OnTogglePause(const FInputActionValue& Value);
 	void OnToggleMap(const FInputActionValue& Value);
 	void OnToggleInventory(const FInputActionValue& Value);
-
+	virtual void Tick(float DeltaTime) override;
 	// 체력 관련 UI
 	
 	// 체력 회복 아이템 사용
