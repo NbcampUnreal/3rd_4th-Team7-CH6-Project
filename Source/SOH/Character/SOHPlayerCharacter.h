@@ -53,7 +53,7 @@ protected:
 	float RunSpeed = 400.f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float StandingRotationSpeed = 10.0f;
+	float StandingRotationSpeed = 20.0f;
 
 	FVector2D CurrentMoveInput;
 

@@ -29,7 +29,7 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 	// 이동 방향으로만 회전
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
-	GetCharacterMovement()->RotationRate = FRotator(0.f, 270.f, 0.f);
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 	// 카메라는 자유롭게 회전
