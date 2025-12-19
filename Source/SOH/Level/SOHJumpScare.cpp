@@ -2,8 +2,11 @@
 #include "Components/BoxComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/AudioComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimInstance.h"
 
 ASOHJumpScare::ASOHJumpScare()
@@ -50,6 +53,10 @@ void ASOHJumpScare::BeginPlay()
 
 void ASOHJumpScare::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	GetWorldTimerManager().ClearTimer(DashTimerHandle);
+	GetWorldTimerManager().ClearTimer(LifetimeTimerHandle);
+	GetWorldTimerManager().ClearTimer(MontageTimerHandle);
+
 	CleanupAudioComps();
 	Super::EndPlay(EndPlayReason);
 }
@@ -64,44 +71,26 @@ ACharacter* ASOHJumpScare::GetPlayerChar() const
 	return UGameplayStatics::GetPlayerCharacter(this, 0);
 }
 
-void ASOHJumpScare::OnSpawnBoxBeginOverlap(
-	UPrimitiveComponent*,
-	AActor* OtherActor,
-	UPrimitiveComponent*,
-	int32,
-	bool,
-	const FHitResult&)
+void ASOHJumpScare::OnSpawnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!IsPlayer(OtherActor))
-	{
 		return;
-	}
 
 	if (bSpawnOnlyOnce && bSpawnTriggered)
-	{
 		return;
-	}
 
 	SpawnCharacter();
 }
 
-void ASOHJumpScare::OnRemoveBoxBeginOverlap(
-	UPrimitiveComponent*,
-	AActor* OtherActor,
-	UPrimitiveComponent*,
-	int32,
-	bool,
-	const FHitResult&)
+void ASOHJumpScare::OnRemoveBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!IsPlayer(OtherActor))
-	{
 		return;
-	}
 
 	if (bRemoveOnlyOnce && bRemoveTriggered)
-	{
 		return;
-	}
 
 	TriggerRemoveAction();
 }
@@ -110,9 +99,11 @@ void ASOHJumpScare::SpawnCharacter()
 {
 	bSpawnTriggered = true;
 
-	if (!SpawnClass || !SpawnArrow) return;
+	if (!SpawnClass || !SpawnArrow)
+		return;
 
-	if (IsValid(SpawnedCharacter)) return;
+	if (IsValid(SpawnedCharacter))
+		return;
 
 	const FTransform SpawnTM = SpawnArrow->GetComponentTransform();
 
@@ -135,9 +126,7 @@ void ASOHJumpScare::StartSpawnSFXAttached()
 	}
 
 	if (!IsValid(SpawnedCharacter) || !SpawnSFX)
-	{
 		return;
-	}
 
 	SpawnAudioComp = UGameplayStatics::SpawnSoundAttached(
 		SpawnSFX,
@@ -174,9 +163,7 @@ void ASOHJumpScare::PlayActionSFXAttached()
 	}
 
 	if (!IsValid(SpawnedCharacter) || !ActionSFX)
-	{
 		return;
-	}
 
 	ActionAudioComp = UGameplayStatics::SpawnSoundAttached(
 		ActionSFX,
@@ -198,62 +185,110 @@ void ASOHJumpScare::TriggerRemoveAction()
 	bRemoveTriggered = true;
 
 	if (!IsValid(SpawnedCharacter))
-	{
 		return;
-	}
 
 	if (bStopSpawnSFXOnRemove)
-	{
 		StopSpawnSFX();
-	}
 
 	PlayActionSFXAttached();
 
 	if (!MontageToPlay)
 	{
 		DestroySpawned();
+		Destroy();
 		return;
+	}
+
+	GetWorldTimerManager().ClearTimer(DashTimerHandle);
+	GetWorldTimerManager().ClearTimer(LifetimeTimerHandle);
+	GetWorldTimerManager().ClearTimer(MontageTimerHandle);
+
+	if (JumpScareLifetime > 0.f)
+	{
+		GetWorldTimerManager().SetTimer(LifetimeTimerHandle, [this]()
+			{
+				GetWorldTimerManager().ClearTimer(DashTimerHandle);
+				DestroySpawned();
+				Destroy();
+			}, JumpScareLifetime, false);
 	}
 
 	if (bLaunchTowardPlayer)
 	{
 		if (ACharacter* Player = GetPlayerChar())
 		{
-			FVector Dir = (Player->GetActorLocation() - SpawnedCharacter->GetActorLocation());
+			FVector Dir = Player->GetActorLocation() - SpawnedCharacter->GetActorLocation();
 			Dir.Z = 0.f;
 			Dir = Dir.GetSafeNormal();
 
-			const FVector LaunchVel = Dir * LaunchStrength + FVector(0.f, 0.f, LaunchUpStrength);
-			SpawnedCharacter->LaunchCharacter(LaunchVel, true, true);
-		}
-	}
-
-	if (USkeletalMeshComponent* Mesh = SpawnedCharacter->GetMesh())
-	{
-		if (UAnimInstance* AnimInst = Mesh->GetAnimInstance())
-		{
-			const float Played = AnimInst->Montage_Play(MontageToPlay, 1.0f);
-			if (Played > 0.f)
+			if (UCharacterMovementComponent* Move = SpawnedCharacter->GetCharacterMovement())
 			{
-				FOnMontageEnded EndDelegate;
-				EndDelegate.BindUObject(this, &ASOHJumpScare::OnMontageEnded);
-				AnimInst->Montage_SetEndDelegate(EndDelegate, MontageToPlay);
-				return;
+				Move->SetMovementMode(MOVE_Walking);
+
+				const FVector DashVel = Dir * DashSpeed;
+
+				if (DashDuration > 0.f)
+				{
+					GetWorldTimerManager().SetTimer(DashTimerHandle, [this, DashVel]()
+						{
+							if (!IsValid(SpawnedCharacter))
+								return;
+
+							if (UCharacterMovementComponent* M = SpawnedCharacter->GetCharacterMovement())
+							{
+								M->Velocity = DashVel;
+							}
+						}, DashTickInterval, true);
+
+					FTimerHandle DashStopHandle;
+					GetWorldTimerManager().SetTimer(DashStopHandle, [this]()
+						{
+							GetWorldTimerManager().ClearTimer(DashTimerHandle);
+						}, DashDuration, false);
+				}
+				else
+				{
+					Move->Velocity = DashVel;
+				}
 			}
 		}
 	}
 
-	DestroySpawned();
+	GetWorldTimerManager().SetTimer(MontageTimerHandle, [this]()
+		{
+			if (!IsValid(SpawnedCharacter))
+				return;
+
+			if (USkeletalMeshComponent* Mesh = SpawnedCharacter->GetMesh())
+			{
+				if (UAnimInstance* AnimInst = Mesh->GetAnimInstance())
+				{
+					const float Played = AnimInst->Montage_Play(MontageToPlay, 1.0f);
+					if (Played > 0.f)
+					{
+						FOnMontageEnded EndDelegate;
+						EndDelegate.BindUObject(this, &ASOHJumpScare::OnMontageEnded);
+						AnimInst->Montage_SetEndDelegate(EndDelegate, MontageToPlay);
+					}
+				}
+			}
+		}, 0.05f, false);
 }
 
-void ASOHJumpScare::OnMontageEnded(UAnimMontage* Montage, bool)
+void ASOHJumpScare::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (MontageToPlay && Montage != MontageToPlay)
-	{
+	if (!bDestroyOnMontageEnd)
 		return;
-	}
+
+	if (MontageToPlay && Montage != MontageToPlay)
+		return;
+
+	GetWorldTimerManager().ClearTimer(DashTimerHandle);
+	GetWorldTimerManager().ClearTimer(LifetimeTimerHandle);
+	GetWorldTimerManager().ClearTimer(MontageTimerHandle);
 
 	DestroySpawned();
+	Destroy();
 }
 
 void ASOHJumpScare::CleanupAudioComps()

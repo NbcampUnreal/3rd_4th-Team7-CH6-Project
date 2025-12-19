@@ -6,9 +6,9 @@
 
 class UBoxComponent;
 class UArrowComponent;
+class UAudioComponent;
 class USoundBase;
 class UAnimMontage;
-class UAudioComponent;
 class ACharacter;
 
 UCLASS()
@@ -23,103 +23,102 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+protected:
+	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* SpawnBox;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* RemoveBox;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere)
 	UArrowComponent* SpawnArrow;
 
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Spawn")
 	TSubclassOf<ACharacter> SpawnClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Spawn")
+	bool bSpawnOnlyOnce = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Remove")
+	bool bRemoveOnlyOnce = true;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|SFX")
 	USoundBase* SpawnSFX = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Spawn")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|SFX")
 	bool bSpawnSFXLoop = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|SFX")
+	bool bStopSpawnSFXOnRemove = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|SFX")
+	USoundBase* ActionSFX = nullptr;
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Action")
 	UAnimMontage* MontageToPlay = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Action")
-	USoundBase* ActionSFX = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Action")
-	bool bStopSpawnSFXOnRemove = true;
-
-	// 플레이어에게 날아가기
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Action")
 	bool bLaunchTowardPlayer = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Action", meta = (EditCondition = "bLaunchTowardPlayer"))
-	float LaunchStrength = 1200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Dash", meta = (EditCondition = "bLaunchTowardPlayer", ClampMin = "0.0"))
+	float DashSpeed = 2000.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Action", meta = (EditCondition = "bLaunchTowardPlayer"))
-	float LaunchUpStrength = 150.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Dash", meta = (EditCondition = "bLaunchTowardPlayer", ClampMin = "0.0"))
+	float DashDuration = 0.35f;
 
-	// 한번만 동작
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Flags")
-	bool bSpawnOnlyOnce = true;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Dash", meta = (EditCondition = "bLaunchTowardPlayer", ClampMin = "0.005"))
+	float DashTickInterval = 0.02f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Flags")
-	bool bRemoveOnlyOnce = true;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Lifetime", meta = (ClampMin = "0.0"))
+	float JumpScareLifetime = 2.0f;
 
-	// Runtime
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Runtime")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config|Lifetime")
+	bool bDestroyOnMontageEnd = false;
+
+protected:
+	UPROPERTY()
 	ACharacter* SpawnedCharacter = nullptr;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Runtime")
+	UPROPERTY()
 	UAudioComponent* SpawnAudioComp = nullptr;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Runtime")
+	UPROPERTY()
 	UAudioComponent* ActionAudioComp = nullptr;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Runtime")
 	bool bSpawnTriggered = false;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Runtime")
 	bool bRemoveTriggered = false;
 
-	// Overlap
+	FTimerHandle DashTimerHandle;
+	FTimerHandle LifetimeTimerHandle;
+	FTimerHandle MontageTimerHandle;
+
+protected:
 	UFUNCTION()
-	void OnSpawnBoxBeginOverlap(
-		UPrimitiveComponent* OverlappedComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
+	void OnSpawnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void OnRemoveBoxBeginOverlap(
-		UPrimitiveComponent* OverlappedComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
+	void OnRemoveBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	// Montage end
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	// Helpers
+protected:
 	bool IsPlayer(AActor* OtherActor) const;
 	ACharacter* GetPlayerChar() const;
 
 	void SpawnCharacter();
-	void TriggerRemoveAction();
-
 	void StartSpawnSFXAttached();
 	void StopSpawnSFX();
-
 	void PlayActionSFXAttached();
+	void TriggerRemoveAction();
 	void CleanupAudioComps();
 	void DestroySpawned();
 };
