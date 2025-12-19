@@ -155,29 +155,13 @@ void ASOHJumpScare::StopSpawnSFX()
 
 void ASOHJumpScare::PlayActionSFXAttached()
 {
-	if (IsValid(ActionAudioComp))
-	{
-		ActionAudioComp->Stop();
-		ActionAudioComp->DestroyComponent();
-		ActionAudioComp = nullptr;
-	}
+	if (!ActionSFX || !SpawnedCharacter) return;
 
-	if (!IsValid(SpawnedCharacter) || !ActionSFX)
-		return;
-
-	ActionAudioComp = UGameplayStatics::SpawnSoundAttached(
+	UGameplayStatics::PlaySoundAtLocation(
+		this,
 		ActionSFX,
-		SpawnedCharacter->GetRootComponent(),
-		NAME_None,
-		FVector::ZeroVector,
-		EAttachLocation::KeepRelativeOffset,
-		true
+		SpawnedCharacter->GetActorLocation()
 	);
-
-	if (IsValid(ActionAudioComp))
-	{
-		ActionAudioComp->bAutoDestroy = true;
-	}
 }
 
 void ASOHJumpScare::TriggerRemoveAction()
