@@ -8,6 +8,7 @@
 #include "UI/SOHMessageManager.h"
 #include "Level/SOHJumpScareBase.h"
 #include "Item/SOHItemManager.h"
+#include "Kismet/GameplayStatics.h"
 
 ASOHFlashlight::ASOHFlashlight()
 {
@@ -55,6 +56,9 @@ void ASOHFlashlight::SetOn(bool bEnable)
     if (bEnable && IsBatteryEmpty())
         bEnable = false;
 
+    // 상태가 실제로 변경될 때만 사운드 재생
+    bool bStateChanged = (bOn != bEnable);
+
     bOn = bEnable;
 
     if (!Spot) return;
@@ -63,6 +67,19 @@ void ASOHFlashlight::SetOn(bool bEnable)
     Spot->SetHiddenInGame(!bOn);
 
     UpdateLightFromBattery();
+
+    // 상태 변경 시 사운드 재생
+    if (bStateChanged && bEquipped)
+    {
+        if (bOn && FlashlightOnSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this, FlashlightOnSound, GetActorLocation());
+        }
+        else if (!bOn && FlashlightOffSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this, FlashlightOffSound, GetActorLocation());
+        }
+    }
 
     if (bOn) StartBatteryDrain();
     else     StopBatteryDrain();

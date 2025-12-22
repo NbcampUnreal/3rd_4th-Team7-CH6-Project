@@ -34,6 +34,12 @@ public:
     UFUNCTION(BlueprintPure, Category = "Flashlight|Battery")
     float GetBatteryPercent() const;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight|Sound")
+    USoundBase* FlashlightOnSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight|Sound")
+    USoundBase* FlashlightOffSound;
+
 protected:
     virtual void BeginPlay() override;
 
