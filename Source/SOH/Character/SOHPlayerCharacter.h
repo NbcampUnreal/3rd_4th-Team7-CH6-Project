@@ -26,6 +26,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetStamina() const { return Stamina; }
 
+	void ApplyLoadedData();
+	
 	// Battery 호출용
 
 	void SetFlashlight(ASOHFlashlight* InLight) { Flashlight = InLight; }

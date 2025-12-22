@@ -77,26 +77,27 @@ void ASOHPlayerCharacter::BeginPlay()
 			BreathingAudioComponent->RegisterComponent();
 		}
 	}
+	
+}
 
-	// ============================
-	// LOAD GAME RESTORE (추가)
-	// ============================
+void ASOHPlayerCharacter::ApplyLoadedData()
+{
 	if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
 	{
-		if (GI->bLoadedFromSave)
+		if (!GI->bLoadedFromSave) return;
+
+		SetActorTransform(GI->LoadedPlayerTransform);
+		Health = GI->LoadedHealth;
+		Stamina = GI->LoadedStamina;
+
+		if (USOHInventoryComponent* Inv = FindComponentByClass<USOHInventoryComponent>())
 		{
-			SetActorTransform(GI->LoadedPlayerTransform);
-			Health = GI->LoadedHealth;
-			Stamina = GI->LoadedStamina;
-			UpdateOverlay(Health, MaxHealth);
-			
-			if (USOHInventoryComponent* Inv = FindComponentByClass<USOHInventoryComponent>())
-			{
-				Inv->LoadInventory(GI->LoadedInventory);
-			}
-			
-			GI->bLoadedFromSave = false;
+			Inv->LoadInventory(GI->LoadedInventory);
 		}
+
+		UpdateOverlay(Health, MaxHealth);
+
+		GI->bLoadedFromSave = false;
 	}
 }
 
