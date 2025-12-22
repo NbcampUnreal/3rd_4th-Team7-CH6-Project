@@ -202,6 +202,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Interaction")
 	float SphereTraceRadius = 15.f; // 에디터에서 조절 가능
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* InteractMontage;
+
 public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

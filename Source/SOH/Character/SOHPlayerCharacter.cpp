@@ -493,6 +493,13 @@ void ASOHPlayerCharacter::Interact()
 	if (LastHighlightedItem)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Interacted with: %s"), *LastHighlightedItem->GetName());
+
+		// 상체 애니메이션 재생
+		if (InteractMontage)
+		{
+			PlayUpperBodyMontage(InteractMontage);
+		}
+
 		ISOHInteractInterface::Execute_Interact(LastHighlightedItem, this);
 	}
 }
