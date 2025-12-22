@@ -36,6 +36,10 @@ public:
 	// 인벤 UI에 쓰임
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void GetInventoryContents_BP(TArray<FSOHInventoryItem>& OutItems) const;
+	
+	// 로드 인벤토리
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void LoadInventory(const TArray<FSOHInventoryItem>& SavedItems);
 
 protected:
 	// 실제 아이템들이 저장될 배열 (우리들의 가방)

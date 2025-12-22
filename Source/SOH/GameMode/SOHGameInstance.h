@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "GameplayTagContainer.h"
+#include "Item/SOHInventoryComponent.h"
 #include "SOHStageData.h"
 #include "SOHGameInstance.generated.h"
 
@@ -48,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool LoadGameData();
 
+	UPROPERTY()
+	TArray<FSOHInventoryItem> LoadedInventory;
+	
 	void DebugPrint();
 	
 	//SaveGame 로드 후 임시 저장용
@@ -61,7 +65,7 @@ public:
 	float LoadedStamina;
 
 	UPROPERTY()
-	bool bLoadedFromSave = false;
+	bool bLoadedFromSave = true;
 
 	
 };

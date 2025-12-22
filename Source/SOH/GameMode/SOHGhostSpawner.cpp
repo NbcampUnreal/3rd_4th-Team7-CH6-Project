@@ -11,32 +11,24 @@ ASOHGhostSpawner::ASOHGhostSpawner()
 void ASOHGhostSpawner::BeginPlay()
 {
     Super::BeginPlay();
-
-    // 초기 설정 검증
-    if (!GhostClass)
-    {
-        UE_LOG(LogTemp, Error, TEXT("GhostSpawner [%s]: GhostClass가 블루프린트에서 설정되지 않음!"), *GetName());
-    }
     
-    if (!TargetActor)
-    {
-        UE_LOG(LogTemp, Error, TEXT("GhostSpawner [%s]: TargetActor가 블루프린트에서 설정되지 않음!"), *GetName());
-    }
-
-    if (!SpawnConditionTag.IsValid())
-    {
-        UE_LOG(LogTemp, Error, TEXT("GhostSpawner [%s]: SpawnConditionTag가 설정되지 않음!"), *GetName());
-    }
 
     USOHGameInstance* GI = GetGameInstance<USOHGameInstance>();
     if (GI)
     {
         GI->OnConditionCompleted.AddDynamic(this, &ASOHGhostSpawner::OnConditionCompleted);
-        UE_LOG(LogTemp, Log, TEXT("GhostSpawner [%s]: GameInstance 이벤트 바인딩 성공"), *GetName());
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("GhostSpawner [%s]: GameInstance 없음!"), *GetName());
+        
+        // 🔥 이미 조건이 달성된 상태라면 즉시 스폰
+        if (GI->HasCondition(SpawnConditionTag))
+        {
+            SpawnGhost();
+        }
+
+        // 🔥 이미 Despawn 조건이 달성되어 있다면 즉시 파괴
+        if (GI->HasCondition(DespawnConditionTag))
+        {
+            DespawnGhost();
+        }
     }
 }
 

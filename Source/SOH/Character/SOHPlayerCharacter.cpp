@@ -89,6 +89,13 @@ void ASOHPlayerCharacter::BeginPlay()
 			Health = GI->LoadedHealth;
 			Stamina = GI->LoadedStamina;
 			UpdateOverlay(Health, MaxHealth);
+			
+			if (USOHInventoryComponent* Inv = FindComponentByClass<USOHInventoryComponent>())
+			{
+				Inv->LoadInventory(GI->LoadedInventory);
+			}
+			
+			GI->bLoadedFromSave = false;
 		}
 	}
 }

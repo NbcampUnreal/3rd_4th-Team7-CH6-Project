@@ -67,6 +67,9 @@ void USOHGameInstance::AdvanceStage()
 {
 	UE_LOG(LogTemp, Warning, TEXT("==== Stage %d 완료! 다음 Stage로 이동 ===="), CurrentStage);
 	CurrentStage++;
+	
+	SaveGameData();
+	UE_LOG(LogTemp, Warning, TEXT("[AUTO SAVE] Stage 변경으로 자동 저장됨."));
 }
 
 void USOHGameInstance::SaveGameData()
@@ -92,6 +95,11 @@ void USOHGameInstance::SaveGameData()
 		{
 			Save->SavedHealth = P->GetHealth();
 			Save->SavedStamina = P->GetStamina();
+			
+			if (USOHInventoryComponent* Inv = P->FindComponentByClass<USOHInventoryComponent>())
+			{
+				Save->SavedInventory = Inv->GetInventoryContents();
+			}
 		}
 	}
 
@@ -124,6 +132,8 @@ bool USOHGameInstance::LoadGameData()
 	LoadedPlayerTransform = Save->PlayerTransform;
 	LoadedHealth = Save->SavedHealth;
 	LoadedStamina = Save->SavedStamina;
+	
+	LoadedInventory = Save->SavedInventory;
 
 	UE_LOG(LogTemp, Warning, TEXT("[LOAD] Game loaded successfully."));
 	return true;

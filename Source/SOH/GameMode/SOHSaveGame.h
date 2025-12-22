@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/SaveGame.h"
+#include "Item/SOHInventoryComponent.h"
 #include "SOHSaveGame.generated.h"
 
 UCLASS()
@@ -28,9 +29,13 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	FGameplayTagContainer SavedConditions;
+	
+	UPROPERTY(BlueprintReadWrite)
+	TArray<FSOHInventoryItem> 
+	SavedInventory;
 
 	USOHSaveGame()
-	   : SavedHealth(100.f)
+	   : SavedHealth(200.f)
 	   , SavedStamina(100.f)
 	   , SavedStage(0)
 	{}

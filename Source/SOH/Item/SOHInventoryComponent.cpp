@@ -92,3 +92,8 @@ void USOHInventoryComponent::GetInventoryContents_BP(TArray<FSOHInventoryItem>& 
 {
 	OutItems = inventoryContents;
 }
+
+void USOHInventoryComponent::LoadInventory(const TArray<FSOHInventoryItem>& SavedItems)
+{
+	inventoryContents = SavedItems;
+}
