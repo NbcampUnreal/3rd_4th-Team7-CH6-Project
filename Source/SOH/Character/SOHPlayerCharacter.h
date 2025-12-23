@@ -207,6 +207,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* InteractMontage;
 
+	bool bIsPlayingInteractMontage = false;
+
+	UFUNCTION()
+	void OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
 public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

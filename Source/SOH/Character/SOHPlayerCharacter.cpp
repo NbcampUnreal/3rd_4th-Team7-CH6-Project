@@ -221,6 +221,11 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 {
+	if (bIsPlayingInteractMontage)
+	{
+		return;
+	}
+
 	if (bIsUIOpen)
 	{
 		return;
@@ -259,6 +264,11 @@ void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 
 void ASOHPlayerCharacter::Look(const FInputActionValue& Value)
 {
+	if (bIsPlayingInteractMontage)
+	{
+		return;
+	}
+
 	// ⭐ UI 열려있으면 무조건 리턴
 	if (bIsUIOpen)
 	{
@@ -500,15 +510,14 @@ void ASOHPlayerCharacter::Interact()
 {
 	if (LastHighlightedItem)
 	{
-		// 애님 인스턴스 가져오기
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (!AnimInstance)
 		{
 			return;
 		}
 
-		// 이미 InteractMontage가 재생 중이면 무시
-		if (AnimInstance->Montage_IsPlaying(InteractMontage))
+		// 이미 재생 중이면 무시
+		if (bIsPlayingInteractMontage || AnimInstance->Montage_IsPlaying(InteractMontage))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Interact montage is already playing!"));
 			return;
@@ -516,14 +525,26 @@ void ASOHPlayerCharacter::Interact()
 
 		UE_LOG(LogTemp, Warning, TEXT("Interacted with: %s"), *LastHighlightedItem->GetName());
 
-		// 상체 애니메이션 재생
 		if (InteractMontage)
 		{
+			bIsPlayingInteractMontage = true;
+
 			PlayUpperBodyMontage(InteractMontage);
+
+			// 몽타주 종료 시 콜백
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindUObject(this, &ASOHPlayerCharacter::OnInteractMontageEnded);
+			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, InteractMontage);
 		}
 
 		ISOHInteractInterface::Execute_Interact(LastHighlightedItem, this);
 	}
+}
+
+void ASOHPlayerCharacter::OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bIsPlayingInteractMontage = false;
+	UE_LOG(LogTemp, Warning, TEXT("Interact montage ended, input restored"));
 }
 
 void ASOHPlayerCharacter::ToggleFlashlight()
