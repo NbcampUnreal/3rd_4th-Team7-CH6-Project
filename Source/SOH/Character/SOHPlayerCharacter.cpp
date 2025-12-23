@@ -500,6 +500,20 @@ void ASOHPlayerCharacter::Interact()
 {
 	if (LastHighlightedItem)
 	{
+		// 애님 인스턴스 가져오기
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (!AnimInstance)
+		{
+			return;
+		}
+
+		// 이미 InteractMontage가 재생 중이면 무시
+		if (AnimInstance->Montage_IsPlaying(InteractMontage))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Interact montage is already playing!"));
+			return;
+		}
+
 		UE_LOG(LogTemp, Warning, TEXT("Interacted with: %s"), *LastHighlightedItem->GetName());
 
 		// 상체 애니메이션 재생
