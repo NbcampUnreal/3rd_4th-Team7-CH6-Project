@@ -200,9 +200,6 @@ protected:
 	// 상호작용 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trace")
 	float TraceDistance = 300.f;
-	
-	UPROPERTY(EditAnywhere, Category = "Interaction")
-	float SphereTraceRadius = 15.f; // 에디터에서 조절 가능
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* InteractMontage;
