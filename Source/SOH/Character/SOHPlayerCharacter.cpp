@@ -221,10 +221,10 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 {
-	if (bIsPlayingInteractMontage)
-	{
-		return;
-	}
+	//if (bIsPlayingInteractMontage)
+	//{
+		//return;
+	//}
 
 	if (bIsUIOpen)
 	{
@@ -264,10 +264,10 @@ void ASOHPlayerCharacter::Move(const FInputActionValue& Value)
 
 void ASOHPlayerCharacter::Look(const FInputActionValue& Value)
 {
-	if (bIsPlayingInteractMontage)
-	{
-		return;
-	}
+	//if (bIsPlayingInteractMontage)
+	//{
+		//return;
+	//}
 
 	// ⭐ UI 열려있으면 무조건 리턴
 	if (bIsUIOpen)
