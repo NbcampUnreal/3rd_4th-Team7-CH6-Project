@@ -209,6 +209,8 @@ protected:
 	UFUNCTION()
 	void OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+	TArray<UUserWidget*> RemovedWidgets;
+
 public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -249,6 +251,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	UUserWidget* PlayerHUD = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Interaction")
+	bool bIsInInteractionCamera = false;
 
 private:
 	UPROPERTY()

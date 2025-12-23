@@ -152,18 +152,96 @@ void ASOHPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// ⭐ UI가 열려있으면 회전/이동 무시
-	if (bIsUIOpen)
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
-		return; 
+		AActor* ViewTarget = PC->GetViewTarget();
+
+		bool bIsViewingOtherCamera = false;
+
+		if (ViewTarget)
+		{
+			FString ViewTargetClassName = ViewTarget->GetClass()->GetName();
+
+			if (!ViewTargetClassName.Contains("SOHPlayerCharacter"))
+			{
+				bIsViewingOtherCamera = true;
+			}
+		}
+
+		if (bIsInInteractionCamera != bIsViewingOtherCamera)
+		{
+			bIsInInteractionCamera = bIsViewingOtherCamera;
+
+			UE_LOG(LogTemp, Error, TEXT("===== CAMERA MODE: %s ====="),
+				bIsInInteractionCamera ? TEXT("INTERACTION") : TEXT("NORMAL"));
+
+			if (bIsInInteractionCamera)
+			{
+				bUIHit = false;
+
+				// ⭐ 제거하기 전에 저장
+				RemovedWidgets.Empty();
+
+				if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
+				{
+					TArray<UUserWidget*> AllWidgets;
+					for (TObjectIterator<UUserWidget> It; It; ++It)
+					{
+						UUserWidget* Widget = *It;
+						if (Widget && Widget->IsInViewport() && Widget->GetWorld() == GetWorld())
+						{
+							AllWidgets.Add(Widget);
+						}
+					}
+
+					for (UUserWidget* Widget : AllWidgets)
+					{
+						RemovedWidgets.Add(Widget); // 저장
+						Widget->RemoveFromParent();
+					}
+
+					UE_LOG(LogTemp, Error, TEXT("✅ ALL HUD REMOVED (saved %d widgets)"), RemovedWidgets.Num());
+				}
+
+				if (LastHighlightedItem)
+				{
+					if (LastHighlightedItem->Implements<USOHInteractInterface>())
+					{
+						ISOHInteractInterface::Execute_CanReceiveTrace(LastHighlightedItem, this, false);
+					}
+					LastHighlightedItem = nullptr;
+				}
+			}
+			else
+			{
+				// ⭐ 저장했던 위젯들 모두 복원
+				UE_LOG(LogTemp, Error, TEXT("Restoring %d widgets..."), RemovedWidgets.Num());
+
+				for (UUserWidget* Widget : RemovedWidgets)
+				{
+					if (Widget && !Widget->IsInViewport())
+					{
+						Widget->AddToViewport();
+						UE_LOG(LogTemp, Warning, TEXT("  - Restored: %s"), *Widget->GetName());
+					}
+				}
+
+				RemovedWidgets.Empty();
+
+				UE_LOG(LogTemp, Error, TEXT("✅ ALL HUD RESTORED"));
+			}
+		}
 	}
 
-	// 현재 속도 체크
+	if (bIsUIOpen || bIsInInteractionCamera)
+	{
+		return;
+	}
+
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	float CurrentSpeed = Velocity.Size();
 
-	// 정지 상태일 때만 컨트롤러 회전을 따라감
 	if (CurrentSpeed < 1.0f)
 	{
 		if (AController* MyController = GetController())
