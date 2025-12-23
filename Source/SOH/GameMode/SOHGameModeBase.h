@@ -27,7 +27,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Game")
 	void OnPlayerDied();
 	
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> DeathWidgetClass;
 

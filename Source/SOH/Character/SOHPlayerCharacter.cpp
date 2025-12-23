@@ -82,23 +82,70 @@ void ASOHPlayerCharacter::BeginPlay()
 
 void ASOHPlayerCharacter::ApplyLoadedData()
 {
-	if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+	UE_LOG(LogTemp, Warning, TEXT("========================================"));
+	UE_LOG(LogTemp, Warning, TEXT("⭐ ApplyLoadedData 시작"));
+    
+	USOHGameInstance* GI = GetGameInstance<USOHGameInstance>();
+	if (!GI)
 	{
-		if (!GI->bLoadedFromSave) return;
-
-		SetActorTransform(GI->LoadedPlayerTransform);
-		Health = GI->LoadedHealth;
-		Stamina = GI->LoadedStamina;
-
-		if (USOHInventoryComponent* Inv = FindComponentByClass<USOHInventoryComponent>())
-		{
-			Inv->LoadInventory(GI->LoadedInventory);
-		}
-
-		UpdateOverlay(Health, MaxHealth);
-
-		GI->bLoadedFromSave = false;
+		UE_LOG(LogTemp, Error, TEXT("❌ GameInstance null!"));
+		return;
 	}
+
+	if (!GI->bLoadedFromSave)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("⚠️ bLoadedFromSave가 false - 적용 안 함"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("📍 현재 위치: %s"), *GetActorLocation().ToString());
+	UE_LOG(LogTemp, Log, TEXT("📍 로드할 위치: %s"), *GI->LoadedPlayerTransform.GetLocation().ToString());
+
+	// ⭐ 위치만 변경 (Transform 전체 말고!)
+	SetActorLocation(GI->LoadedPlayerTransform.GetLocation());
+	SetActorRotation(GI->LoadedPlayerTransform.GetRotation());
+
+	// 스탯 복원
+	Health = GI->LoadedHealth;
+	Stamina = GI->LoadedStamina;
+
+	// 인벤토리 복원
+	if (USOHInventoryComponent* Inv = FindComponentByClass<USOHInventoryComponent>())
+	{
+		Inv->LoadInventory(GI->LoadedInventory);
+	}
+
+	UpdateOverlay(Health, MaxHealth);
+
+	// ⭐⭐⭐ 핵심: Controller와 Input 재설정
+	APlayerController* PC = GetController<APlayerController>();
+	if (PC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("🎮 Controller 재설정 시작"));
+        
+		// 1. ViewTarget 재설정 (카메라)
+		PC->SetViewTargetWithBlend(this, 0.0f);
+        
+		// 2. Input Mode 강제 설정
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+        
+		// 3. Possess 재설정 (확실하게!)
+		PC->UnPossess();
+		PC->Possess(this);
+        
+		UE_LOG(LogTemp, Warning, TEXT("✅ Controller 재설정 완료"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ PlayerController null!"));
+	}
+
+	GI->bLoadedFromSave = false;
+    
+	UE_LOG(LogTemp, Warning, TEXT("✅ ApplyLoadedData 완료!"));
+	UE_LOG(LogTemp, Warning, TEXT("========================================"));
 }
 
 void ASOHPlayerCharacter::Tick(float DeltaTime)

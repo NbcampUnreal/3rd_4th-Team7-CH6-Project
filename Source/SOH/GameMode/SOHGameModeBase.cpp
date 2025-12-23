@@ -54,34 +54,74 @@ void ASOHGameModeBase::StartGame()
     
     FString CurrentLevel = GetWorld()->GetMapName();
     
-    if (CurrentLevel.Contains("MainMenu") || CurrentLevel.Contains(LobbyLevelName.ToString()))
+    if (CurrentLevel.Contains("MainMenuLevel") || CurrentLevel.Contains(LobbyLevelName.ToString()))
     {
         UGameplayStatics::OpenLevel(this, GameLevelName);
     }
 }
 
 // ⭐ 이어하기
+// SOHGameModeBase.cpp
 void ASOHGameModeBase::ContinueGame()
 {
     UE_LOG(LogTemp, Log, TEXT("===================================="));
-    UE_LOG(LogTemp, Log, TEXT("▶️ ContinueGame: Load Game"));
+    UE_LOG(LogTemp, Log, TEXT("▶️ ContinueGame"));
     UE_LOG(LogTemp, Log, TEXT("===================================="));
     
     USOHGameInstance* GI = GetGameInstance<USOHGameInstance>();
-    if (!GI) return;
+    if (!GI)
+    {
+        UE_LOG(LogTemp, Error, TEXT("❌ GameInstance null"));
+        return;
+    }
 
-    // 세이브 데이터 로드
+    // 세이브 파일 로드
     if (!GI->LoadGameData())
     {
-        UE_LOG(LogTemp, Error, TEXT("[GameMode] ❌ Failed to load"));
+        UE_LOG(LogTemp, Error, TEXT("❌ 로드 실패"));
         return;
     }
     
     FString CurrentLevel = GetWorld()->GetMapName();
+    UE_LOG(LogTemp, Log, TEXT("📍 현재 레벨: %s"), *CurrentLevel);
     
+    // 메인 메뉴에서 호출
     if (CurrentLevel.Contains("MainMenu") || CurrentLevel.Contains(LobbyLevelName.ToString()))
     {
+        UE_LOG(LogTemp, Log, TEXT("🎬 메인 메뉴 → 게임 레벨로 이동"));
         UGameplayStatics::OpenLevel(this, GameLevelName);
+    }
+    else
+    {
+        // 게임 중 호출
+        UE_LOG(LogTemp, Warning, TEXT("🎮 게임 중 로드 - 데이터 적용"));
+        
+        APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+        if (!PC)
+        {
+            UE_LOG(LogTemp, Error, TEXT("❌ PlayerController null"));
+            return;
+        }
+
+        ASOHPlayerCharacter* PlayerCharacter = Cast<ASOHPlayerCharacter>(PC->GetPawn());
+        if (!PlayerCharacter)
+        {
+            UE_LOG(LogTemp, Error, TEXT("❌ PlayerCharacter null"));
+            return;
+        }
+
+        // 데이터 적용
+        PlayerCharacter->ApplyLoadedData();
+        
+        // ⭐ 0.1초 후 한 번 더 Input Mode 설정 (확실하게!)
+        FTimerHandle TimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(TimerHandle, [PC]()
+        {
+            FInputModeGameOnly InputMode;
+            PC->SetInputMode(InputMode);
+            PC->bShowMouseCursor = false;
+            UE_LOG(LogTemp, Warning, TEXT("⏰ 0.1초 후 Input Mode 재설정"));
+        }, 0.1f, false);
     }
 }
 
@@ -125,3 +165,4 @@ void ASOHGameModeBase::OnPlayerDied()
         PC->bShowMouseCursor = true;
     }
 }
+
