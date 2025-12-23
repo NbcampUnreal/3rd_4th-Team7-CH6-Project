@@ -13,9 +13,6 @@ class SOH_API USOHSaveGame : public USaveGame
 
 public:
 	UPROPERTY(BlueprintReadWrite)
-	FName SaveLevelName;
-
-	UPROPERTY(BlueprintReadWrite)
 	FTransform PlayerTransform;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -29,10 +26,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	FGameplayTagContainer SavedConditions;
-	
+    
 	UPROPERTY(BlueprintReadWrite)
-	TArray<FSOHInventoryItem> 
-	SavedInventory;
+	TArray<FSOHInventoryItem> SavedInventory;
 
 	USOHSaveGame()
 	   : SavedHealth(200.f)

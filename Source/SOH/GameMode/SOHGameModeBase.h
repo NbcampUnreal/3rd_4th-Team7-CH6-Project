@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Blueprint/UserWidget.h"
+#include "GameplayTagContainer.h"
 #include "SOHGameModeBase.generated.h"
 
 UCLASS()
@@ -15,6 +16,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Game")
 	void StartGame();
 
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void ContinueGame();
+	
 	// Called when game is cleared
 	UFUNCTION(BlueprintCallable, Category="Game")
 	void OnGameClear();
@@ -22,6 +26,7 @@ public:
 	// Called when player dies
 	UFUNCTION(BlueprintCallable, Category="Game")
 	void OnPlayerDied();
+	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> DeathWidgetClass;
@@ -31,6 +36,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
 	// Blueprint에서 UI 처리할 수 있도록 이벤트 선언
 	UFUNCTION(BlueprintImplementableEvent, Category="UI")
@@ -48,4 +55,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category="Level")
 	FName GameLevelName = "MainLevel";
+	
+	UPROPERTY(EditDefaultsOnly, Category="SaveGame")
+	bool bEnableAutoSave = true;
+	
 };
