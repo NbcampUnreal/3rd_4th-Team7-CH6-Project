@@ -46,8 +46,6 @@ protected:
 	void ShowGameClearUI();
 
 private:
-	// 공통 레벨 로딩 함수
-	void LoadLevel(FName LevelName);
 	
 	UPROPERTY(EditDefaultsOnly, Category="Level")
 	FName LobbyLevelName = "MainMenuLevel";

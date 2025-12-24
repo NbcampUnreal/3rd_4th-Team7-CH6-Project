@@ -67,6 +67,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "SaveGame")
     void ResetGameData();
     
+    UFUNCTION(BlueprintCallable, Category = "Game")
+    void ContinueGame();
+    
     // 로드 플래그
     UPROPERTY(BlueprintReadWrite, Category = "SaveGame")
     bool bLoadedFromSave = false;
@@ -86,4 +89,10 @@ public:
     // 로드된 인벤토리
     UPROPERTY(BlueprintReadWrite, Category = "SaveGame")
     TArray<FSOHInventoryItem> LoadedInventory;
+	
+    UPROPERTY(EditDefaultsOnly, Category="Level")
+    FName LobbyLevelName = "MainMenuLevel";
+
+    UPROPERTY(EditDefaultsOnly, Category="Level")
+    FName GameLevelName = "MainLevel";
 };

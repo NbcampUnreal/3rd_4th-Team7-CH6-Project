@@ -77,7 +77,6 @@ void ASOHPlayerCharacter::BeginPlay()
 			BreathingAudioComponent->RegisterComponent();
 		}
 	}
-	
 }
 
 void ASOHPlayerCharacter::ApplyLoadedData()
@@ -116,31 +115,6 @@ void ASOHPlayerCharacter::ApplyLoadedData()
 	}
 
 	UpdateOverlay(Health, MaxHealth);
-
-	// ⭐⭐⭐ 핵심: Controller와 Input 재설정
-	APlayerController* PC = GetController<APlayerController>();
-	if (PC)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("🎮 Controller 재설정 시작"));
-        
-		// 1. ViewTarget 재설정 (카메라)
-		PC->SetViewTargetWithBlend(this, 0.0f);
-        
-		// 2. Input Mode 강제 설정
-		FInputModeGameOnly InputMode;
-		PC->SetInputMode(InputMode);
-		PC->bShowMouseCursor = false;
-        
-		// 3. Possess 재설정 (확실하게!)
-		PC->UnPossess();
-		PC->Possess(this);
-        
-		UE_LOG(LogTemp, Warning, TEXT("✅ Controller 재설정 완료"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("❌ PlayerController null!"));
-	}
 
 	GI->bLoadedFromSave = false;
     

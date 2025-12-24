@@ -147,16 +147,31 @@ void USOHGameInstance::SaveGameData()
                    *Save->PlayerTransform.GetLocation().ToString());
         }
     }
-    else
+    
+    // ⭐⭐⭐ 여기에 추가!
+    UE_LOG(LogTemp, Warning, TEXT("========================================"));
+    UE_LOG(LogTemp, Warning, TEXT("[SAVE] 🌍 월드 액터 저장 (GameplayTag 기반)"));
+    UE_LOG(LogTemp, Log, TEXT("[SAVE] 완료된 조건: %d개"), CompletedConditions.Num());
+    
+    // CompletedConditions를 문자열로 변환해서 저장
+    FString TagsString;
+    for (const FGameplayTag& Tag : CompletedConditions)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[SAVE] ⚠️ 플레이어를 찾을 수 없습니다!"));
+        if (!TagsString.IsEmpty())
+        {
+            TagsString += TEXT(",");
+        }
+        TagsString += Tag.ToString();
+        UE_LOG(LogTemp, Log, TEXT("[SAVE]   📦 %s"), *Tag.ToString());
     }
+    
+    // ⭐ SaveGame에 추가 (일단 간단하게)
+    Save->SavedConditions = CompletedConditions;
+    UE_LOG(LogTemp, Warning, TEXT("========================================"));
 
-    // 실제 저장 수행
     if (UGameplayStatics::SaveGameToSlot(Save, SAVE_SLOT_NAME, SAVE_USER_INDEX))
     {
         UE_LOG(LogTemp, Warning, TEXT("[SAVE] ✅ Stage %d 저장 완료!"), CurrentStage);
-        UE_LOG(LogTemp, Log, TEXT("[SAVE] 완료된 조건: %d개"), CompletedConditions.Num());
     }
     else
     {
@@ -203,6 +218,12 @@ bool USOHGameInstance::LoadGameData()
     UE_LOG(LogTemp, Log, TEXT("[LOAD] 위치: %s"), *LoadedPlayerTransform.GetLocation().ToString());
     UE_LOG(LogTemp, Log, TEXT("[LOAD] 완료된 조건: %d개"), CompletedConditions.Num());
     
+    UE_LOG(LogTemp, Warning, TEXT("[LOAD] 🌍 완료된 조건: %d개"), CompletedConditions.Num());
+    for (const FGameplayTag& Tag : CompletedConditions)
+    {
+        UE_LOG(LogTemp, Log, TEXT("[LOAD]   📦 %s"), *Tag.ToString());
+    }
+    
     return true;
 }
 
@@ -229,4 +250,30 @@ void USOHGameInstance::ResetGameData()
     LoadedInventory.Empty();
     
     UE_LOG(LogTemp, Log, TEXT("[RESET] ✅ 초기화 완료"));
+}
+
+void USOHGameInstance::ContinueGame()
+{
+    if (!LoadGameData())
+    {
+        UE_LOG(LogTemp, Error, TEXT("❌ 로드 실패"));
+        return;
+    }
+    
+    FString CurrentLevel = GetWorld()->GetMapName();
+    
+    if (CurrentLevel.Contains("MainMenu") || CurrentLevel.Contains(LobbyLevelName.ToString()))
+    {
+        // ⭐ 메인 메뉴 → 게임 레벨
+        UGameplayStatics::OpenLevel(this, GameLevelName);
+    }
+    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+    if (PC)
+    {
+        ASOHPlayerCharacter* PlayerCharacter = Cast<ASOHPlayerCharacter>(PC->GetPawn());
+        if (PlayerCharacter)
+        {
+            PlayerCharacter->ApplyLoadedData();
+        }
+    }
 }
