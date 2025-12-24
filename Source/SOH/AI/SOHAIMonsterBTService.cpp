@@ -65,6 +65,7 @@ void USOHAIMonsterBTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
         BB->SetValueAsBool(TEXT("PlayerInRange"), false);
         BB->SetValueAsBool(TEXT("IsSearching"), false);
         MonsterController->ClearFocus(EAIFocusPriority::Gameplay);
+        Monster->StopChaseLoop();
 
         if (APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(MonsterController, 0))
         {
