@@ -178,8 +178,6 @@ void ASOHPlayerCharacter::Tick(float DeltaTime)
 			if (bIsInInteractionCamera)
 			{
 				bUIHit = false;
-
-				// ⭐ 제거하기 전에 저장
 				RemovedWidgets.Empty();
 
 				if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
@@ -196,13 +194,20 @@ void ASOHPlayerCharacter::Tick(float DeltaTime)
 
 					for (UUserWidget* Widget : AllWidgets)
 					{
-						RemovedWidgets.Add(Widget); // 저장
-						Widget->RemoveFromParent();
+						// ⭐ 크로스헤어 UI만 제거 (이름으로 판별)
+						FString WidgetName = Widget->GetClass()->GetName();
+						if (WidgetName.Contains("Crosshair") || WidgetName.Contains("CrossHair"))
+						{
+							RemovedWidgets.Add(Widget);
+							Widget->RemoveFromParent();
+							UE_LOG(LogTemp, Warning, TEXT("Removed Crosshair: %s"), *WidgetName);
+						}
 					}
 
-					UE_LOG(LogTemp, Error, TEXT("✅ ALL HUD REMOVED (saved %d widgets)"), RemovedWidgets.Num());
+					UE_LOG(LogTemp, Error, TEXT("✅ Crosshair REMOVED (saved %d widgets)"), RemovedWidgets.Num());
 				}
 
+				// LastHighlightedItem 처리는 그대로 유지
 				if (LastHighlightedItem)
 				{
 					if (LastHighlightedItem->Implements<USOHInteractInterface>())
