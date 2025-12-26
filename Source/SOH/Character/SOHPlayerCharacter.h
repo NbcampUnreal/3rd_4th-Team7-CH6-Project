@@ -219,6 +219,7 @@ protected:
 	UFUNCTION()
 	void OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+	UPROPERTY()
 	TArray<UUserWidget*> RemovedWidgets;
 
 public:
