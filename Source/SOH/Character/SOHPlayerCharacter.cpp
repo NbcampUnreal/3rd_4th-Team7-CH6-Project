@@ -743,12 +743,45 @@ float ASOHPlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	UpdateOverlay(Health, MaxHealth);
 
+	// ⭐ 피격 애니메이션 재생 (죽지 않았을 때만)
+	if (Health > 0.f && HitReactionMontage)
+	{
+		PlayHitReaction();
+	}
+
 	if (Health <= 0.f)
 	{
 		Die();
 	}
 
 	return ActualDamage;
+}
+
+void ASOHPlayerCharacter::PlayHitReaction()
+{
+	// 이미 재생 중이거나 죽었으면 무시
+	if (bIsPlayingHitReaction || bIsDead) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!AnimInstance || !HitReactionMontage) return;
+
+	bIsPlayingHitReaction = true;
+
+	// 상체만 재생 
+	PlayUpperBodyMontage(HitReactionMontage);
+
+	// 몽타주 종료 콜백
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &ASOHPlayerCharacter::OnHitReactionEnded);
+	AnimInstance->Montage_SetEndDelegate(EndDelegate, HitReactionMontage);
+
+	UE_LOG(LogTemp, Log, TEXT("Hit reaction played!"));
+}
+
+void ASOHPlayerCharacter::OnHitReactionEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bIsPlayingHitReaction = false;
+	UE_LOG(LogTemp, Log, TEXT("Hit reaction ended"));
 }
 
 void ASOHPlayerCharacter::UseHealthItem()

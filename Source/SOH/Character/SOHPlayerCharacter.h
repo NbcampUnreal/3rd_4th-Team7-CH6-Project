@@ -118,6 +118,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat|Health")
 	USoundBase* HealSound;
 
+	// 피격 반응
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UAnimMontage* HitReactionMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bIsPlayingHitReaction = false;
+
+	UFUNCTION()
+	void OnHitReactionEnded(UAnimMontage* Montage, bool bInterrupted);
+
 	// 체력 감소/죽음 처리
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Death")
@@ -263,6 +273,7 @@ private:
 	void UpdateStamina();
 	void OnExhausted();
 	void OnRecovered();
+	void PlayHitReaction();
 
 	UPROPERTY()
 	class UAudioComponent* BreathingAudioComponent;
