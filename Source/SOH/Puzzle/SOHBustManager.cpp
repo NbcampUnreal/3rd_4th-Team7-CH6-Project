@@ -57,6 +57,9 @@ void ASOHBustManager::OnEnterOverlap(UPrimitiveComponent* OverlappedComp, AActor
 {
     if (!OtherActor->IsA(ACharacter::StaticClass())) return;
 
+    OverlappedComp->SetGenerateOverlapEvents(false);
+    OverlappedComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
     for (ASOHSlidingDoor* Door : TargetDoors)
     {
         if (!Door) continue;
