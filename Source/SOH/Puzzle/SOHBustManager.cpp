@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "Components/BoxComponent.h"
+#include "GameMode/SOHGameInstance.h"
 #include "Level/SOHSlidingDoor.h"
 
 ASOHBustManager::ASOHBustManager()
@@ -89,6 +90,15 @@ void ASOHBustManager::CheckPuzzleSolved()
     {
         bPuzzleSolved = true;
 
+        if (PuzzleClearTag.IsValid())
+        {
+            if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
+            {
+                GI->CompleteCondition(PuzzleClearTag);
+                UE_LOG(LogTemp, Warning, TEXT("Combination Puzzle Completed! Tag = %s"), *PuzzleClearTag.ToString());
+            }
+        }
+        
         for (ASOHBust* Bust : BustPieces)
         {
             if (Bust) Bust->bIsLocked = true;

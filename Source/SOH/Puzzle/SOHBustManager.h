@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SOHBust.h"
+#include "GameplayTagContainer.h"
 #include "SOHBustManager.generated.h"
 
 class ASOHSlidingDoor;
@@ -20,6 +21,9 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Puzzle")
 	bool bIsLocked = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle")
+	FGameplayTag PuzzleClearTag;
 
 protected:
 	virtual void BeginPlay() override;
