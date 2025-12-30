@@ -121,3 +121,33 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 		UE_LOG(LogTemp, Warning, TEXT("[Lock] 인벤토리가 없는 대상이 접근했습니다."));
 	}
 }
+
+void ASOHLockActor::UnlockByScript(AActor* Caller, bool bDestroyAfterUnlock)
+{
+	// 열쇠 체크를 스킵하고 "성공했을 때" 경로만 실행
+	for (ASOHSlidingDoor* Door : TargetSlidingDoor)
+	{
+		if (Door)
+		{
+			Door->UnlockSlidingDoor(Caller);
+		}
+	}
+
+	for (ASOHOpenDoor* Door : TargetOpenDoor)
+	{
+		if (Door)
+		{
+			Door->UnlockOpenDoor(Caller);
+		}
+	}
+
+	if (UnlockSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(this, UnlockSound, GetActorLocation());
+	}
+
+	if (bDestroyAfterUnlock)
+	{
+		Destroy();
+	}
+}

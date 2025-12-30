@@ -34,6 +34,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
 	TArray<ASOHOpenDoor*> TargetOpenDoor;
 	
+	UFUNCTION(BlueprintCallable, Category="Lock System")
+	void UnlockByScript(AActor* Caller, bool bDestroyAfterUnlock = true);
+	
 protected:
 	// 자물쇠 외형
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lock System")
