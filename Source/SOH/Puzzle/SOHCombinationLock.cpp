@@ -118,17 +118,25 @@ void ASOHCombinationLock::Interact_Implementation(AActor* Caller)
     Head->SetOverlayMaterial(nullptr);
     for (auto* Gear : Gears)
     {
-        if (Gear)
-            Gear->SetOverlayMaterial(nullptr);
+        Gear->SetOverlayMaterial(nullptr);
     }
-    // UpdateHighlight();
-
+    bIsInteracting = true;
+    
     if (LockGuideWidgetClass && !LockGuideWidget)
     {
         LockGuideWidget = CreateWidget<UUserWidget>(PC, LockGuideWidgetClass);
         if (LockGuideWidget)
             LockGuideWidget->AddToViewport();
     }
+}
+
+bool ASOHCombinationLock::CanReceiveTrace_Implementation(AActor* Caller, bool bCanInteract)
+{
+    if (bIsInteracting)
+    {
+        return false;
+    }
+    return Super::CanReceiveTrace_Implementation(Caller, bCanInteract);
 }
 
 // Input functions
@@ -189,6 +197,8 @@ void ASOHCombinationLock::Exit()
         LockGuideWidget->RemoveFromParent();
         LockGuideWidget = nullptr;
     }
+    
+    bIsInteracting = false;
 }
 
 // Update gear highlight

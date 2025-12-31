@@ -28,6 +28,7 @@ class SOH_API ASOHCombinationLock : public ASOHInteractableActor
 public:
     ASOHCombinationLock();
     virtual void Interact_Implementation(AActor* Caller) override;
+    virtual bool CanReceiveTrace_Implementation(AActor* Caller, bool bCanInteract) override;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle")
     FGameplayTag PuzzleClearTag;
@@ -35,6 +36,8 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
+    
+    bool bIsInteracting = false;
 
     // Components
     UPROPERTY(VisibleAnywhere)
