@@ -19,6 +19,8 @@ class SOH_API ASOHFlashlight : public ASOHBaseItem
 public:
     ASOHFlashlight();
 
+    virtual void Tick(float DeltaTime) override;
+
     UFUNCTION(BlueprintCallable, Category = "Puzzle")
     void SetFlashlightCutScene();
 
@@ -57,6 +59,9 @@ private:
 
     UPROPERTY()
     USkeletalMeshComponent* OwnerMesh;
+
+    UPROPERTY()
+    UCameraComponent* OwnerCamera;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight")
     FName HandSocketName = TEXT("Chest_Socket");

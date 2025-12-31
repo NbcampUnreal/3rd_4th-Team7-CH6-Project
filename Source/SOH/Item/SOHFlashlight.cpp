@@ -9,10 +9,11 @@
 #include "Level/SOHJumpScareBase.h"
 #include "Item/SOHItemManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
 
 ASOHFlashlight::ASOHFlashlight()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
     Pivot = CreateDefaultSubobject<USceneComponent>(TEXT("Pivot"));
     RootComponent = Pivot;
@@ -92,6 +93,18 @@ void ASOHFlashlight::Toggle()
     SetOn(!bOn);
 }
 
+void ASOHFlashlight::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if (bOn && OwnerCamera && Spot)
+    {
+        // SpotLight만 카메라 방향으로 회전
+        FRotator CameraRotation = OwnerCamera->GetComponentRotation();
+        Spot->SetWorldRotation(CameraRotation);
+    }
+}
+
 void ASOHFlashlight::SetEquipped(ACharacter* NewOwner)
 {
     if (!NewOwner) return;
@@ -122,6 +135,12 @@ void ASOHFlashlight::SetEquipped(ACharacter* NewOwner)
     HideInteractWidget();
     ApplyOverlayMaterial(nullptr);
     SetFlashlightCutScene();
+
+    // 카메라 참조 저장
+    OwnerCamera = NewOwner->FindComponentByClass<UCameraComponent>();
+
+    // Tick 활성화
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 void ASOHFlashlight::StartBatteryDrain()
