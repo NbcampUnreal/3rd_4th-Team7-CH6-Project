@@ -972,7 +972,7 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 		//시간 정지
 		if (UIType == FName("Pause") || UIType == FName("Inventory") || UIType == FName("Map"))
 		{
-			UGameplayStatics::SetGlobalTimeDilation(this, 0.0001f);
+			UGameplayStatics::SetGlobalTimeDilation(this, 0.01f);
 		}
 
 		// 입력 모드 변경
