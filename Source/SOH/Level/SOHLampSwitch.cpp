@@ -38,18 +38,15 @@ void ASOHLampSwitch::Interact_Implementation(AActor* Caller)
             *Caller->GetClass()->GetName());
     }
 
-    // ¿·±› ªÛ≈¬ »Æ¿Œ
     if (bIsLocked)
     {
         UE_LOG(LogTemp, Warning, TEXT("[LampSwitch] Switch is LOCKED - Showing message"));
 
-        // MessageManager √£±‚
         USOHMessageManager* MessageMgr = Caller->FindComponentByClass<USOHMessageManager>();
 
         if (MessageMgr)
         {
-            // ∏ﬁΩ√¡ˆ «•Ω√ (2√ ∞£)
-			FText Msg = FText::FromString(TEXT(" ∫“¿Ã ƒ—¡ˆ¡ˆ æ ¥¬¥Ÿ "));
+			FText Msg = FText::FromString(TEXT("Î∂àÏù¥ Îì§Ïñ¥Ïò§ÏßÄ ÏïäÎäîÎã§.. Ï†ÑÍ∏∞Ïã§Ïóê Í∞ÄÎ≥¥Ïûê."));
 
             MessageMgr->ShowMessageText(Msg, 2.0f);
 
@@ -60,10 +57,9 @@ void ASOHLampSwitch::Interact_Implementation(AActor* Caller)
             UE_LOG(LogTemp, Warning, TEXT("[LampSwitch] MessageManager NOT Found on Caller!"));
         }
 
-        return;  // ¿·∞‹¿÷¿∏∏È ø©±‚º≠ ¡æ∑·
+        return;
     }
 
-    // ¿·±› «ÿ¡¶µ  °Ê ¡§ªÛ ¿€µø
     UE_LOG(LogTemp, Warning, TEXT("[LampSwitch] Switch is UNLOCKED - Toggling lights"));
 
     ToggleAllLamps();
