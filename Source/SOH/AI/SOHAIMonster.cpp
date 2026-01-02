@@ -43,7 +43,7 @@ ASOHAIMonster::ASOHAIMonster()
 
 	HearingRange = 1500.f;
 
-	AttackDamage = 20.0f;
+	AttackDamage = 50.0f;
 	AttackRange = 200.0f;
 }
 

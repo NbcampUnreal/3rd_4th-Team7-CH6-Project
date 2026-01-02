@@ -71,7 +71,7 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 		{
 			UE_LOG(LogTemp, Log, TEXT("[Lock] 성공! 열쇠(%s)를 사용하여 잠금을 해제했습니다."), *RequiredKeyID.ToString());
 
-			//InventoryComp->ConsumeItem(RequiredKeyID, 1);
+			InventoryComp->ConsumeItem(RequiredKeyID, 1);
 
 			// 연결된 문에게 잠금 해제 명령
 			for (ASOHSlidingDoor* Door : TargetSlidingDoor)
