@@ -4,6 +4,8 @@
 #include "Level/SOHOpenDoor.h"
 #include "UI/SOHMessageManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameMode/SOHSaveGame.h"
+#include "GameMode/SOHGameInstance.h"
 #include "Components/StaticMeshComponent.h"
 
 ASOHLockActor::ASOHLockActor()
@@ -59,6 +61,14 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 					Door->UnlockOpenDoor(Caller); // 해당 함수가 ASOHOpenDoor에 정의되어 있어야 함
 				}
 			}
+			
+			bUnlocked = true;
+			
+			if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+			{
+				GI->SaveGameData();
+			}
+			
 			Destroy(); // 자물쇠 삭제
 			return;
 			
@@ -100,7 +110,14 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 					GetActorLocation()
 				);
 			}
-
+			
+			bUnlocked = true;
+			
+			if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+			{
+				GI->SaveGameData();
+			}
+			
 			// 4. 잠금 해제 연출
 			Destroy(); // 자물쇠 삭제
 		}
@@ -145,9 +162,81 @@ void ASOHLockActor::UnlockByScript(AActor* Caller, bool bDestroyAfterUnlock)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(this, UnlockSound, GetActorLocation());
 	}
+	
+	bUnlocked = true;
 
+	if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+	{
+		GI->SaveGameData();
+	}
+	
 	if (bDestroyAfterUnlock)
 	{
 		Destroy();
+	}
+}
+
+void ASOHLockActor::SaveState_Implementation(USOHSaveGame* SaveData)
+{
+	if (!SaveData || WorldStateID.IsNone()) return;
+
+	if (!bUnlocked)
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("[SAVE][Lock] %s NOT solved (skip)"),
+			*WorldStateID.ToString()
+		);
+		return;
+	}
+
+	FWorldStateData& Data = SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+	Data.bIsSolved = true;
+
+	UE_LOG(LogTemp, Warning,
+		TEXT("[SAVE][Lock] %s solved"),
+		*WorldStateID.ToString()
+	);
+}
+
+
+void ASOHLockActor::LoadState_Implementation(USOHSaveGame* SaveData)
+{
+	UE_LOG(LogTemp, Warning,
+		TEXT("[LOAD][Lock] LoadState called: %s"),
+		*GetName()
+	);
+
+	if (!SaveData || WorldStateID.IsNone())
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("[LOAD][Lock] Invalid SaveData or WorldStateID NONE")
+		);
+		return;
+	}
+
+	if (FWorldStateData* Data = SaveData->WorldStateMap.Find(WorldStateID))
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("[LOAD][Lock] %s Found. bIsSolved=%d"),
+			*WorldStateID.ToString(),
+			Data->bIsSolved
+		);
+
+		if (Data->bIsSolved)
+		{
+			UE_LOG(LogTemp, Warning,
+				TEXT("[LOAD][Lock] %s already solved → Destroy"),
+				*WorldStateID.ToString()
+			);
+
+			Destroy();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("[LOAD][Lock] %s NOT FOUND in SaveData"),
+			*WorldStateID.ToString()
+		);
 	}
 }

@@ -2,15 +2,19 @@
 
 #include "CoreMinimal.h"
 #include "Interaction/SOHInteractableActor.h"
+#include "GameMode/SOHSaveObjectInterface.h"
 #include "SOHSlidingDoor.generated.h"
 
 class UStaticMeshComponent;
 class USceneComponent;
 class USoundBase;
 class ASOHLockActor;
+class USOHSaveGame;
 
 UCLASS()
-class SOH_API ASOHSlidingDoor : public ASOHInteractableActor
+class SOH_API ASOHSlidingDoor 
+	: public ASOHInteractableActor
+	, public ISOHSaveObjectInterface
 {
 	GENERATED_BODY()
 	
@@ -22,7 +26,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsArtroomPlay = false;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+	FName WorldStateID;
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -82,4 +89,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door|Noise")
 	FName NoiseTag = "Door";
 
+	virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
+	virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
 };

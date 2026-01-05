@@ -8,6 +8,7 @@
 #include "SOHGameInstance.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConditionCompleted, FGameplayTag, CompletedTag);
+class USOHSaveGame;
 
 UCLASS()
 class SOH_API USOHGameInstance : public UGameInstance
@@ -17,6 +18,9 @@ class SOH_API USOHGameInstance : public UGameInstance
 public:
     USOHGameInstance();
     
+    TArray<AActor*> FoundSaveActors;
+    
+    virtual void Init() override;
     // 현재 스테이지 ID
     UPROPERTY(BlueprintReadOnly, Category = "Stage")
     int32 CurrentStage = 0;
@@ -69,10 +73,6 @@ public:
     
     UFUNCTION(BlueprintCallable, Category = "Game")
     void ContinueGame();
-    
-    // 로드 플래그
-    UPROPERTY(BlueprintReadWrite, Category = "SaveGame")
-    bool bLoadedFromSave = false;
 
     // 로드된 플레이어 위치
     UPROPERTY(BlueprintReadWrite, Category = "SaveGame")
@@ -95,4 +95,21 @@ public:
 
     UPROPERTY(EditDefaultsOnly, Category="Level")
     FName GameLevelName = "MainLevel";
+    
+    UFUNCTION(BlueprintCallable)
+    void ApplyWorldState();
+    
+    // 로드 플래그
+    UPROPERTY(BlueprintReadWrite, Category = "SaveGame")
+    bool bLoadedFromSave = false;
+    
+private:
+    UPROPERTY()
+    USOHSaveGame* CurrentSaveGame = nullptr;
+    
+    UFUNCTION()
+    void OnPostLoadMapWithWorld(UWorld* LoadedWorld);
+    
+    bool bPendingApplyWorldState = false;
+
 };

@@ -1,7 +1,10 @@
 #include "SOHGameInstance.h"
 #include "SOHSaveGame.h"
 #include "Character/SOHPlayerCharacter.h"
+#include "GameMode/SOHSaveObjectInterface.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 
 // 세이브 슬롯 상수 정의
 const FString USOHGameInstance::SAVE_SLOT_NAME = TEXT("SOH_SaveSlot");
@@ -14,6 +17,18 @@ USOHGameInstance::USOHGameInstance()
     LoadedHealth = 200.0f;
     LoadedStamina = 100.0f;
     bLoadedFromSave = false;
+}
+
+void USOHGameInstance::Init()
+{
+    Super::Init();
+
+    UE_LOG(LogTemp, Warning, TEXT("[GI] Init called"));
+
+    FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(
+        this,
+        &USOHGameInstance::OnPostLoadMapWithWorld
+    );
 }
 
 void USOHGameInstance::CompleteCondition(FGameplayTag ConditionTag)
@@ -106,72 +121,68 @@ void USOHGameInstance::AdvanceStage()
 
 void USOHGameInstance::SaveGameData()
 {
-    // SaveGame 객체 생성
-    USOHSaveGame* Save = Cast<USOHSaveGame>(
-        UGameplayStatics::CreateSaveGameObject(USOHSaveGame::StaticClass())
-    );
-
-    if (!Save)
+    // 🔥 핵심 1: SaveGame 재사용
+    if (!CurrentSaveGame)
     {
-        UE_LOG(LogTemp, Error, TEXT("[SAVE] ❌ SaveGame 객체 생성 실패!"));
-        return;
+        CurrentSaveGame = Cast<USOHSaveGame>(
+            UGameplayStatics::CreateSaveGameObject(USOHSaveGame::StaticClass())
+        );
+
+        if (!CurrentSaveGame)
+        {
+            UE_LOG(LogTemp, Error, TEXT("[SAVE] ❌ SaveGame 객체 생성 실패!"));
+            return;
+        }
     }
 
+    USOHSaveGame* Save = CurrentSaveGame;
+
     // 스테이지 정보 저장
-    Save->SavedStage = CurrentStage;
+    Save->SavedStage      = CurrentStage;
     Save->SavedConditions = CompletedConditions;
 
     // 플레이어 정보 저장
     ACharacter* Player = UGameplayStatics::GetPlayerCharacter(this, 0);
     if (Player)
     {
-        // 현재 위치 저장
         Save->PlayerTransform = Player->GetActorTransform();
 
-        // 플레이어 스탯 저장
-        ASOHPlayerCharacter* P = Cast<ASOHPlayerCharacter>(Player);
-        if (P)
+        if (ASOHPlayerCharacter* P = Cast<ASOHPlayerCharacter>(Player))
         {
-            Save->SavedHealth = P->GetHealth();
+            Save->SavedHealth   = P->GetHealth();
             Save->SavedStamina = P->GetStamina();
-            
-            // 인벤토리 저장
+
             if (USOHInventoryComponent* Inv = P->FindComponentByClass<USOHInventoryComponent>())
             {
                 Save->SavedInventory = Inv->GetInventoryContents();
             }
-
-            UE_LOG(LogTemp, Log, TEXT("[SAVE] 플레이어 상태: HP=%.0f, Stamina=%.0f, 위치=%s"), 
-                   Save->SavedHealth, 
-                   Save->SavedStamina,
-                   *Save->PlayerTransform.GetLocation().ToString());
         }
     }
     
-    // ⭐⭐⭐ 여기에 추가!
-    UE_LOG(LogTemp, Warning, TEXT("========================================"));
-    UE_LOG(LogTemp, Warning, TEXT("[SAVE] 🌍 월드 액터 저장 (GameplayTag 기반)"));
-    UE_LOG(LogTemp, Log, TEXT("[SAVE] 완료된 조건: %d개"), CompletedConditions.Num());
-    
-    // CompletedConditions를 문자열로 변환해서 저장
-    FString TagsString;
-    for (const FGameplayTag& Tag : CompletedConditions)
+    // 월드 액터 저장
+    TArray<AActor*> SaveActors;
+    UGameplayStatics::GetAllActorsWithInterface(
+        GetWorld(),
+        USOHSaveObjectInterface::StaticClass(),
+        SaveActors
+    );
+
+    UE_LOG(LogTemp, Warning, TEXT("[SAVE] 🌍 SaveObjectInterface 액터 수: %d"), SaveActors.Num());
+
+    for (AActor* Actor : SaveActors)
     {
-        if (!TagsString.IsEmpty())
-        {
-            TagsString += TEXT(",");
-        }
-        TagsString += Tag.ToString();
-        UE_LOG(LogTemp, Log, TEXT("[SAVE]   📦 %s"), *Tag.ToString());
+        ISOHSaveObjectInterface::Execute_SaveState(Actor, Save);
     }
-    
-    // ⭐ SaveGame에 추가 (일단 간단하게)
-    Save->SavedConditions = CompletedConditions;
-    UE_LOG(LogTemp, Warning, TEXT("========================================"));
 
+    UE_LOG(LogTemp, Warning,
+        TEXT("[SAVE] WorldStateMap.Num=%d"),
+        Save->WorldStateMap.Num()
+    );
+
+    // 실제 슬롯 저장
     if (UGameplayStatics::SaveGameToSlot(Save, SAVE_SLOT_NAME, SAVE_USER_INDEX))
     {
-        UE_LOG(LogTemp, Warning, TEXT("[SAVE] ✅ Stage %d 저장 완료!"), CurrentStage);
+        UE_LOG(LogTemp, Warning, TEXT("[SAVE] ✅ 저장 완료!"));
     }
     else
     {
@@ -179,53 +190,35 @@ void USOHGameInstance::SaveGameData()
     }
 }
 
+
 bool USOHGameInstance::LoadGameData()
 {
-    // 세이브 파일 존재 여부 확인
     if (!UGameplayStatics::DoesSaveGameExist(SAVE_SLOT_NAME, SAVE_USER_INDEX))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("[LOAD] ⚠️ 세이브 파일이 없습니다."));
         return false;
-    }
 
-    // SaveGame 로드
-    USOHSaveGame* Save = Cast<USOHSaveGame>(
+    CurrentSaveGame = Cast<USOHSaveGame>(
         UGameplayStatics::LoadGameFromSlot(SAVE_SLOT_NAME, SAVE_USER_INDEX)
     );
-    
-    if (!Save)
-    {
-        UE_LOG(LogTemp, Error, TEXT("[LOAD] ❌ 세이브 파일 로드 실패!"));
+
+    if (!CurrentSaveGame)
         return false;
-    }
 
-    // 스테이지 정보 복원
-    CurrentStage = Save->SavedStage;
-    CompletedConditions = Save->SavedConditions;
+    CurrentStage        = CurrentSaveGame->SavedStage;
+    CompletedConditions = CurrentSaveGame->SavedConditions;
 
-    // 플레이어 데이터 임시 저장 (나중에 ApplyLoadedData에서 사용)
-    LoadedPlayerTransform = Save->PlayerTransform;
-    LoadedHealth = Save->SavedHealth;
-    LoadedStamina = Save->SavedStamina;
-    LoadedInventory = Save->SavedInventory;
+    LoadedPlayerTransform = CurrentSaveGame->PlayerTransform;
+    LoadedHealth          = CurrentSaveGame->SavedHealth;
+    LoadedStamina         = CurrentSaveGame->SavedStamina;
+    LoadedInventory       = CurrentSaveGame->SavedInventory;
 
-    // 로드 플래그 설정
     bLoadedFromSave = true;
 
-    UE_LOG(LogTemp, Warning, TEXT("[LOAD] ✅ 로드 완료!"));
-    UE_LOG(LogTemp, Log, TEXT("[LOAD] Stage: %d"), CurrentStage);
-    UE_LOG(LogTemp, Log, TEXT("[LOAD] HP: %.0f, Stamina: %.0f"), LoadedHealth, LoadedStamina);
-    UE_LOG(LogTemp, Log, TEXT("[LOAD] 위치: %s"), *LoadedPlayerTransform.GetLocation().ToString());
-    UE_LOG(LogTemp, Log, TEXT("[LOAD] 완료된 조건: %d개"), CompletedConditions.Num());
-    
-    UE_LOG(LogTemp, Warning, TEXT("[LOAD] 🌍 완료된 조건: %d개"), CompletedConditions.Num());
-    for (const FGameplayTag& Tag : CompletedConditions)
-    {
-        UE_LOG(LogTemp, Log, TEXT("[LOAD]   📦 %s"), *Tag.ToString());
-    }
-    
+    UE_LOG(LogTemp, Warning, TEXT("[LOAD] ✅ SaveGame 로드 완료 (WorldState=%d)"),
+        CurrentSaveGame->WorldStateMap.Num());
+
     return true;
 }
+
 
 bool USOHGameInstance::HasSaveFile() const
 {
@@ -259,21 +252,76 @@ void USOHGameInstance::ContinueGame()
         UE_LOG(LogTemp, Error, TEXT("❌ 로드 실패"));
         return;
     }
+
+    // ✅ 이번 레벨 로드가 '컨티뉴 로드'임을 표시
+    bPendingApplyWorldState = true;
     
-    FString CurrentLevel = GetWorld()->GetMapName();
+    UE_LOG(LogTemp, Error, TEXT("🔥 CALL ApplyWorldState FROM ContinueGame"));
+    ApplyWorldState();
     
-    if (CurrentLevel.Contains("MainMenu") || CurrentLevel.Contains(LobbyLevelName.ToString()))
+    UGameplayStatics::OpenLevel(this, GameLevelName);
+}
+
+void USOHGameInstance::ApplyWorldState()
+{
+    if (!CurrentSaveGame)
     {
-        // ⭐ 메인 메뉴 → 게임 레벨
-        UGameplayStatics::OpenLevel(this, GameLevelName);
+        UE_LOG(LogTemp, Warning, TEXT("[LOAD] No SaveGame → Skip Apply"));
+        return;
     }
-    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-    if (PC)
+
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsWithInterface(
+        World,
+        USOHSaveObjectInterface::StaticClass(),
+        FoundActors
+    );
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("[LOAD] 🌍 ApplyWorldState - 액터 수: %d"),
+        FoundActors.Num()
+    );
+
+    for (AActor* Actor : FoundActors)
     {
-        ASOHPlayerCharacter* PlayerCharacter = Cast<ASOHPlayerCharacter>(PC->GetPawn());
-        if (PlayerCharacter)
+        ISOHSaveObjectInterface::Execute_LoadState(
+            Actor,
+            CurrentSaveGame
+        );
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("[LOAD] ✅ ApplyWorldState 완료"));
+}
+
+void USOHGameInstance::OnPostLoadMapWithWorld(UWorld* LoadedWorld)
+{
+    UE_LOG(LogTemp, Warning, TEXT("[GI] OnPostLoadMapWithWorld called"));
+
+    if (!bPendingApplyWorldState)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[GI] Not a continue-load. Skip Apply."));
+        return;
+    }
+
+    // ❌ 여기서 Save 준비 체크하지 않는다
+
+    // 한 번만 적용하도록 플래그 리셋
+    bPendingApplyWorldState = false;
+
+    LoadedWorld->GetTimerManager().SetTimerForNextTick([this]()
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[GI] Delayed ApplyWorldState"));
+
+        // ✅ 실제 적용 직전에 체크
+        if (!bLoadedFromSave || !CurrentSaveGame)
         {
-            PlayerCharacter->ApplyLoadedData();
+            UE_LOG(LogTemp, Warning, TEXT("[GI] Save still not ready. Abort Apply."));
+            return;
         }
-    }
+
+        ApplyWorldState();
+    });
 }

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Interaction/SOHInteractableActor.h" // 탁완님 헤더
+#include "GameMode/SOHSaveObjectInterface.h"
 #include "SOHLockActor.generated.h"
 
 class ASOHOpenDoor;
@@ -11,7 +12,9 @@ class ASOHSlidingDoor;
  * 특정 열쇠가 있어야만 상호작용에 성공하는 자물쇠 액터
  */
 UCLASS()
-class SOH_API ASOHLockActor : public ASOHInteractableActor
+class SOH_API ASOHLockActor 
+	: public ASOHInteractableActor
+	, public ISOHSaveObjectInterface
 {
 	GENERATED_BODY()
     
@@ -36,6 +39,15 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Lock System")
 	void UnlockByScript(AActor* Caller, bool bDestroyAfterUnlock = true);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+	FName WorldStateID;
+
+	virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
+	virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
+	
+	UPROPERTY()
+	bool bUnlocked = false;
 	
 protected:
 	// 자물쇠 외형

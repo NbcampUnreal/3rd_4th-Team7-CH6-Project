@@ -6,7 +6,7 @@
 void ASOHGameModeBase::BeginPlay()
 {
     Super::BeginPlay();
-
+    
     FString MapName = GetWorld()->GetMapName();
     UE_LOG(LogTemp, Log, TEXT("===================================="));
     UE_LOG(LogTemp, Log, TEXT("GameMode BeginPlay: %s"), *MapName);

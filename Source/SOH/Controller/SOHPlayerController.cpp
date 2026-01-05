@@ -2,6 +2,7 @@
 #include "SOH/Character/SOHPlayerCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameMode/SOHGameInstance.h"
 
 void ASOHPlayerController::BeginPlay()
 {
@@ -15,6 +16,17 @@ void ASOHPlayerController::BeginPlay()
 				Subsystem->AddMappingContext(IMC_Player, 0);
 		}
 
+	}
+	if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+	{
+		// Save가 있든 없든 여기서 한 번만 적용
+		GetWorld()->GetTimerManager().SetTimerForNextTick([GI]()
+		{
+			UE_LOG(LogTemp, Warning,
+				TEXT("[LOAD] ✅ PlayerController -> ApplyWorldState"));
+
+			GI->ApplyWorldState();
+		});
 	}
 }
 

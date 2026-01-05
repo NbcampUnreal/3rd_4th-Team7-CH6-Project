@@ -6,6 +6,24 @@
 #include "Item/SOHInventoryComponent.h"
 #include "SOHSaveGame.generated.h"
 
+USTRUCT(BlueprintType)
+struct FWorldStateData
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	bool bIsOpen = false;
+
+	UPROPERTY()
+	bool bIsOn = false;
+
+	UPROPERTY()
+	bool bIsSolved = false;
+	
+	UPROPERTY()
+	bool bIsLocked = false; 
+};
+
 UCLASS()
 class SOH_API USOHSaveGame : public USaveGame
 {
@@ -29,6 +47,9 @@ public:
     
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FSOHInventoryItem> SavedInventory;
+	
+	UPROPERTY(BlueprintReadWrite)
+	TMap<FName, FWorldStateData> WorldStateMap;
 
 	USOHSaveGame()
 	   : SavedHealth(200.f)
@@ -36,3 +57,4 @@ public:
 	   , SavedStage(0)
 	{}
 };
+
