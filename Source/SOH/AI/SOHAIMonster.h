@@ -91,6 +91,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Movement")
 	USoundBase* ChaseSound;
 
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* AttackSound;
+
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void PlayDetectPlayerSound();
 

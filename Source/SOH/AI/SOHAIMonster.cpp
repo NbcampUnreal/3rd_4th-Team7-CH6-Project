@@ -120,6 +120,15 @@ void ASOHAIMonster::TryAttack()
         }
     }
 
+    if (AttackSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(
+            this,
+            AttackSound,
+            GetActorLocation()
+        );
+    }
+
     UGameplayStatics::ApplyDamage(Target, AttackDamage, GetController(), this, nullptr);
 }
 

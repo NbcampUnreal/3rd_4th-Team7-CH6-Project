@@ -139,6 +139,15 @@ void ASOHSoundMonster::TryAttack()
 	if (DistSq > FMath::Square(AttackRange))
 		return;
 
+	if (AttackSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			AttackSound,
+			GetActorLocation()
+		);
+	}
+
 	UGameplayStatics::ApplyDamage(Target, AttackDamage, GetController(), this, nullptr);
 }
 

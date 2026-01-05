@@ -57,6 +57,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AI|Combat")
 	void TryAttack();
 
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundBase* AttackSound;
+
 	UFUNCTION(BlueprintCallable, Category = "AI|Door")
 	void CheckDoorAhead();
 
