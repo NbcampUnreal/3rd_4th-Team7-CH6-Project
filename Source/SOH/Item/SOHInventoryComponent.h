@@ -21,6 +21,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool AddToInventory(FName newItemID, int32 newQuantity);
 
+	// 아이템 사용 함수 (성공 시 true 반환)
+    UFUNCTION(BlueprintCallable, Category = "Inventory")
+    bool UseItem(FName ItemID);
+
 	// 아이템 제거 함수
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool ConsumeItem(FName ItemID, int32 Count);
