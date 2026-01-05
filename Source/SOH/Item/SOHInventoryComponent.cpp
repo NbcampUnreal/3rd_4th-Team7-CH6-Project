@@ -1,6 +1,8 @@
 #include "SOHInventoryComponent.h"
 #include "SOHItemManager.h"        // 매니저 접근용
 #include "Kismet/GameplayStatics.h" // GameInstance 접근용
+#include "Character/SOHPlayerCharacter.h"
+
 
 USOHInventoryComponent::USOHInventoryComponent()
 {
@@ -76,11 +78,16 @@ bool USOHInventoryComponent::UseItem(FName ItemID)
 	// 4. 태그 검사: "Health" 태그가 포함되어 있는가?
 	if (ItemData->itemTags.Contains(FName("Health")))
 	{
-		AActor* OwnerActor = GetOwner();
-		if (OwnerActor)
+		// 컴포넌트의 주인(Player)을 찾기
+		AActor* Owner = GetOwner();
+		ASOHPlayerCharacter* PlayerCharacter = Cast<ASOHPlayerCharacter>(Owner);
+		
+		if (PlayerCharacter)
 		{
 			// [체력 회복 로직]
-
+			// 플레이어의 Heal 함수를 직접 호출 (데이터 테이블의 value만큼)
+			PlayerCharacter->Heal(ItemData->value);
+			
 			UE_LOG(LogTemp, Warning, TEXT("[Inventory] 체력 회복 아이템 사용! (%s) -> 회복량: %.1f"), 
 				*ItemData->itemName.ToString(), ItemData->value);
             
@@ -107,7 +114,7 @@ bool USOHInventoryComponent::UseItem(FName ItemID)
 		ConsumeItem(ItemID, 1);
 		return true;
 	}
-
+	
 	return false;
 }
 
