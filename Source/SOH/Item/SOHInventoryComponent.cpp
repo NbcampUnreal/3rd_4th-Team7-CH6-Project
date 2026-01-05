@@ -50,6 +50,67 @@ bool USOHInventoryComponent::AddToInventory(FName newItemID, int32 newQuantity)
 	return true;
 }
 
+bool USOHInventoryComponent::UseItem(FName ItemID)
+{
+	// 1. 수량 체크
+	int32 Quantity = GetItemQuantity(ItemID);
+	if (Quantity <= 0) return false;
+
+	// 2. 데이터 가져오기
+	UGameInstance* GameInst = UGameplayStatics::GetGameInstance(GetWorld());
+	USOHItemManager* ItemManager = GameInst ? GameInst->GetSubsystem<USOHItemManager>() : nullptr;
+	if (!ItemManager) return false;
+
+	FSOHItemTableRow* ItemData = ItemManager->GetItemDataByID(ItemID);
+	if (!ItemData) return false;
+
+	// 3. 일단 '소비(Consumable)' 타입인지 먼저 확인 (선택사항이지만 권장)
+	if (ItemData->itemType != ESOHItemType::Consumable)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("이 아이템은 사용할 수 없는 타입입니다."));
+		return false;
+	}
+
+	bool bUsedSuccessfully = false;
+
+	// 4. 태그 검사: "Health" 태그가 포함되어 있는가?
+	if (ItemData->itemTags.Contains(FName("Health")))
+	{
+		AActor* OwnerActor = GetOwner();
+		if (OwnerActor)
+		{
+			// [체력 회복 로직]
+
+			UE_LOG(LogTemp, Warning, TEXT("[Inventory] 체력 회복 아이템 사용! (%s) -> 회복량: %.1f"), 
+				*ItemData->itemName.ToString(), ItemData->value);
+            
+			bUsedSuccessfully = true;
+		}
+	}
+	/*
+	// 5. 나중에 마나 아이템이 생긴다면 이렇게 추가하면 됩니다.
+	else if (ItemData->itemTags.Contains(FName("Mana")))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Inventory] 마나 회복 아이템 사용!"));
+		// 마나 회복 로직...
+		bUsedSuccessfully = true;
+	}
+	*/
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("사용 가능한 태그(Health 등)가 없는 아이템입니다."));
+	}
+
+	// 6. 사용 성공 시 차감
+	if (bUsedSuccessfully)
+	{
+		ConsumeItem(ItemID, 1);
+		return true;
+	}
+
+	return false;
+}
+
 bool USOHInventoryComponent::ConsumeItem(FName ItemID, int32 Count)
 {
 	if (Count <= 0) return false;
