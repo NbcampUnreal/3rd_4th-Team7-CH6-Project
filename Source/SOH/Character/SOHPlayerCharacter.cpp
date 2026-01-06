@@ -795,6 +795,12 @@ void ASOHPlayerCharacter::UseHealthItem()
 		return;
 	}
 
+	if (bIsPlayingHealMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Already using health item!"));
+		return;
+	}
+
 	USOHInventoryComponent* InventoryComp = FindComponentByClass<USOHInventoryComponent>();
 	if (!InventoryComp) return;
 
@@ -832,6 +838,24 @@ void ASOHPlayerCharacter::UseHealthItem()
 	if (!ItemManager->GetItemDataByID_BP(HealthItemID, HealthData))
 		return;
 
+	if (HealMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			bIsPlayingHealMontage = true;
+
+			PlayUpperBodyMontage(HealMontage);
+
+			// 몽타주 종료 콜백
+			FOnMontageEnded EndDelegate;
+			EndDelegate.BindUObject(this, &ASOHPlayerCharacter::OnHealMontageEnded);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, HealMontage);
+
+			UE_LOG(LogTemp, Log, TEXT("Heal montage started"));
+		}
+	}
+
 	// 체력 회복
 	float HealAmount = HealthData.value;
 	float BeforeHealth = Health;
@@ -854,6 +878,12 @@ void ASOHPlayerCharacter::UseHealthItem()
 		UE_LOG(LogTemp, Log, TEXT("Healed %.1f HP (%.1f -> %.1f)"),
 			AfterHealth - BeforeHealth, BeforeHealth, AfterHealth);
 	}
+}
+
+void ASOHPlayerCharacter::OnHealMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bIsPlayingHealMontage = false;
+	UE_LOG(LogTemp, Log, TEXT("Heal montage ended"));
 }
 
 void ASOHPlayerCharacter::Heal(float HealAmount)

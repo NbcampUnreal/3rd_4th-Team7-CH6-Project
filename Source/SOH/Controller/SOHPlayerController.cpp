@@ -68,6 +68,11 @@ void ASOHPlayerController::SetupInputComponent()
 			EnhancedInput->BindAction(IA_UseBattery, ETriggerEvent::Triggered, this, &ASOHPlayerController::UseBattery);
 		}
 
+		if (IA_Heal)
+		{
+			EnhancedInput->BindAction(IA_Heal, ETriggerEvent::Started, this, &ASOHPlayerController::UseHealthItem);
+		}
+
 		if (IA_TogglePause)
 		{
 			EnhancedInput->BindAction(IA_TogglePause, ETriggerEvent::Started, this, &ASOHPlayerController::OnTogglePause);
@@ -148,6 +153,14 @@ void ASOHPlayerController::UseBattery(const FInputActionValue& Value)
 	if (PC)
 	{
 		PC->UseBattery();
+	}
+}
+
+void ASOHPlayerController::UseHealthItem(const FInputActionValue& Value)
+{
+	if (ASOHPlayerCharacter* MyChar = Cast<ASOHPlayerCharacter>(GetPawn()))
+	{
+		MyChar->UseHealthItem();
 	}
 }
 

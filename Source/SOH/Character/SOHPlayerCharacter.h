@@ -118,6 +118,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat|Health")
 	USoundBase* HealSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* HealMontage;
+
+	bool bIsPlayingHealMontage = false;
+
 	// 피격 반응
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	UAnimMontage* HitReactionMontage;
@@ -236,6 +241,7 @@ public:
 	void ToggleFlashlight();
 	void PlayUpperBodyMontage(UAnimMontage* Montage);
 	void UseBattery();
+	void OnHealMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	void OnTogglePause(const FInputActionValue& Value);
 	void OnToggleMap(const FInputActionValue& Value);
 	void OnToggleInventory(const FInputActionValue& Value);

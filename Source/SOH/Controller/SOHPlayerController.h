@@ -40,6 +40,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputAction* IA_UseBattery;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* IA_Heal;  
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Actions")
 	UInputAction* IA_TogglePause;
 
@@ -57,6 +60,7 @@ protected:
 	void Interact(const FInputActionValue& Value);
 	void ToggleFlashlight(const FInputActionValue& Value);
 	void UseBattery(const FInputActionValue& Value);
+	void UseHealthItem(const FInputActionValue& Value);
 	void OnTogglePause(const FInputActionValue& Value);
 	void OnToggleMap(const FInputActionValue& Value);
 	void OnToggleInventory(const FInputActionValue& Value);
