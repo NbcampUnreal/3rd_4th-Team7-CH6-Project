@@ -123,4 +123,18 @@ void ASOHOpenDoor::UnlockOpenDoor(AActor* Caller)
 	}
 
 	bLocked = false;
+
+	if (!bIsOpen && !bIsMoving)
+	{
+		bIsMoving = true;
+
+		if (OpenSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, OpenSound, GetActorLocation());
+		}
+
+		BP_OpenDoor(Caller);
+
+		UE_LOG(LogTemp, Warning, TEXT("[Door] %s auto-opening"), *GetName());
+	}
 }

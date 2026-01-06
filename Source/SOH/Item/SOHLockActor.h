@@ -36,6 +36,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
 	TArray<ASOHOpenDoor*> TargetOpenDoor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
+	TArray<ASOHLockActor*> LinkedLocks;
 	
 	UFUNCTION(BlueprintCallable, Category="Lock System")
 	void UnlockByScript(AActor* Caller, bool bDestroyAfterUnlock = true);

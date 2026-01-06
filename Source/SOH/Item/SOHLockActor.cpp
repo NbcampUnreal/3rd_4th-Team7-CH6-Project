@@ -62,6 +62,15 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 				}
 			}
 			
+			// 연결된 자물쇠들도 해제
+			for (ASOHLockActor* LinkedLock : LinkedLocks)
+			{
+				if (LinkedLock && LinkedLock != this)
+				{
+					LinkedLock->UnlockByScript(Caller, true);
+				}
+			}
+
 			bUnlocked = true;
 			
 			if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
@@ -98,6 +107,16 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 				if (Door)
 				{
 					Door->UnlockOpenDoor(Caller); // 해당 함수가 ASOHOpenDoor에 정의되어 있어야 함
+				}
+			}
+
+			// **연결된 자물쇠들도 해제**
+			for (ASOHLockActor* LinkedLock : LinkedLocks)
+			{
+				if (LinkedLock && LinkedLock != this)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("[Lock] Unlocking linked lock: %s"), *LinkedLock->GetName());
+					LinkedLock->UnlockByScript(Caller, true);
 				}
 			}
 
