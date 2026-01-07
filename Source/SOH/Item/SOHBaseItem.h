@@ -4,6 +4,7 @@
 #include "Interaction/SOHInteractableActor.h"
 #include "SOHItemDataStructs.h" // 데이터 구조체
 #include "GameplayTagContainer.h"
+#include "GameMode/SOHCutscenePlayerBase.h"
 #include "SOHBaseItem.generated.h"
 
 UCLASS()
@@ -35,6 +36,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="GameplayTag")
 	FGameplayTag ItemConditionTag;
 
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Cutscene")
+	ACutscenePlayerBase* CutscenePlayer = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Cutscene")
+	FGameplayTag CheckTag;
+	
+	void TryTriggerItemCutscene();
 
 protected:
 	// 아이템의 3D 외형을 담당하는 컴포넌트 (Mesh) 

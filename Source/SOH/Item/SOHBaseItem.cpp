@@ -3,6 +3,7 @@
 #include "SOHInventoryComponent.h" // 인벤토리 컴포넌트
 #include "Components/StaticMeshComponent.h"
 #include "GameMode/SOHGameInstance.h"
+#include "GameMode/SOHCutscenePlayerBase.h"
 #include "UI/SOHMessageManager.h"
 
 ASOHBaseItem::ASOHBaseItem()
@@ -117,8 +118,10 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
 
         if (bSuccess)
         {
-            UE_LOG(LogTemp, Log, TEXT("BaseItem: Picked up by %s -> ItemID: %s"), *Caller->GetName(), *itemID.ToString());
+            TryTriggerItemCutscene();
 
+            UE_LOG(LogTemp, Log, TEXT("BaseItem: Picked up by %s -> ItemID: %s"), *Caller->GetName(), *itemID.ToString());
+            
             if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
             {
                 if (ItemConditionTag.IsValid())
@@ -158,7 +161,6 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
                 );
                 MessageMgr->ShowMessageText(Msg, 1.5f);
             }
-
             Destroy();
         }
         else
@@ -201,3 +203,30 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
 //        }
 //    }
 //}
+
+void ASOHBaseItem::TryTriggerItemCutscene()
+{
+    UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] TryTriggerItemCutscene CALLED"));
+
+    if (!IsValid(CutscenePlayer))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] CutscenePlayer INVALID"));
+        return;
+    }
+
+    USOHGameInstance* GI = GetGameInstance<USOHGameInstance>();
+    if (!GI)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] GameInstance INVALID"));
+        return;
+    }
+
+    if (CheckTag.IsValid() && GI->HasCondition(CheckTag))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] Already Played → Skip"));
+        return;
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] Execute_PlayCutscene"));
+    CutscenePlayer->PlayCutscene();
+}
