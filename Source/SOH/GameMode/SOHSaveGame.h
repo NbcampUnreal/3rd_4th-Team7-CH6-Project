@@ -30,6 +30,9 @@ class SOH_API USOHSaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
+	UPROPERTY()
+	bool bHasFlashlight = false;
+	
 	UPROPERTY(BlueprintReadWrite)
 	FTransform PlayerTransform;
 

@@ -103,6 +103,9 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "SaveGame")
     bool bLoadedFromSave = false;
     
+    UPROPERTY(BlueprintReadOnly)
+    bool bIsLoadingSave = false;
+    
 private:
     UPROPERTY()
     USOHSaveGame* CurrentSaveGame = nullptr;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameMode/SOHSaveObjectInterface.h"
 #include "Item/SOHBaseItem.h"
 #include "SOHFlashlight.generated.h"
 
@@ -12,7 +13,9 @@ class ACharacter;
 class ASOHJumpScareBase;
 
 UCLASS()
-class SOH_API ASOHFlashlight : public ASOHBaseItem
+class SOH_API ASOHFlashlight 
+    : public ASOHBaseItem
+    , public ISOHSaveObjectInterface
 {
     GENERATED_BODY()
 
@@ -41,6 +44,12 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight|Sound")
     USoundBase* FlashlightOffSound;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Save")
+    FName WorldStateID;
+    
+    virtual void SaveState_Implementation(class USOHSaveGame* SaveData) override;
+    virtual void LoadState_Implementation(class USOHSaveGame* SaveData) override;
 
 protected:
     virtual void BeginPlay() override;

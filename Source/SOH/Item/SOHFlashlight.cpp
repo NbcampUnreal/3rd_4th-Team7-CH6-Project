@@ -8,6 +8,7 @@
 #include "UI/SOHMessageManager.h"
 #include "Level/SOHJumpScareBase.h"
 #include "Item/SOHItemManager.h"
+#include "GameMode/SOHSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 
@@ -229,7 +230,7 @@ float ASOHFlashlight::GetBatteryPercent() const
 }
 
 void ASOHFlashlight::Interact_Implementation(AActor* Caller)
-{
+{ 
     if (!Caller) return;
 
     USOHInventoryComponent* InventoryComp = Caller->FindComponentByClass<USOHInventoryComponent>();
@@ -237,7 +238,7 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
 
     if (!bAdded)
         return;
-
+    
     UGameInstance* GI = GetGameInstance();
     USOHItemManager* ItemMgr = GI ? GI->GetSubsystem<USOHItemManager>() : nullptr;
 
@@ -250,7 +251,7 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
             ItemName = ItemData->itemName;
         }
     }
-
+    
     if (USOHMessageManager* MsgMgr = Caller->FindComponentByClass<USOHMessageManager>())
     {
         FText Msg = FText::Format(
@@ -259,7 +260,9 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
         );
         MsgMgr->ShowMessageText(Msg, 1.5f);
     }
-
+    
+    TryTriggerItemCutscene();
+    
     if (ACharacter* Char = Cast<ACharacter>(Caller))
     {
         SetEquipped(Char);
@@ -274,4 +277,53 @@ void ASOHFlashlight::Interact_Implementation(AActor* Caller)
 void ASOHFlashlight::SetFlashlightCutScene()
 {
     PlayFlashlightCutScene();
+}
+
+void ASOHFlashlight::SaveState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone())
+        return;
+
+    // 손에 장착된 상태라면 저장
+    if (!bEquipped)
+        return;
+
+    FWorldStateData& Data =
+        SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+
+    Data.bIsSolved = true;
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("[SAVE][Flashlight] %s equipped"),
+        *WorldStateID.ToString());
+}
+
+void ASOHFlashlight::LoadState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone())
+        return;
+
+    FWorldStateData* Data =
+        SaveData->WorldStateMap.Find(WorldStateID);
+
+    if (!Data || !Data->bIsSolved)
+        return;
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("[LOAD][Flashlight] Restore %s"),
+        *WorldStateID.ToString());
+
+    ACharacter* Player =
+        UGameplayStatics::GetPlayerCharacter(this, 0);
+
+    if (!Player)
+        return;
+
+    // 🔥 여기서 다시 장착
+    SetEquipped(Player);
+
+    if (ASOHPlayerCharacter* PC = Cast<ASOHPlayerCharacter>(Player))
+    {
+        PC->SetFlashlight(this);
+    }
 }
