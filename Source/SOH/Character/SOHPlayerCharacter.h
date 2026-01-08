@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Sound/SoundBase.h"
 #include "SOHPlayerCharacter.generated.h"
 
 class ASOHFlashlight;
@@ -38,6 +39,13 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bUIHit;
+	
+	// UI 열고 닫을 때 재생할 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI Audio")
+	USoundBase* UIOpenSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI Audio")
+	USoundBase* UICloseSound;
 
 protected:
 	virtual void BeginPlay() override;

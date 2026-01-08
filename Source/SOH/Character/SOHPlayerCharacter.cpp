@@ -999,6 +999,12 @@ void ASOHPlayerCharacter::OpenUI(UUserWidget* NewUI, FName UIType)
 		CurrentOpenUI->AddToViewport();
 		bIsUIOpen = true;
 
+		if (UIOpenSound)
+		{
+			// 시간 정지 영향 안 받게
+			UGameplayStatics::PlaySound2D(this, UIOpenSound, 1.0f, 1.0f, 0.0f, nullptr, nullptr, true);
+		}
+
 		//시간 정지
 		if (UIType == FName("Pause") || UIType == FName("Inventory") || UIType == FName("Map"))
 		{
@@ -1031,6 +1037,10 @@ void ASOHPlayerCharacter::CloseUI()
 	}
 
 	UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
+	if (UICloseSound)
+	{
+		UGameplayStatics::PlaySound2D(this, UICloseSound);
+	}
 	CurrentUIType = NAME_None;
 	bIsUIOpen = false;
 
