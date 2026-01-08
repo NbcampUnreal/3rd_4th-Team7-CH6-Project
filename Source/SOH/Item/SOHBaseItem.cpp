@@ -4,6 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameMode/SOHGameInstance.h"
 #include "GameMode/SOHCutscenePlayerBase.h"
+#include "GameMode/SOHSaveGame.h"
 #include "UI/SOHMessageManager.h"
 
 ASOHBaseItem::ASOHBaseItem()
@@ -229,4 +230,28 @@ void ASOHBaseItem::TryTriggerItemCutscene()
 
     UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] Execute_PlayCutscene"));
     CutscenePlayer->PlayCutscene();
+}
+
+void ASOHBaseItem::SaveState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone()) return;
+
+    FWorldStateData& Data =
+        SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+
+    Data.bIsCollected = true;
+}
+
+void ASOHBaseItem::LoadState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone()) return;
+
+    if (FWorldStateData* Data =
+        SaveData->WorldStateMap.Find(WorldStateID))
+    {
+        if (Data->bIsCollected)
+        {
+            Destroy();
+        }
+    }
 }

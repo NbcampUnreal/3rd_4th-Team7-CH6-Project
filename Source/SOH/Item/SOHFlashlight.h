@@ -13,9 +13,7 @@ class ACharacter;
 class ASOHJumpScareBase;
 
 UCLASS()
-class SOH_API ASOHFlashlight 
-    : public ASOHBaseItem
-    , public ISOHSaveObjectInterface
+class SOH_API ASOHFlashlight  : public ASOHBaseItem
 {
     GENERATED_BODY()
 
@@ -44,9 +42,6 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight|Sound")
     USoundBase* FlashlightOffSound;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Save")
-    FName WorldStateID;
     
     virtual void SaveState_Implementation(class USOHSaveGame* SaveData) override;
     virtual void LoadState_Implementation(class USOHSaveGame* SaveData) override;

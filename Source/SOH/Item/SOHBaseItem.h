@@ -5,10 +5,13 @@
 #include "SOHItemDataStructs.h" // 데이터 구조체
 #include "GameplayTagContainer.h"
 #include "GameMode/SOHCutscenePlayerBase.h"
+#include "GameMode/SOHSaveObjectInterface.h"
 #include "SOHBaseItem.generated.h"
 
 UCLASS()
-class SOH_API ASOHBaseItem : public ASOHInteractableActor
+class SOH_API ASOHBaseItem 
+	: public ASOHInteractableActor
+	, public ISOHSaveObjectInterface
 {
 	GENERATED_BODY()
     
@@ -43,6 +46,12 @@ public:
 	FGameplayTag CheckTag;
 	
 	void TryTriggerItemCutscene();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Save")
+	FName WorldStateID;
+	
+	virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
+	virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
 
 protected:
 	// 아이템의 3D 외형을 담당하는 컴포넌트 (Mesh) 

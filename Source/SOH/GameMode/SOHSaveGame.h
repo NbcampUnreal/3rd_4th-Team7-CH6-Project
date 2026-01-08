@@ -22,6 +22,9 @@ struct FWorldStateData
 	
 	UPROPERTY()
 	bool bIsLocked = false; 
+	
+	UPROPERTY()
+	bool bIsCollected = false;
 };
 
 UCLASS()
