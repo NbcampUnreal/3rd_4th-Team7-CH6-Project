@@ -91,6 +91,13 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Conditions", meta = (EditCondition = "bUseDeactivationTag"))
     FGameplayTag DeactivationConditionTag;
+    
+    //완료 태그
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Conditions")
+    bool bSendCompleteTag = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "JumpScare|Conditions", meta = (EditCondition = "bSendCompleteTag"))
+    FGameplayTag JumpScareCompleteTag;
 
 protected:
     // 점프스퀘어 진행 중인지

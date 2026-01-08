@@ -1,5 +1,6 @@
 #include "Puzzle/SOHComputer.h"
 #include "GameMode/SOHGameInstance.h"
+#include "GameMode/SOHSaveGame.h"
 #include "Interaction/SOHInteractableActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h" 
@@ -68,8 +69,32 @@ void ASOHComputer::SetPasswordSolved(bool bSolved)
 			if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
 			{
 				GI->CompleteCondition(PuzzleSolvedTag);
+				GI->SaveGameData();
 				UE_LOG(LogTemp, Warning, TEXT("Computer Puzzle Solved! Tag Sent: %s"), *PuzzleSolvedTag.ToString());
 			}
 		}
+	}
+}
+
+void ASOHComputer::SaveState_Implementation(USOHSaveGame* SaveData)
+{
+	if (!SaveData || WorldStateID.IsNone())
+		return;
+
+	FWorldStateData& Data =
+		SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+
+	Data.bIsSolved = bIsPasswordSolved;
+}
+
+void ASOHComputer::LoadState_Implementation(USOHSaveGame* SaveData)
+{
+	if (!SaveData || WorldStateID.IsNone())
+		return;
+
+	if (FWorldStateData* Data =
+		SaveData->WorldStateMap.Find(WorldStateID))
+	{
+		bIsPasswordSolved = Data->bIsSolved;
 	}
 }

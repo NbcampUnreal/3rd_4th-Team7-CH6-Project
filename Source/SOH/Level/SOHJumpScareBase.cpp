@@ -312,6 +312,14 @@ void ASOHJumpScareBase::InternalEndJumpScare()
     // BP 연결
     OnJumpScareEnded();
 
+    if (bSendCompleteTag && JumpScareCompleteTag.IsValid())
+    {
+        if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
+        {
+            GI->CompleteCondition(JumpScareCompleteTag);
+        }
+    }
+    
     // 이 점프스퀘어 Destroy
     if (bOneShot)
     {
