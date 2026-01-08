@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameMode/SOHGameInstance.h"
+#include "GameMode/SOHSaveGame.h"
 #include "Level/SOHOpenDoor.h"
 
 // Constructor
@@ -262,6 +263,13 @@ void ASOHCombinationLock::UnlockComplete()
         LinkedDoor->UnlockOpenDoor(this);
     }
     
+    bIsSolved = true;
+    
+    if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
+    {
+        GI->SaveGameData();
+    }
+    
     if (PuzzleClearTag.IsValid())
     {
         if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
@@ -282,3 +290,37 @@ void ASOHCombinationLock::UnlockComplete()
     });
     GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle,DestroyDelegate,0.5,false );
 }
+
+void ASOHCombinationLock::SaveState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone())
+        return;
+
+    FWorldStateData& Data =
+        SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+
+    Data.bIsSolved = bIsSolved;
+}
+void ASOHCombinationLock::LoadState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone())
+        return;
+
+    if (FWorldStateData* Data =
+        SaveData->WorldStateMap.Find(WorldStateID))
+    {
+        if (Data->bIsSolved)
+        {
+            bIsSolved = true;
+
+            // 🔥 이미 풀린 퍼즐이면
+            if (LinkedDoor)
+            {
+                LinkedDoor->UnlockOpenDoor(this);
+            }
+
+            Destroy(); // 퍼즐 액터 제거
+        }
+    }
+}
+

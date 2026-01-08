@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "GameplayTagContainer.h"
+#include "GameMode/SOHSaveObjectInterface.h"
 #include "SOHCombinationLock.generated.h"
 
 class UStaticMeshComponent;
@@ -21,7 +22,9 @@ struct FDigit
 };
 
 UCLASS()
-class SOH_API ASOHCombinationLock : public ASOHInteractableActor
+class SOH_API ASOHCombinationLock 
+    : public ASOHInteractableActor
+    , public ISOHSaveObjectInterface
 {
     GENERATED_BODY()
 
@@ -32,6 +35,15 @@ public:
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle")
     FGameplayTag PuzzleClearTag;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName WorldStateID;
+    
+    virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
+    virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
+    
+    UPROPERTY()
+    bool bIsSolved = false;
 
 protected:
     virtual void BeginPlay() override;
