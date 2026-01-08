@@ -53,6 +53,9 @@ public:
 	virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
 	virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Item")
+	bool bCollected = false;
+	
 protected:
 	// 아이템의 3D 외형을 담당하는 컴포넌트 (Mesh) 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")

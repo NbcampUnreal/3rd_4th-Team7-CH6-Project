@@ -98,81 +98,69 @@ void ASOHBaseItem::InitItem(FName newItemID)
 // 인터페이스 함수 구현
 void ASOHBaseItem::Interact_Implementation(AActor* Caller)
 {
-    // 부모의 로직(로그 출력)도 실행하고 싶다면 호출 (선택사항)
     Super::Interact_Implementation(Caller);
 
-    // 상호작용 시도 로그
-    UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] Interact Called by Actor: %s"), Caller ? *Caller->GetName() : TEXT("NULL"));
+    UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] Interact Called by Actor: %s"),
+        Caller ? *Caller->GetName() : TEXT("NULL"));
 
     if (!Caller) return;
 
-    // 1. 상호작용한 대상(Caller)에게 인벤토리 컴포넌트가 있는지 확인
-    // Caller는 AActor 타입이므로 바로 컴포넌트 검색 가능
     USOHInventoryComponent* InventoryComp = Caller->FindComponentByClass<USOHInventoryComponent>();
-
-    if (InventoryComp)
-    {
-        UE_LOG(LogTemp, Log, TEXT("[SOHBaseItem] Inventory Component Found on Caller. Trying to Add..."));
-        
-        // 2. 가방에 넣기 시도
-        bool bSuccess = InventoryComp->AddToInventory(itemID, 1);
-
-        if (bSuccess)
-        {
-            TryTriggerItemCutscene();
-
-            UE_LOG(LogTemp, Log, TEXT("BaseItem: Picked up by %s -> ItemID: %s"), *Caller->GetName(), *itemID.ToString());
-            
-            if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
-            {
-                if (ItemConditionTag.IsValid())
-                {
-                    GI->CompleteCondition(ItemConditionTag);
-                    UE_LOG(LogTemp, Warning,
-                        TEXT("[TAG] Condition Sent From Item: %s"),
-                        *ItemConditionTag.ToString());
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Warning,
-                        TEXT("[TAG] Item has NO GameplayTag set: %s"),
-                        *itemID.ToString());
-                }
-            }
-            
-            UGameInstance* gameInst = GetGameInstance();
-            USOHItemManager* itemManager = gameInst ? gameInst->GetSubsystem<USOHItemManager>() : nullptr;
-
-            FText ItemName = FText::FromName(itemID);
-            if (itemManager)
-            {
-                FSOHItemTableRow* itemData = itemManager->GetItemDataByID(itemID);
-                if (itemData)
-                {
-                    ItemName = itemData->itemName;
-                }
-            }
-
-            USOHMessageManager* MessageMgr = Caller->FindComponentByClass<USOHMessageManager>();
-            if (MessageMgr)
-            {
-                FText Msg = FText::Format(
-                    FText::FromString(TEXT("{0}을(를) 획득했다.")),
-                    ItemName
-                );
-                MessageMgr->ShowMessageText(Msg, 1.5f);
-            }
-            Destroy();
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Inventory Full or Error!"));
-        }
-    }
-    else
+    if (!InventoryComp)
     {
         UE_LOG(LogTemp, Warning, TEXT("Interactor has no SOHInventoryComponent!"));
+        return;
     }
+
+    UE_LOG(LogTemp, Log, TEXT("[SOHBaseItem] Inventory Component Found on Caller. Trying to Add..."));
+
+    const bool bSuccess = InventoryComp->AddToInventory(itemID, 1);
+    if (!bSuccess)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Inventory Full or Error!"));
+        return;
+    }
+
+    // ✅ 여기부터 “줍기 성공” 처리
+    bCollected = true;
+
+    TryTriggerItemCutscene();
+
+    if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+    {
+        // 태그 처리 (있으면)
+        if (ItemConditionTag.IsValid())
+        {
+            GI->CompleteCondition(ItemConditionTag);
+            UE_LOG(LogTemp, Warning, TEXT("[TAG] Condition Sent From Item: %s"),
+                *ItemConditionTag.ToString());
+        }
+
+        // ✅ 태그 유무 상관없이 저장은 무조건 호출 (핵심)
+        GI->SaveGameData();
+    }
+
+    // 메시지 출력 (기존 로직 유지)
+    UGameInstance* gameInst = GetGameInstance();
+    USOHItemManager* itemManager = gameInst ? gameInst->GetSubsystem<USOHItemManager>() : nullptr;
+
+    FText ItemName = FText::FromName(itemID);
+    if (itemManager)
+    {
+        if (FSOHItemTableRow* itemData = itemManager->GetItemDataByID(itemID))
+        {
+            ItemName = itemData->itemName;
+        }
+    }
+
+    if (USOHMessageManager* MessageMgr = Caller->FindComponentByClass<USOHMessageManager>())
+    {
+        FText Msg = FText::Format(FText::FromString(TEXT("{0}을(를) 획득했다.")), ItemName);
+        MessageMgr->ShowMessageText(Msg, 1.5f);
+    }
+
+    // ✅ 저장 후 제거
+    Destroy();
 }
 
 // 테스트 코드
@@ -236,18 +224,15 @@ void ASOHBaseItem::SaveState_Implementation(USOHSaveGame* SaveData)
 {
     if (!SaveData || WorldStateID.IsNone()) return;
 
-    FWorldStateData& Data =
-        SaveData->WorldStateMap.FindOrAdd(WorldStateID);
-
-    Data.bIsCollected = true;
+    FWorldStateData& Data = SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+    Data.bIsCollected = bCollected;
 }
 
 void ASOHBaseItem::LoadState_Implementation(USOHSaveGame* SaveData)
 {
     if (!SaveData || WorldStateID.IsNone()) return;
 
-    if (FWorldStateData* Data =
-        SaveData->WorldStateMap.Find(WorldStateID))
+    if (FWorldStateData* Data = SaveData->WorldStateMap.Find(WorldStateID))
     {
         if (Data->bIsCollected)
         {
@@ -255,3 +240,4 @@ void ASOHBaseItem::LoadState_Implementation(USOHSaveGame* SaveData)
         }
     }
 }
+
