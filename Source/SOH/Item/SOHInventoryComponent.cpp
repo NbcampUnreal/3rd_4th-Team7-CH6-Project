@@ -40,6 +40,10 @@ bool USOHInventoryComponent::AddToInventory(FName newItemID, int32 newQuantity)
 		if (slot.itemID == newItemID)
 		{
 			slot.quantity += newQuantity;
+
+			if (ItemPickupSound)
+				UGameplayStatics::PlaySound2D(this, ItemPickupSound);
+
 			UE_LOG(LogTemp, Log, TEXT("Item Stacked: %s, New Qty: %d"), *newItemID.ToString(), slot.quantity);
 			return true;
 		}
@@ -47,6 +51,10 @@ bool USOHInventoryComponent::AddToInventory(FName newItemID, int32 newQuantity)
 
 	// 3. 없으면 새로 추가
 	inventoryContents.Add(FSOHInventoryItem(newItemID, newQuantity));
+
+	if (ItemPickupSound)
+		UGameplayStatics::PlaySound2D(this, ItemPickupSound);
+
 	UE_LOG(LogTemp, Log, TEXT("Item Added New Slot: %s, Qty: %d"), *newItemID.ToString(), newQuantity);
     
 	return true;

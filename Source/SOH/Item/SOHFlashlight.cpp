@@ -216,6 +216,11 @@ bool ASOHFlashlight::UseBatteryItem(float ChargeAmount)
 
     CurrentBattery = FMath::Clamp(CurrentBattery + ChargeAmount, 0.f, MaxBattery);
 
+    if (BatteryChargeSound)
+    {
+        UGameplayStatics::PlaySound2D(this, BatteryChargeSound);
+    }
+
     UpdateLightFromBattery();
 
     return CurrentBattery > Before;

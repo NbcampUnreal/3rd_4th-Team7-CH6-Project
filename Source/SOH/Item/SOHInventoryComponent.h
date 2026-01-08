@@ -49,4 +49,7 @@ protected:
 	// 실제 아이템들이 저장될 배열 (우리들의 가방)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TArray<FSOHInventoryItem> inventoryContents;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory|Sound")
+	USoundBase* ItemPickupSound;
 };

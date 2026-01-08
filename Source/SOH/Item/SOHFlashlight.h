@@ -96,6 +96,9 @@ private:
     UPROPERTY(VisibleInstanceOnly, Category = "Flashlight|Battery")
     float CurrentBattery = 3.0f;
 
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Sound")
+    USoundBase* BatteryChargeSound;
+
     bool IsBatteryEmpty() const { return CurrentBattery <= 0.f; }
 
     void UpdateLightFromBattery();
