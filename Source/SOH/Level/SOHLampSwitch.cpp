@@ -1,5 +1,6 @@
 #include "SOHLampSwitch.h"
 #include "SOHLamp.h"
+#include "GameMode/SOHSaveGame.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/SOHMessageManager.h"
@@ -81,19 +82,52 @@ bool ASOHLampSwitch::CanReceiveTrace_Implementation(AActor* Caller, bool bCanInt
 
 void ASOHLampSwitch::ToggleAllLamps()
 {
-    if (!bIsLocked)
-    {
-        for (ASOHLamp* Lamp : ControlledLamps)
-        {
-            if (IsValid(Lamp))
-            {
-                Lamp->ToggleLight();
-            }
-        }
-    }
+    if (bIsLocked)
+        return;
+
+    // 🔥 스위치의 "논리 상태"를 먼저 토글
+    bPowerOn = !bPowerOn;
+
+    // 🔥 현재 상태를 램프들에 강제로 적용
+    ApplyPowerState();
 }
 
 void ASOHLampSwitch::SetLocked(bool bNewLocked)
 {
     bIsLocked = bNewLocked;
+}
+
+void ASOHLampSwitch::ApplyPowerState()
+{
+    for (ASOHLamp* Lamp : ControlledLamps)
+    {
+        if (!IsValid(Lamp)) continue;
+
+        if (bPowerOn)
+            Lamp->TurnOn();
+        else
+            Lamp->TurnOff();
+    }
+}
+
+void ASOHLampSwitch::SaveState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone()) return;
+
+    FWorldStateData& Data =
+        SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+
+    Data.bIsOn = bPowerOn;
+}
+
+void ASOHLampSwitch::LoadState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone()) return;
+
+    if (FWorldStateData* Data =
+        SaveData->WorldStateMap.Find(WorldStateID))
+    {
+        bPowerOn = Data->bIsOn;
+        ApplyPowerState(); // 🔥 중요
+    }
 }

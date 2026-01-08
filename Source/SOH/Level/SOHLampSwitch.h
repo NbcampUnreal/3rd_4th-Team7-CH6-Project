@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameMode/SOHSaveObjectInterface.h"
 #include "Interaction/SOHInteractableActor.h"
 #include "SOHLampSwitch.generated.h"
 
@@ -9,7 +10,9 @@ class ASOHLamp;
 class USoundBase;
 
 UCLASS()
-class SOH_API ASOHLampSwitch : public ASOHInteractableActor
+class SOH_API ASOHLampSwitch 
+    : public ASOHInteractableActor
+    , public ISOHSaveObjectInterface
 {
     GENERATED_BODY()
 
@@ -23,12 +26,17 @@ protected:
 
     virtual bool CanReceiveTrace_Implementation(AActor* Caller, bool bCanInteract) override;
 
+    void ApplyPowerState();
+    
     void ToggleAllLamps();
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Lamp")
     void PlaySwitchAnimation();
 
 protected:
+    UPROPERTY(EditAnywhere, Category="Lamp")
+    bool bPowerOn = false;
+    
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* SwitchMesh;
 
@@ -45,4 +53,10 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Lamp|Lock")
     void SetLocked(bool bNewLocked);
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName WorldStateID;
+    
+    virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
+    virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
 };
