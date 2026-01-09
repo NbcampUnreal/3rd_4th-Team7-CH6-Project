@@ -159,15 +159,13 @@ void ASOHSlidingDoor::SaveState_Implementation(USOHSaveGame* SaveData)
 	// 🔥 문 이동 중이면 저장하지 않음
 	if (bIsMoving)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[Save] Door %s is moving. Skip save."), *WorldStateID.ToString());
 		return;
 	}
 
 	FWorldStateData& Data = SaveData->WorldStateMap.FindOrAdd(WorldStateID);
 	Data.bIsLocked = bLocked;
 	Data.bIsOpen = bIsOpen;
-
-	UE_LOG(LogTemp, Log, TEXT("[Save] Door %s saved. Open=%d"), *WorldStateID.ToString(), bIsOpen);
+	
 }
 
 void ASOHSlidingDoor::LoadState_Implementation(USOHSaveGame* SaveData)
@@ -197,13 +195,7 @@ void ASOHSlidingDoor::LoadState_Implementation(USOHSaveGame* SaveData)
 		}
 		else
 		{
-			// 닫힌 상태면 여기서 굳이 Close 애니메이션 돌리지 말고,
-			// 필요하면 "즉시 닫힘 세팅" BP/함수로 위치만 맞춰주는 걸 추천.
-			// BP_CloseDoor(nullptr); // ❌ 로드 때 타임라인 돌리면 꼬일 수 있음
 		}
-
-		UE_LOG(LogTemp, Warning, TEXT("[LOAD][Door] %s Loaded. Locked=%d Open=%d"),
-			*WorldStateID.ToString(), bLocked ? 1 : 0, bIsOpen ? 1 : 0);
 	}
 }
 

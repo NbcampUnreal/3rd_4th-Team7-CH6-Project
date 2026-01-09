@@ -2,15 +2,19 @@
 
 #include "CoreMinimal.h"
 #include "Interaction/SOHInteractableActor.h"
+#include "GameMode/SOHSaveObjectInterface.h"
 #include "SOHOpenDoor.generated.h"
 
 class UStaticMeshComponent;
 class USceneComponent;
 class USoundBase;
 class ASOHLockActor;
+class USOHSaveGame;
 
 UCLASS()
-class SOH_API ASOHOpenDoor : public ASOHInteractableActor
+class SOH_API ASOHOpenDoor 
+	: public ASOHInteractableActor
+	, public ISOHSaveObjectInterface
 {
 	GENERATED_BODY()
 
@@ -78,4 +82,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door|Noise")
 	FName NoiseTag = "Door";
+	
+	virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
+	virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+	FName WorldStateID;
 };
