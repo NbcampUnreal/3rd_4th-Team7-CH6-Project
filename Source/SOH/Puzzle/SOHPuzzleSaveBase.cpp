@@ -1,4 +1,5 @@
 #include "Puzzle/SOHPuzzleSaveBase.h"
+#include "GameMode/SOHGameInstance.h"
 #include "GameMode/SOHSaveGame.h"
 
 ASOHPuzzleSaveBase::ASOHPuzzleSaveBase()
@@ -12,6 +13,14 @@ void ASOHPuzzleSaveBase::MarkPuzzleSolved()
 		return;
 
 	bIsSolved = true;
+	
+	if (UWorld* World = GetWorld())
+	{
+		if (USOHGameInstance* GI = World->GetGameInstance<USOHGameInstance>())
+		{
+			GI->SaveGameData();
+		}
+	}
 }
 
 void ASOHPuzzleSaveBase::SaveState_Implementation(USOHSaveGame* SaveData)
@@ -36,9 +45,7 @@ void ASOHPuzzleSaveBase::LoadState_Implementation(USOHSaveGame* SaveData)
 		if (Data->bIsSolved)
 		{
 			bIsSolved = true;
-
 			// 이미 해결된 퍼즐이면 제거 (필요 시 BP에서 오버라이드 가능)
-			Destroy();
 		}
 	}
 }
