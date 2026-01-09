@@ -81,7 +81,7 @@ protected:
 	// 스태미너
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat|Stamina")
-	float MaxStamina = 100.f;
+	float MaxStamina = 140.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat|Stamina")
 	float Stamina;
@@ -93,10 +93,10 @@ protected:
 	float StaminaRegenPerSec = 10.f;   // 쉬면 초당 회복
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
-	float StaminaRegenDelay = 2.f; // 회복 시작 전 대기시간
+	float StaminaRegenDelay = 1.f; // 회복 시작 전 대기시간
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stat|Stamina")
-	float MinStaminaToRun = 5.f;       // 이 이하이면 달리기 불가
+	float MinStaminaToRun = 10.f;       // 이 이하이면 달리기 불가
 
 	UPROPERTY(BlueprintReadOnly, Category = "Stamina")
 	bool bIsExhausted = false; // 탈진 상태

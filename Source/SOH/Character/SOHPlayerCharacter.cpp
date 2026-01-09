@@ -521,7 +521,7 @@ void ASOHPlayerCharacter::UpdateStamina()
 			Stamina = FMath::Clamp(Stamina, 0.f, MaxStamina);
 
 			// 탈진 상태 해제 (50% 회복 시)
-			if (bIsExhausted && Stamina >= MaxStamina * 0.5f)
+			if (bIsExhausted && Stamina >= MaxStamina * 0.2f)
 			{
 				bIsExhausted = false;
 				bCanSprint = true;
