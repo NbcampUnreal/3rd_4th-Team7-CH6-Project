@@ -264,48 +264,26 @@ void ASOHPlayerCharacter::TraceForInteractable()
 		Params
 	);
 
-	// 강화된 디버그
-	//DrawDebugLine(GetWorld(), Start, End, bHit ? FColor::Green : FColor::Red, false, 0.1f, 0, 2.0f);
-
-	if (bHit)
-	{
-		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.f, 12, FColor::Yellow, false, 0.1f);
-		//UE_LOG(LogTemp, Warning, TEXT("=== HIT DETECTED ==="));
-		//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
-		//UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *HitResult.GetComponent()->GetName());
-		//UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), HitResult.Distance);
-	}
-	else
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("No hit"));
-	}
-
 	AActor* HitActor = nullptr;
 
 	if (bHit)
 	{
 		HitActor = HitResult.GetActor();
-		//UE_LOG(LogTemp, Warning, TEXT("Checking interface for: %s"), *HitActor->GetName());
 
-		if (HitActor && HitActor->Implements<USOHInteractInterface>())
+		// ⭐ Interface를 구현한 물체만 인식
+		if (HitActor && !HitActor->Implements<USOHInteractInterface>())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("✅ INTERFACE OK!"));
-		}
-		else
-		{
-			//UE_LOG(LogTemp, Error, TEXT("❌ NO INTERFACE!"));
+			// Interface 없으면 무시
 			HitActor = nullptr;
 		}
 	}
 
 	bUIHit = (HitActor != nullptr);
-	UE_LOG(LogTemp, Warning, TEXT("bUIHit: %s"), bUIHit ? TEXT("TRUE") : TEXT("FALSE"));
 
 	if (LastHighlightedItem != HitActor)
 	{
 		if (LastHighlightedItem)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Removing highlight from: %s"), *LastHighlightedItem->GetName());
 			if (LastHighlightedItem->Implements<USOHInteractInterface>())
 			{
 				ISOHInteractInterface::Execute_CanReceiveTrace(LastHighlightedItem, this, false);
@@ -316,7 +294,6 @@ void ASOHPlayerCharacter::TraceForInteractable()
 
 		if (HitActor)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Adding highlight to: %s"), *HitActor->GetName());
 			ISOHInteractInterface::Execute_CanReceiveTrace(HitActor, this, true);
 			LastHighlightedItem = HitActor;
 		}
