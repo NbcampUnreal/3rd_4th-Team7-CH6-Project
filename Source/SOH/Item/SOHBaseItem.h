@@ -42,6 +42,9 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Cutscene")
 	ACutscenePlayerBase* CutscenePlayer = nullptr;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Cutscene")
+	FName CutscenePlayerActorTag = TEXT("CutscenePlayer");
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Cutscene")
 	FGameplayTag CheckTag;
 	

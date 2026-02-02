@@ -5,6 +5,7 @@
 #include "GameMode/SOHGameInstance.h"
 #include "GameMode/SOHCutscenePlayerBase.h"
 #include "GameMode/SOHSaveGame.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/SOHMessageManager.h"
 
 ASOHBaseItem::ASOHBaseItem()
@@ -48,6 +49,16 @@ void ASOHBaseItem::BeginPlay()
     else
     {
         // UE_LOG(LogTemp, Error, TEXT("[SOHBaseItem] Error: ItemID is None at BeginPlay! Check Blueprint Defaults."));
+    }
+    
+    if (!CutscenePlayer)
+    {
+        TArray<AActor*> Found;
+        UGameplayStatics::GetAllActorsWithTag(GetWorld(), CutscenePlayerActorTag, Found);
+        if (Found.Num() > 0)
+        {
+            CutscenePlayer = Cast<ACutscenePlayerBase>(Found[0]);
+        }
     }
 }
 
