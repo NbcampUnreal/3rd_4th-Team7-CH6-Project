@@ -8,11 +8,11 @@ ASOHBust::ASOHBust()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    // ·çÆ® ¸Þ½¬
+    // ï¿½ï¿½Æ® ï¿½Þ½ï¿½
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
     StaticMesh->SetupAttachment(RootComponent);
 
-    // Å¸ÀÓ¶óÀÎ
+    // Å¸ï¿½Ó¶ï¿½ï¿½ï¿½
     RotationTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("RotationTimeline"));
     RotationTimeline->SetNetAddressable();
 }
@@ -25,12 +25,12 @@ void ASOHBust::BeginPlay()
 
     StartRotation = StaticMesh->GetRelativeRotation();
 
-    // Å¸ÀÓ¶óÀÎ ¾÷µ¥ÀÌÆ® ¹ÙÀÎµù
+    // Å¸ï¿½Ó¶ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Îµï¿½
     FOnTimelineFloat UpdateFunc;
     UpdateFunc.BindUFunction(this, FName("HandleTimelineUpdate"));
     RotationTimeline->AddInterpFloat(RotationCurve, UpdateFunc);
 
-    // Å¸ÀÓ¶óÀÎ Á¾·á ¹ÙÀÎµù
+    // Å¸ï¿½Ó¶ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½
     FOnTimelineEvent FinishFunc;
     FinishFunc.BindUFunction(this, FName("HandleTimelineFinished"));
     RotationTimeline->SetTimelineFinishedFunc(FinishFunc);
@@ -44,7 +44,7 @@ void ASOHBust::Interact_Implementation(AActor* Caller)
     if (!RotationTimeline || !RotationCurve)
         return;
 
-    // ? ÀÌ¹Ì È¸Àü ÁßÀÌ¸é ¹«½Ã ? ¿ÀÂ÷ ¿ÏÀü Á¦°Å
+    // ? ï¿½Ì¹ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ? ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (RotationTimeline->IsPlaying())
         return;
 
@@ -53,24 +53,24 @@ void ASOHBust::Interact_Implementation(AActor* Caller)
         UGameplayStatics::PlaySoundAtLocation(this, RotateSound, GetActorLocation());
     }
 
-    // ÆÛÁñ °Ë»ç¿ë Position Áõ°¡ (0~3)
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½ï¿½ Position ï¿½ï¿½ï¿½ï¿½ (0~3)
     Position = (Position + 1) % 4;
 
     OnBustRotated.Broadcast();
 
-    // ÇöÀç È¸ÀüÀ» ½ÃÀÛÀ¸·Î ¼³Á¤
+    // ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     StartRotation = StaticMesh->GetRelativeRotation();
 
-    // ¸ñÇ¥ È¸Àü 90µµ Áõ°¡
+    // ï¿½ï¿½Ç¥ È¸ï¿½ï¿½ 90ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     TargetRotation = StartRotation + FRotator(0.f, YawPerPosition, 0.f);
 
-    // È¸Àü ½ÃÀÛ
+    // È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     RotationTimeline->PlayFromStart();
 }
 
 void ASOHBust::HandleTimelineUpdate(float Alpha)
 {
-    // Start ¡æ Target À» ºÎµå·´°Ô º¸°£
+    // Start ï¿½ï¿½ Target ï¿½ï¿½ ï¿½Îµå·´ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     FRotator NewRot = UKismetMathLibrary::RLerp(
         StartRotation,
         TargetRotation,
@@ -83,5 +83,32 @@ void ASOHBust::HandleTimelineUpdate(float Alpha)
 
 void ASOHBust::HandleTimelineFinished()
 {
-    // ÇÊ¿ä ¾øÀ½ (´ÙÀ½ È¸Àü¿¡¼­ StartRotationÀÌ °»½ÅµÊ)
+    // ï¿½Ê¿ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ StartRotationï¿½ï¿½ ï¿½ï¿½ï¿½Åµï¿½)
+}
+
+void ASOHBust::SaveState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone())
+        return;
+
+    FWorldStateData& Data =
+        SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+
+    Data.IntValue = Position;
+}
+
+void ASOHBust::LoadState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone())
+        return;
+
+    if (FWorldStateData* Data =
+        SaveData->WorldStateMap.Find(WorldStateID))
+    {
+        Position = Data->IntValue;
+
+        // â­ íšŒì „ ë³µì›
+        const float Yaw = Position * YawPerPosition;
+        StaticMesh->SetRelativeRotation(FRotator(0.f, Yaw, 0.f));
+    }
 }

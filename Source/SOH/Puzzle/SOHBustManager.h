@@ -5,13 +5,17 @@
 #include "SOHBust.h"
 #include "GameplayTagContainer.h"
 #include "GameMode/SOHCutscenePlayerBase.h"
+#include "GameMode/SOHSaveObjectInterface.h"
+#include "GameMode/SOHSaveGame.h"
 #include "SOHBustManager.generated.h"
 
 class ASOHSlidingDoor;
 class UBoxComponent;
 
 UCLASS()
-class SOH_API ASOHBustManager : public AActor
+class SOH_API ASOHBustManager 
+	: public AActor
+	, public ISOHSaveObjectInterface
 {
 	GENERATED_BODY()
     
@@ -29,6 +33,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Cutscene")
 	ACutscenePlayerBase* EnterCutscenePlayer = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+	FName WorldStateID;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Puzzle|State")
+	bool bEnterTriggered = false;
+	
+	virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
+	virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
 
 protected:
 	virtual void BeginPlay() override;

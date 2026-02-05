@@ -25,6 +25,9 @@ struct FWorldStateData
 	
 	UPROPERTY()
 	bool bIsCollected = false;
+	
+	UPROPERTY()
+	int32 IntValue = 0;
 };
 
 UCLASS()
