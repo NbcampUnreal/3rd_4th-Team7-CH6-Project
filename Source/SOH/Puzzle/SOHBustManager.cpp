@@ -56,17 +56,26 @@ void ASOHBustManager::OnEnterOverlap(UPrimitiveComponent* OverlappedComp, AActor
     UPrimitiveComponent* OtherComp, int32 BodyIndex, bool bFromSweep,
     const FHitResult& SweepResult)
 {
-    if (!OtherActor->IsA(ACharacter::StaticClass())) return;
-
+    if (!OtherActor || !OtherActor->IsA(ACharacter::StaticClass())) return;
+    
     OverlappedComp->SetGenerateOverlapEvents(false);
     OverlappedComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+    
+    if (IsValid(EnterCutscenePlayer))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] EnterOverlap -> PlayCutscene"));
+        EnterCutscenePlayer->PlayCutscene();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] EnterCutscenePlayer is NULL"));
+    }
+    
     for (ASOHSlidingDoor* Door : TargetDoors)
     {
         if (!Door) continue;
 
         Door->IsArtroomPlay = true;
-
         Door->LockAndCloseDoor(this);
     }
 }
