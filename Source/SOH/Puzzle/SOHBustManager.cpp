@@ -78,6 +78,11 @@ void ASOHBustManager::OnEnterOverlap(UPrimitiveComponent* OverlappedComp, AActor
         Door->IsArtroomPlay = true;
         Door->LockAndCloseDoor(this);
     }
+    
+    if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
+    {
+        GI->SaveGameData();
+    }
 }
 
 void ASOHBustManager::CheckPuzzleSolved()
@@ -104,6 +109,7 @@ void ASOHBustManager::CheckPuzzleSolved()
             if (USOHGameInstance* GI = GetWorld()->GetGameInstance<USOHGameInstance>())
             {
                 GI->CompleteCondition(PuzzleClearTag);
+                GI->SaveGameData();
                 UE_LOG(LogTemp, Warning, TEXT("Combination Puzzle Completed! Tag = %s"), *PuzzleClearTag.ToString());
             }
         }
@@ -124,6 +130,67 @@ void ASOHBustManager::CheckPuzzleSolved()
 
                 Door->UnlockSlidingDoor(this);
             }
+        }
+    }
+}
+
+void ASOHBustManager::SaveState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone())
+        return;
+
+    FWorldStateData& Data =
+        SaveData->WorldStateMap.FindOrAdd(WorldStateID);
+
+    Data.bIsSolved = bPuzzleSolved;
+    Data.bIsLocked = bEnterTriggered; // 트리거 상태로 재활용
+}
+
+void ASOHBustManager::LoadState_Implementation(USOHSaveGame* SaveData)
+{
+    if (!SaveData || WorldStateID.IsNone())
+        return;
+
+    if (FWorldStateData* Data =
+        SaveData->WorldStateMap.Find(WorldStateID))
+    {
+        bPuzzleSolved   = Data->bIsSolved;
+        bEnterTriggered = Data->bIsLocked;
+
+        // 퍼즐이 이미 풀린 상태
+        if (bPuzzleSolved)
+        {
+            for (ASOHBust* Bust : BustPieces)
+            {
+                if (Bust) Bust->bIsLocked = true;
+            }
+
+            for (ASOHSlidingDoor* Door : TargetDoors)
+            {
+                if (Door)
+                {
+                    Door->IsArtroomPlay = false;
+                    Door->UnlockSlidingDoor(this);
+                }
+            }
+
+            EnterTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            EnterTrigger->SetGenerateOverlapEvents(false);
+        }
+        // 퍼즐은 안 풀렸지만 입장 트리거는 발동된 상태
+        else if (bEnterTriggered)
+        {
+            for (ASOHSlidingDoor* Door : TargetDoors)
+            {
+                if (Door)
+                {
+                    Door->IsArtroomPlay = true;
+                    Door->LockAndCloseDoor(this);
+                }
+            }
+
+            EnterTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            EnterTrigger->SetGenerateOverlapEvents(false);
         }
     }
 }

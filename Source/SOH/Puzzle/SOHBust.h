@@ -2,16 +2,20 @@
 
 #include "CoreMinimal.h"
 #include "Interaction/SOHInteractableActor.h"
+#include "GameMode/SOHSaveObjectInterface.h"
+#include "GameMode/SOHSaveGame.h"
 #include "SOHBust.generated.h"
 
-// È¸Àü ÀÌº¥Æ® µ¨¸®°ÔÀÌÆ®
+// È¸ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBustRotated);
 
 class UTimelineComponent;
 class UCurveFloat;
 
 UCLASS()
-class SOH_API ASOHBust : public ASOHInteractableActor
+class SOH_API ASOHBust 
+	: public ASOHInteractableActor
+	, public ISOHSaveObjectInterface
 {
 	GENERATED_BODY()
 
@@ -20,16 +24,22 @@ public:
 
 	virtual void Interact_Implementation(AActor* Caller) override;
 
-	// ÆÛÁñ ¸Å´ÏÀú°¡ ÀÐÀ» ¼ö ÀÖ¾î¾ß ÇÏ¹Ç·Î public
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ ï¿½Ï¹Ç·ï¿½ public
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Position = 0;
 
-	// ÆÛÁñ ¸Å´ÏÀú¿¡¼­ ¹ÙÀÎµùÇÔ
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½ï¿½ï¿½
 	UPROPERTY(BlueprintAssignable)
 	FBustRotated OnBustRotated;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Puzzle")
 	bool bIsLocked = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+	FName WorldStateID;
+	
+	virtual void SaveState_Implementation(USOHSaveGame* SaveData) override;
+	virtual void LoadState_Implementation(USOHSaveGame* SaveData) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -55,7 +65,7 @@ protected:
 	USoundBase* RotateSound;
 
 private:
-	// º¸°£¿ë ½ÃÀÛ/¸ñÇ¥ È¸Àü °ª
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½Ç¥ È¸ï¿½ï¿½ ï¿½ï¿½
 	FRotator StartRotation;
 	FRotator TargetRotation;
 };
