@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "SOHBust.h"
 #include "GameplayTagContainer.h"
+#include "GameMode/SOHCutscenePlayerBase.h"
 #include "SOHBustManager.generated.h"
 
 class ASOHSlidingDoor;
@@ -24,6 +25,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle")
 	FGameplayTag PuzzleClearTag;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Cutscene")
+	ACutscenePlayerBase* EnterCutscenePlayer = nullptr;
+
 
 protected:
 	virtual void BeginPlay() override;
