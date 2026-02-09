@@ -1012,7 +1012,6 @@ void ASOHPlayerCharacter::CloseUI()
 		CurrentOpenUI->RemoveFromParent();
 		CurrentOpenUI = nullptr;
 	}
-
 	UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
 	if (UICloseSound)
 	{
@@ -1021,12 +1020,13 @@ void ASOHPlayerCharacter::CloseUI()
 	CurrentUIType = NAME_None;
 	bIsUIOpen = false;
 
-	if (APlayerController* PC = GetController<APlayerController>())
+	// ⭐ IsValid()만으로 충분합니다
+	APlayerController* PC = GetController<APlayerController>();
+	if (IsValid(PC))
 	{
 		FInputModeGameOnly GameInputMode;
 		PC->SetInputMode(GameInputMode);
 		PC->bShowMouseCursor = false;
-
 		PC->SetIgnoreLookInput(false);
 		PC->SetIgnoreMoveInput(false);
 		PC->ResetIgnoreInputFlags();
