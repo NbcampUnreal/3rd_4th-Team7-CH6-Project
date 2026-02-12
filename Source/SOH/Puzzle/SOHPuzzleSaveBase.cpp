@@ -9,11 +9,10 @@ ASOHPuzzleSaveBase::ASOHPuzzleSaveBase()
 
 void ASOHPuzzleSaveBase::MarkPuzzleSolved()
 {
-	if (bIsSolved)
-		return;
+	if (bIsSolved) return;
 
 	bIsSolved = true;
-	
+	// ✅ 자동 저장
 	if (UWorld* World = GetWorld())
 	{
 		if (USOHGameInstance* GI = World->GetGameInstance<USOHGameInstance>())
@@ -22,6 +21,7 @@ void ASOHPuzzleSaveBase::MarkPuzzleSolved()
 		}
 	}
 }
+
 
 void ASOHPuzzleSaveBase::SaveState_Implementation(USOHSaveGame* SaveData)
 {
@@ -36,16 +36,20 @@ void ASOHPuzzleSaveBase::SaveState_Implementation(USOHSaveGame* SaveData)
 
 void ASOHPuzzleSaveBase::LoadState_Implementation(USOHSaveGame* SaveData)
 {
-	if (!SaveData || WorldStateID.IsNone())
-		return;
+	if (!SaveData || WorldStateID.IsNone()) return;
 
-	if (FWorldStateData* Data =
-		SaveData->WorldStateMap.Find(WorldStateID))
+	if (FWorldStateData* Data = SaveData->WorldStateMap.Find(WorldStateID))
 	{
 		if (Data->bIsSolved)
 		{
 			bIsSolved = true;
-			// 이미 해결된 퍼즐이면 제거 (필요 시 BP에서 오버라이드 가능)
+
+			// ✅ 로드시에도 퍼즐을 "풀린 모습"으로 강제 적용
+			BP_ApplySolvedState();
 		}
 	}
+}
+
+void ASOHPuzzleSaveBase::BP_ApplySolvedState_Implementation()
+{
 }

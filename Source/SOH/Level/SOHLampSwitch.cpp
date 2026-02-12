@@ -3,6 +3,9 @@
 #include "GameMode/SOHSaveGame.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameMode/SOHGameInstance.h"
+#include "GameMode/SOHSaveGame.h"
+#include "Components/StaticMeshComponent.h"
 #include "UI/SOHMessageManager.h"
 
 ASOHLampSwitch::ASOHLampSwitch()
@@ -27,6 +30,31 @@ ASOHLampSwitch::ASOHLampSwitch()
 void ASOHLampSwitch::BeginPlay()
 {
     Super::BeginPlay();
+
+    // 🔥 저장된 값이 아직 없을 때만 초기 동기화
+    if (USOHGameInstance* GI = GetGameInstance<USOHGameInstance>())
+    {
+        if (USOHSaveGame* Save = GI->GetCurrentSaveGame())
+        {
+            if (Save->WorldStateMap.Contains(WorldStateID))
+            {
+                // 이미 저장된 값이 있으면 LoadState에서 처리됨
+                return;
+            }
+        }
+    }
+
+    // 🔥 저장값이 없다면 → 램프 초기 상태를 기준으로 스위치 설정
+    for (ASOHLamp* Lamp : ControlledLamps)
+    {
+        if (IsValid(Lamp))
+        {
+            bPowerOn = Lamp->bStartOn;
+            break; // 하나만 기준으로 삼아도 충분
+        }
+    }
+
+    ApplyPowerState();
 }
 
 void ASOHLampSwitch::Interact_Implementation(AActor* Caller)

@@ -29,6 +29,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Lamp")
     void TurnOff();
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Light")
+    bool bStartOn = false;
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* LampMesh;
@@ -41,9 +43,6 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lamp")
     bool bIsOn;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Light")
-    bool bStartOn = false;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Light")
     float EmissiveOn = 0.09f;

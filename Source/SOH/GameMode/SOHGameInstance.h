@@ -58,6 +58,9 @@ public:
     // 게임 저장
     UFUNCTION(BlueprintCallable, Category = "SaveGame")
     void SaveGameData();
+    
+    UFUNCTION(BlueprintPure, Category="SaveGame")
+    USOHSaveGame* GetCurrentSaveGame() const { return CurrentSaveGame; }
 
     // 게임 로드
     UFUNCTION(BlueprintCallable, Category = "SaveGame")

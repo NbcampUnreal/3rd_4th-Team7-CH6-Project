@@ -24,6 +24,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Puzzle|State")
 	bool bIsSolved = false;
 
+	/** 로드시/클리어시 "풀린 상태"를 실제 월드에 반영 (BP에서 구현) */
+	UFUNCTION(BlueprintNativeEvent, Category = "Puzzle")
+	void BP_ApplySolvedState();
+
 public:
 	/** 퍼즐 해결 시 BP에서 호출 */
 	UFUNCTION(BlueprintCallable, Category="Puzzle")
