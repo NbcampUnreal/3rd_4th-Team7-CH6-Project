@@ -58,10 +58,13 @@ void ASOHOpenDoor::Interact_Implementation(AActor* Caller)
 		return;
 	}
 
-
+	// ✅ 핵심: "결정 순간"에 목표 상태를 먼저 반영
+	// (저장/로드는 이 목표 상태를 기준으로 움직이게 됨)
+	const bool bWillOpen = !bIsOpen;
+	bIsOpen = bWillOpen;
 	bIsMoving = true;
 
-	if (!bIsOpen)
+	if (bWillOpen)
 	{
 		if (OpenSound)
 		{
@@ -112,6 +115,8 @@ void ASOHOpenDoor::NotifyDoorMoveStarted()
 
 void ASOHOpenDoor::NotifyDoorMoveFinished(bool bNowOpen)
 {
+	// bIsOpen은 이미 "목표 상태"로 바뀌어 있을 가능성이 높지만,
+	// 최종 동기화로 맞춰주는 건 안전함 (네트워크/블렌딩 등 예외 대비)
 	bIsOpen = bNowOpen;
 	bIsMoving = false;
 }
@@ -125,8 +130,10 @@ void ASOHOpenDoor::UnlockOpenDoor(AActor* Caller)
 
 	bLocked = false;
 
+	// ✅ 잠금 해제 후 자동 오픈이 결정되는 순간 목표 상태를 먼저 true로
 	if (!bIsOpen && !bIsMoving)
 	{
+		bIsOpen = true;     // ✅ 핵심: "열릴 예정" 상태를 먼저 반영
 		bIsMoving = true;
 
 		if (OpenSound)
@@ -140,23 +147,17 @@ void ASOHOpenDoor::UnlockOpenDoor(AActor* Caller)
 	}
 }
 
-void  ASOHOpenDoor::SaveState_Implementation(USOHSaveGame* SaveData)
+void ASOHOpenDoor::SaveState_Implementation(USOHSaveGame* SaveData)
 {
 	if (!SaveData || WorldStateID.IsNone()) return;
 
-	// 🔥 문 이동 중이면 저장하지 않음
-	if (bIsMoving)
-	{
-		return;
-	}
-
+	// ✅ 핵심: 이동 중이어도 저장 스킵하지 않음
 	FWorldStateData& Data = SaveData->WorldStateMap.FindOrAdd(WorldStateID);
 	Data.bIsLocked = bLocked;
 	Data.bIsOpen = bIsOpen;
-	
 }
 
-void  ASOHOpenDoor::LoadState_Implementation(USOHSaveGame* SaveData)
+void ASOHOpenDoor::LoadState_Implementation(USOHSaveGame* SaveData)
 {
 	UE_LOG(LogTemp, Error, TEXT("🔥 Door LoadState CALLED: %s"), *GetName());
 
@@ -164,25 +165,19 @@ void  ASOHOpenDoor::LoadState_Implementation(USOHSaveGame* SaveData)
 
 	if (FWorldStateData* Data = SaveData->WorldStateMap.Find(WorldStateID))
 	{
-		// ✅ 1) 잠금 상태는 항상 복원 (핵심!)
 		bLocked = Data->bIsLocked;
-
-		// 이동 상태는 로드 시 정지시키는 게 안전
+		bIsOpen = Data->bIsOpen;
 		bIsMoving = false;
 
-		// ✅ 2) 열림/닫힘 상태 복원
-		bIsOpen = Data->bIsOpen;
-
-		if (bIsOpen)
+		if (DoorFrame)
 		{
-			// 충돌 제거 (열림 상태일 때만)
-			DoorFrame->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-
-			// BP에서 "강제로 열린 상태" 세팅 (즉시 세팅용이면 더 좋음)
-			BP_OpenDoor(nullptr);
-		}
-		else
-		{
+			if (bIsOpen)
+			{
+				DoorFrame->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+			}
+			else
+			{
+			}
 		}
 	}
 }
