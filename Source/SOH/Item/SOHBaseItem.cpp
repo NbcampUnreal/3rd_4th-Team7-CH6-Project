@@ -8,6 +8,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/SOHMessageManager.h"
 
+// 커스텀 로그 카테고리 정의
+// Output Log 필터에서 'SOHItem'으로 검색하거나 카테고리를 선택할 수 있습니다.
+DEFINE_LOG_CATEGORY_STATIC(LogSOHItem, Log, All);
+
 ASOHBaseItem::ASOHBaseItem()
 {
     // 1. 외형을 담당할 스태틱 메쉬 컴포넌트 생성
@@ -38,17 +42,12 @@ void ASOHBaseItem::BeginPlay()
 {
     Super::BeginPlay();
 
-    // BeginPlay 로그: 아이템이 월드에 생성되었음을 알림
-    UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] BeginPlay: %s (ItemID: %s)"), *GetName(), *itemID.ToString());
+    UE_LOG(LogSOHItem, Log, TEXT("[BeginPlay] %s (ItemID: %s)"), *GetName(), *itemID.ToString());
 
     // 만약 레벨에 미리 배치해두고 ID를 적어놨다면, 시작하자마자 초기화 진행
     if (!itemID.IsNone())
     {
         InitItem(itemID);
-    }
-    else
-    {
-        // UE_LOG(LogTemp, Error, TEXT("[SOHBaseItem] Error: ItemID is None at BeginPlay! Check Blueprint Defaults."));
     }
     
     if (!CutscenePlayer)
@@ -66,8 +65,7 @@ void ASOHBaseItem::InitItem(FName newItemID)
 {
     // 1. ID 저장
     itemID = newItemID;
-    // UE_LOG(LogTemp, Log, TEXT("[SOHBaseItem] InitItem Called. Requesting Data for ID: %s"), *itemID.ToString());
-
+    
     // 2. 게임 인스턴스를 통해 ItemManager 찾기
     UGameInstance* gameInst = GetGameInstance();
     USOHItemManager* itemManager = gameInst ? gameInst->GetSubsystem<USOHItemManager>() : nullptr;
@@ -83,7 +81,7 @@ void ASOHBaseItem::InitItem(FName newItemID)
             if (itemData->mesh)
             {
                 itemMesh->SetStaticMesh(itemData->mesh);
-                UE_LOG(LogTemp, Log, TEXT("[SOHBaseItem] Mesh Set Successfully for %s"), *itemID.ToString());
+                UE_LOG(LogSOHItem, Log, TEXT("[InitItem] Mesh Set Successfully for %s"), *itemID.ToString());
 
                 // (선택사항) 아이템 이름으로 액터 이름 바꾸기 (디버깅용)
                 #if WITH_EDITOR
@@ -92,17 +90,17 @@ void ASOHBaseItem::InitItem(FName newItemID)
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] Data Found, but Mesh is NULL for ID: %s"), *itemID.ToString());
+                UE_LOG(LogSOHItem, Log, TEXT("[InitItem] Data Found, but Mesh is NULL for ID: %s"), *itemID.ToString());
             }
         }
         else
         {
-            UE_LOG(LogTemp,Warning, TEXT("[SOHBaseItem] Init Failed: Data Table has no row for ID: %s"), *itemID.ToString());
+            UE_LOG(LogSOHItem, Log, TEXT("[InitItem] Init Failed: Data Table has no row for ID: %s"), *itemID.ToString());
         }
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] CRITICAL: SOHItemManager Subsystem NOT Found!"));
+        UE_LOG(LogSOHItem, Log, TEXT("[InitItem] CRITICAL: SOHItemManager Subsystem NOT Found!"));
     }
 }
 
@@ -110,8 +108,7 @@ void ASOHBaseItem::InitItem(FName newItemID)
 void ASOHBaseItem::Interact_Implementation(AActor* Caller)
 {
     Super::Interact_Implementation(Caller);
-
-    UE_LOG(LogTemp, Warning, TEXT("[SOHBaseItem] Interact Called by Actor: %s"),
+    UE_LOG(LogSOHItem, Log, TEXT("[Interact] Called by Actor: %s"),
         Caller ? *Caller->GetName() : TEXT("NULL"));
 
     if (!Caller) return;
@@ -119,20 +116,20 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
     USOHInventoryComponent* InventoryComp = Caller->FindComponentByClass<USOHInventoryComponent>();
     if (!InventoryComp)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Interactor has no SOHInventoryComponent!"));
+        UE_LOG(LogSOHItem, Log, TEXT("[Interact] Interactor has no SOHInventoryComponent!"));
         return;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("[SOHBaseItem] Inventory Component Found on Caller. Trying to Add..."));
+    UE_LOG(LogSOHItem, Log, TEXT("[Interact] Inventory Component Found. Trying to Add..."));
 
     const bool bSuccess = InventoryComp->AddToInventory(itemID, 1);
     if (!bSuccess)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Inventory Full or Error!"));
+        UE_LOG(LogSOHItem, Log, TEXT("[Interact] Inventory Full or Error!"));
         return;
     }
 
-    // ✅ 여기부터 “줍기 성공” 처리
+    // “줍기 성공” 처리
     bCollected = true;
 
     TryTriggerItemCutscene();
@@ -143,15 +140,14 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
         if (ItemConditionTag.IsValid())
         {
             GI->CompleteCondition(ItemConditionTag);
-            UE_LOG(LogTemp, Warning, TEXT("[TAG] Condition Sent From Item: %s"),
-                *ItemConditionTag.ToString());
+            UE_LOG(LogSOHItem, Log, TEXT("[Interact] Condition Sent From Item: %s"), *ItemConditionTag.ToString());
         }
 
-        // ✅ 태그 유무 상관없이 저장은 무조건 호출 (핵심)
+        // 태그 유무 상관없이 저장은 무조건 호출
         GI->SaveGameData();
     }
 
-    // 메시지 출력 (기존 로직 유지)
+    // 메시지 출력
     UGameInstance* gameInst = GetGameInstance();
     USOHItemManager* itemManager = gameInst ? gameInst->GetSubsystem<USOHItemManager>() : nullptr;
 
@@ -170,64 +166,35 @@ void ASOHBaseItem::Interact_Implementation(AActor* Caller)
         MessageMgr->ShowMessageText(Msg, 1.5f);
     }
 
-    // ✅ 저장 후 제거
+    // 저장 후 제거
     Destroy();
 }
 
-// 테스트 코드
-//void ASOHBaseItem::NotifyActorBeginOverlap(AActor* OtherActor)
-//{
-//    Super::NotifyActorBeginOverlap(OtherActor);
-//
-//    // 1. 부딪힌 대상(OtherActor)이 유효한지, 그리고 나 자신(this)이 아닌지 확인
-//    if (OtherActor && OtherActor != this)
-//    {
-//        // 2. 부딪힌 대상에게 '인벤토리 컴포넌트'가 있는지 찾아본다.
-//        // (FindComponentByClass는 액터에 붙은 컴포넌트를 검색해 줍니다)
-//        USOHInventoryComponent* InventoryComp = OtherActor->FindComponentByClass<USOHInventoryComponent>();
-//
-//        if (InventoryComp)
-//        {
-//            // 3. 인벤토리가 있다면, 아이템 추가 시도!
-//            // (지금은 테스트니까 1개씩 추가한다고 가정)
-//            bool bSuccess = InventoryComp->AddToInventory(itemID, 1);
-//
-//            if (bSuccess)
-//            {
-//                // 4. 추가에 성공했으면 로그를 남기고
-//                UE_LOG(LogTemp, Log, TEXT("Item Picked Up: %s"), *itemID.ToString());
-//
-//                // 5. 이 아이템 액터는 세상에서 사라진다. (Destroy)
-//                Destroy();
-//            }
-//        }
-//    }
-//}
-
 void ASOHBaseItem::TryTriggerItemCutscene()
 {
-    UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] TryTriggerItemCutscene CALLED"));
+    // ✅ 흰색 로그
+    UE_LOG(LogSOHItem, Log, TEXT("[Cutscene] TryTriggerItemCutscene CALLED"));
 
     if (!IsValid(CutscenePlayer))
     {
-        UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] CutscenePlayer INVALID"));
+        UE_LOG(LogSOHItem, Log, TEXT("[Cutscene] CutscenePlayer INVALID"));
         return;
     }
 
     USOHGameInstance* GI = GetGameInstance<USOHGameInstance>();
     if (!GI)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] GameInstance INVALID"));
+        UE_LOG(LogSOHItem, Log, TEXT("[Cutscene] GameInstance INVALID"));
         return;
     }
 
     if (CheckTag.IsValid() && GI->HasCondition(CheckTag))
     {
-        UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] Already Played → Skip"));
+        UE_LOG(LogSOHItem, Log, TEXT("[Cutscene] Already Played → Skip"));
         return;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("[CUTSCENE] Execute_PlayCutscene"));
+    UE_LOG(LogSOHItem, Log, TEXT("[Cutscene] Execute_PlayCutscene"));
     CutscenePlayer->PlayCutscene();
 }
 
@@ -251,4 +218,3 @@ void ASOHBaseItem::LoadState_Implementation(USOHSaveGame* SaveData)
         }
     }
 }
-
