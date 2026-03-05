@@ -227,24 +227,21 @@ bool USOHGameInstance::HasSaveFile() const
 
 void USOHGameInstance::ResetGameData()
 {
-    UE_LOG(LogTemp, Log, TEXT("[RESET] 🔄 새 게임 데이터 초기화"));
-
-    // 스테이지 초기화
     CurrentStage = 0;
     CompletedConditions.Reset();
-    
-    // 로드 플래그 초기화
-    bLoadedFromSave = false;
-    
-    // 플레이어 데이터 초기화
-    LoadedPlayerTransform = FTransform::Identity;
-    LoadedHealth = 200.0f;      // 새 게임 기본 체력
-    LoadedStamina = 100.0f;     // 새 게임 기본 스태미나
-    LoadedInventory.Empty();
-    
-    UE_LOG(LogTemp, Log, TEXT("[RESET] ✅ 초기화 완료"));
-}
 
+    bLoadedFromSave = false;
+
+    LoadedPlayerTransform = FTransform::Identity;
+    LoadedHealth = 200.0f;
+    LoadedStamina = 100.0f;
+    LoadedInventory.Empty();
+
+    CurrentSaveGame = nullptr;
+
+    // ⭐ 세이브 파일 삭제
+    UGameplayStatics::DeleteGameInSlot(SAVE_SLOT_NAME, SAVE_USER_INDEX);
+}
 void USOHGameInstance::ContinueGame()
 {
     if (!LoadGameData())
