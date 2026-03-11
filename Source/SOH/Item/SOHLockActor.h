@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
 	FName RequiredKeyID;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
+	FName TargetDoorTag; // 문(Door)에 설정한 태그 이름
+	
 	// 이 자물쇠를 열면 잠금이 해제될 문
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock System")
 	TArray<ASOHSlidingDoor*> TargetSlidingDoor;

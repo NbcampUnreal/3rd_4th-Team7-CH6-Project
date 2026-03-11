@@ -36,6 +36,24 @@ void ASOHLockActor::Interact_Implementation(AActor* Caller)
 
 	if (!Caller) return;
 
+	TArray<AActor*> FoundDoors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TargetDoorTag, FoundDoors);
+	for (AActor* Door : FoundDoors)
+	{
+		if (ASOHSlidingDoor* SlidingDoor = Cast<ASOHSlidingDoor>(Door))
+		{
+			TargetSlidingDoor.Add(SlidingDoor);
+		}
+		else if (ASOHOpenDoor* OpenDoor = Cast<ASOHOpenDoor>(Door))
+		{
+			TargetOpenDoor.Add(OpenDoor);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("잘못된 참조입니다."));
+		}
+	}
+	
 	// 1. 말을 건 사람(Caller)의 인벤토리를 가져옵니다.
 	USOHInventoryComponent* InventoryComp = Caller->FindComponentByClass<USOHInventoryComponent>();
 
