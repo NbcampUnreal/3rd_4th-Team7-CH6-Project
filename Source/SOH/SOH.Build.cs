@@ -8,7 +8,7 @@ public class SOH : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "GameplayTasks", "UMG", "NavigationSystem", "GameplayTags"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "GameplayTasks", "UMG", "NavigationSystem", "GameplayTags", "LevelSequence", "MovieScene"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
