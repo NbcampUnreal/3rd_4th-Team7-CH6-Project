@@ -10,6 +10,7 @@ class ASOHFlashlight;
 class UAnimMontage;
 class USoundBase;
 class UUserWidget;
+class USpringArmComponent;
 
 UCLASS()
 class SOH_API ASOHPlayerCharacter : public ACharacter
@@ -169,8 +170,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool bIsRunning = false;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	class USpringArmComponent* SpringArm;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
+	USpringArmComponent* SpringArm;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
@@ -301,8 +302,5 @@ private:
 	FTimerHandle StaminaUpdateTimer;
 
 	void CheckCrouchMovement();
-
-
-
 };
 
