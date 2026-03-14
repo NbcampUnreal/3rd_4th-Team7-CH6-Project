@@ -80,6 +80,9 @@ private:
     bool bOn = false;
     bool bEquipped = false;
 
+    // 한 번만 보여줄 저전력 경고 플래그
+    bool bLowBatteryWarned = false;
+
     void SetOn(bool bEnable);
     void SetEquipped(ACharacter* NewOwner);
 
@@ -110,7 +113,7 @@ private:
     float MaxIntensity = 10.0f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
-    float MinIntensity = 1.f;
+    float MinIntensity = 0.5f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
     float MaxOuterConeAngle = 35.f;

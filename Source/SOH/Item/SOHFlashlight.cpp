@@ -196,6 +196,25 @@ void ASOHFlashlight::DrainOnce()
 
         return;
     }
+    else if (CurrentBattery <= 20.f)
+    {
+        // 한 번만 표시하도록 플래그 확인
+        if (!bLowBatteryWarned)
+        {
+            if (OwnerChar)
+            {
+                if (USOHMessageManager* MsgMgr = OwnerChar->FindComponentByClass<USOHMessageManager>())
+                {
+                    MsgMgr->ShowMessageText(
+                        FText::FromString(TEXT("배터리가 많이 줄어들었어.")),
+                        1.5f
+                    );
+                }
+            }
+            bLowBatteryWarned = true;
+        }
+        return;
+    }
     UpdateLightFromBattery();
 }
 
