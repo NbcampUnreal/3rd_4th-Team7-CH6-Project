@@ -35,7 +35,7 @@ ASOHPlayerCharacter::ASOHPlayerCharacter()
 	// 카메라는 자유롭게 회전
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetMesh(), FName("CharacterCameraSocket"));
-	SpringArm->TargetArmLength = 80.f;
+	SpringArm->TargetArmLength = 60.f;
 	SpringArm->bUsePawnControlRotation = true;  // ← 마우스 따라감
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
