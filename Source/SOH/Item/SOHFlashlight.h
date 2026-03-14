@@ -105,6 +105,31 @@ private:
 
     bool IsBatteryEmpty() const { return CurrentBattery <= 0.f; }
 
+    // 베터리 잔량에 따른 빛 크기 조절
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
+    float MaxIntensity = 10.0f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
+    float MinIntensity = 1.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
+    float MaxOuterConeAngle = 35.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
+    float MinOuterConeAngle = 20.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
+    float MaxInnerConeAngle = 20.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
+    float MinInnerConeAngle = 10.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
+    float MaxAttenuationRadius = 2000.f;
+
+    UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
+    float MinAttenuationRadius = 500.f;
+
     void UpdateLightFromBattery();
 
     void StartBatteryDrain();

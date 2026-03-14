@@ -205,7 +205,20 @@ void ASOHFlashlight::UpdateLightFromBattery()
         return;
 
     const float Ratio = (MaxBattery <= 0.f) ? 0.f : CurrentBattery / MaxBattery;
-    // 향후 Ratio에 따라 Spot 강도/범위 등을 조절할 수 있습니다.
+    
+    // 손전등 밝기 - 배터리 비율에 따른 선형 보간 처리
+    const float NewIntensity = FMath::Lerp(MinIntensity, MaxIntensity, Ratio);
+    Spot->SetIntensity(NewIntensity);
+
+    // 손전등 범위 - 배터리 비율에 따른 선형 보간 처리
+    const float NewOuter = FMath::Lerp(MinOuterConeAngle, MaxOuterConeAngle, Ratio);
+    const float NewInner = FMath::Clamp(FMath::Lerp(MinInnerConeAngle, MaxInnerConeAngle, Ratio), 0.f, NewOuter);
+
+    // 조명 범위 조절
+    const float NewRadius = FMath::Lerp(MinAttenuationRadius, MaxAttenuationRadius, Ratio);
+    Spot->SetAttenuationRadius(NewRadius);
+
+    // Spot이 꺼져있으면 보이지 않도록 처리는 SetOn에서 담당하므로 여기서는 값만 갱신
 }
 
 bool ASOHFlashlight::UseBatteryItem(float ChargeAmount)
