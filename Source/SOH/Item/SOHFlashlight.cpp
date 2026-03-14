@@ -188,7 +188,7 @@ void ASOHFlashlight::DrainOnce()
             if (USOHMessageManager* MsgMgr = OwnerChar->FindComponentByClass<USOHMessageManager>())
             {
                 MsgMgr->ShowMessageText(
-                    FText::FromString(TEXT("비상 배터리 방전 비상")),
+                    FText::FromString(TEXT("배터리가 방전되었어.")),
                     1.5f
                 );
             }
@@ -205,6 +205,7 @@ void ASOHFlashlight::UpdateLightFromBattery()
         return;
 
     const float Ratio = (MaxBattery <= 0.f) ? 0.f : CurrentBattery / MaxBattery;
+    // 향후 Ratio에 따라 Spot 강도/범위 등을 조절할 수 있습니다.
 }
 
 bool ASOHFlashlight::UseBatteryItem(float ChargeAmount)
@@ -232,6 +233,11 @@ float ASOHFlashlight::GetBatteryPercent() const
         return 0.f;
 
     return FMath::Clamp(CurrentBattery / MaxBattery, 0.f, 1.f);
+}
+
+bool ASOHFlashlight::IsOn() const
+{
+    return bOn;
 }
 
 void ASOHFlashlight::Interact_Implementation(AActor* Caller)

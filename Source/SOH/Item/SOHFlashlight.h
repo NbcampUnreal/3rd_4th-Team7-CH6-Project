@@ -37,6 +37,10 @@ public:
     UFUNCTION(BlueprintPure, Category = "Flashlight|Battery")
     float GetBatteryPercent() const;
 
+    // 상태 조회 추가 : bOn 동기화용
+    UFUNCTION(BlueprintPure, Category = "Flashlight")
+    bool IsOn() const;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight|Sound")
     USoundBase* FlashlightOnSound;
 

@@ -632,8 +632,13 @@ void ASOHPlayerCharacter::ToggleFlashlight()
 {
 	if (Flashlight)
 	{
+		// 손전등 토글
 		Flashlight->Toggle();
 
+		// 실제 손전등 상태로 동기화
+		bFlashlightOn = Flashlight->IsOn();
+
+		// 켜진 동작이면 몽타주 재생
 		if (bFlashlightOn)
 		{
 			PlayUpperBodyMontage(FlashlightMontage);
@@ -1082,4 +1087,18 @@ void ASOHPlayerCharacter::OnTogglePause(const FInputActionValue& Value)
 	}
 
 	ToggleUI(FName("Pause"), PauseMenuClass);
+}
+
+// SetFlashlight 구현: Flashlight 포인터 설정과 상태 동기화
+void ASOHPlayerCharacter::SetFlashlight(ASOHFlashlight* InLight)
+{
+	Flashlight = InLight;
+	if (Flashlight)
+	{
+		bFlashlightOn = Flashlight->IsOn();
+	}
+	else
+	{
+		bFlashlightOn = false;
+	}
 }

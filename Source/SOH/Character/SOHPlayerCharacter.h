@@ -32,7 +32,8 @@ public:
 	
 	// Battery 호출용
 
-	void SetFlashlight(ASOHFlashlight* InLight) { Flashlight = InLight; }
+	// Flashlight 상태 동기화 수행
+	void SetFlashlight(ASOHFlashlight* InLight);
 
 	ASOHFlashlight* GetFlashlight() const { return Flashlight; }
 
