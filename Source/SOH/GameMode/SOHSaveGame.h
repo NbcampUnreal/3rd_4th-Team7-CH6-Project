@@ -28,6 +28,10 @@ struct FWorldStateData
 	
 	UPROPERTY()
 	int32 IntValue = 0;
+
+	// 배터리 잔량 저장용 (플래시라이트용)
+	UPROPERTY()
+	float BatteryLevel = 0.f;
 };
 
 UCLASS()

@@ -302,7 +302,12 @@ void ASOHFlashlight::SaveState_Implementation(USOHSaveGame* SaveData)
     FWorldStateData& Data =
         SaveData->WorldStateMap.FindOrAdd(WorldStateID);
 
+    // 기존 동작 유지: 장착 상태를 기록 (퍼즐/월드 상태 용도)
     Data.bIsSolved = true;
+
+    // 배터리 관련 정보 저장
+    Data.bIsOn = bOn;
+    Data.BatteryLevel = CurrentBattery;
 
     UE_LOG(LogTemp, Warning,
         TEXT("[SAVE][Flashlight] %s equipped"),
@@ -330,9 +335,13 @@ void ASOHFlashlight::LoadState_Implementation(USOHSaveGame* SaveData)
     if (!Player)
         return;
 
-    // 🔥 여기서 다시 장착
+    // 다시 장착
     SetEquipped(Player);
 
+    // 배터리 잔량 복원
+    CurrentBattery = FMath::Clamp(Data->BatteryLevel, 0.f, MaxBattery);
+
+    // 화면/소유자에 알리기 위해 상태 동기화
     if (ASOHPlayerCharacter* PC = Cast<ASOHPlayerCharacter>(Player))
     {
         PC->SetFlashlight(this);
