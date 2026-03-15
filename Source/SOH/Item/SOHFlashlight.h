@@ -37,6 +37,8 @@ public:
     UFUNCTION(BlueprintPure, Category = "Flashlight|Battery")
     float GetBatteryPercent() const;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flashlight|LightFunction")
+    UMaterialInterface* LightFunctionMaterial = nullptr;
     // 상태 조회 추가 : bOn 동기화용
     UFUNCTION(BlueprintPure, Category = "Flashlight")
     bool IsOn() const;
@@ -61,6 +63,9 @@ private:
 
     UPROPERTY(VisibleAnywhere)
     USpotLightComponent* Spot;
+    
+    UPROPERTY()
+    UMaterialInstanceDynamic* LightFunctionDynamic; // 실제 손전등 빛이 맺히는 것 같은 효과를 주기 위해 추가
 
     UPROPERTY()
     ACharacter* OwnerChar;
@@ -85,6 +90,8 @@ private:
 
     void SetOn(bool bEnable);
     void SetEquipped(ACharacter* NewOwner);
+
+    void SetLightFunctionMaterial(UMaterialInterface* NewMaterial);
 
     // 배터리
 
@@ -113,7 +120,7 @@ private:
     float MaxIntensity = 10.0f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
-    float MinIntensity = 0.5f;
+    float MinIntensity = 0.01f;
 
     UPROPERTY(EditAnywhere, Category = "Flashlight|Light")
     float MaxOuterConeAngle = 35.f;

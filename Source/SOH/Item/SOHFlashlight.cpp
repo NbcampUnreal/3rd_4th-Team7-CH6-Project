@@ -11,6 +11,8 @@
 #include "GameMode/SOHSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 ASOHFlashlight::ASOHFlashlight()
 {
@@ -42,6 +44,12 @@ ASOHFlashlight::ASOHFlashlight()
 void ASOHFlashlight::BeginPlay()
 {
     Super::BeginPlay();
+
+    // 머티리얼 인스턴스 생성 및 SpotLight에 할당
+    if (Spot && LightFunctionMaterial)
+    {
+        Spot->SetLightFunctionMaterial(LightFunctionMaterial);
+    }
 
     CurrentBattery = FMath::Clamp(InitialBattery, 0.f, MaxBattery);
 
@@ -97,6 +105,8 @@ void ASOHFlashlight::Toggle()
 void ASOHFlashlight::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    UpdateLightFromBattery();
 
     if (bOn && OwnerCamera && Spot)
     {
@@ -238,6 +248,11 @@ void ASOHFlashlight::UpdateLightFromBattery()
     Spot->SetAttenuationRadius(NewRadius);
 
     // Spot이 꺼져있으면 보이지 않도록 처리는 SetOn에서 담당하므로 여기서는 값만 갱신
+
+    if (LightFunctionDynamic)
+    {
+        LightFunctionDynamic->SetScalarParameterValue(TEXT("BatteryDrive"), Ratio);
+    }
 }
 
 bool ASOHFlashlight::UseBatteryItem(float ChargeAmount)
