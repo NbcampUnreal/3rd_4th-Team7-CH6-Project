@@ -18,6 +18,9 @@ ASOHOpenDoor::ASOHOpenDoor()
 	DoorFrame = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorFrame"));
 	DoorFrame->SetupAttachment(Root);
 
+	// 추가: 부착 시 위치 초기화를 명시하여 이격 방지
+	DoorFrame->SetRelativeLocation(FVector::ZeroVector);
+
 	if (InteractionRange)
 		InteractionRange->SetupAttachment(Root);
 
@@ -177,7 +180,9 @@ void ASOHOpenDoor::LoadState_Implementation(USOHSaveGame* SaveData)
 			}
 			else
 			{
+				DoorFrame->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
 			}
 		}
+		BP_SyncDoorVisualState(bIsOpen);
 	}
 }

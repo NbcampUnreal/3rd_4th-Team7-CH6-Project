@@ -56,6 +56,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Door")
 	void BP_OnLocked(AActor* Caller); // 문 열 수 없다는 로직을 만들기 위해 남겨둠
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Door")
+	void BP_SyncDoorVisualState(bool bOpen); // 로딩 직후 상태 강제 동기화용
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Door")
 	void NotifyDoorMoveStarted();
